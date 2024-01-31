@@ -10,17 +10,15 @@ export type SupportedProtocolInfo = {
   params?: any
 }
 
-export type OrderERC20Filter = {
+export type OrderFilter = {
   chainId?: number
   signerWallet?: string
   signerToken?: string
+  signerId?: string
   senderWallet?: string
   senderToken?: string
+  tags?: string[]
 }
-
-export type OrderFilter = {
-  signerId?: string
-} & OrderERC20Filter
 
 export type OrderResponse<OrderType> = {
   orders: OrderType[]

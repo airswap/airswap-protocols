@@ -1,10 +1,6 @@
 const { expect } = require('chai')
-const {
-  toAtomicString,
-  generateMerkleTreeFromData,
-  getMerkleRoot,
-  getMerkleProof,
-} = require('@airswap/utils')
+const { toAtomicString } = require('@airswap/utils')
+const { generateTreeFromData, getRoot, getProof } = require('@airswap/merkle')
 const { soliditySha3 } = require('web3-utils')
 
 const { ethers } = require('hardhat')
@@ -77,7 +73,7 @@ describe('Pool Integration', () => {
 
     await pool.setAdmin(deployer.address)
 
-    tree = generateMerkleTreeFromData({
+    tree = generateTreeFromData({
       [alice.address]: ALICE_SCORE,
       [bob.address]: BOB_SCORE,
       [carol.address]: CAROL_SCORE,
@@ -86,12 +82,12 @@ describe('Pool Integration', () => {
 
   describe('withdraw increase the staker balance', async () => {
     it('transfers the claimed funds to the staker', async () => {
-      const root = getMerkleRoot(tree)
+      const root = getRoot(tree)
       expect(await pool.connect(deployer).enable(TREE_ID, root)).to.emit(
         pool,
         'Enable'
       )
-      const proof = getMerkleProof(tree, soliditySha3(bob.address, BOB_SCORE))
+      const proof = getProof(tree, soliditySha3(bob.address, BOB_SCORE))
       await pool.connect(bob).withdraw(
         [
           {

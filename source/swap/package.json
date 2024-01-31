@@ -32,7 +32,7 @@
     "@openzeppelin/contracts": "^4.8.3"
   },
   "devDependencies": {
-    "@airswap/utils": "4.2.1",
+    "@airswap/utils": "4.2.3",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.7"
   },
   "publishConfig": {
