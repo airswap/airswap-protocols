@@ -201,7 +201,7 @@ describe('Utils', async () => {
 
   it('Gets full SwapERC20 from signerWallet and logs', async () => {
     const nonce = '1'
-    const signerWallet = '0x51C72848c68a965f66FA7a88855F9f7784502a7F'
+    const signerWallet = '0x51c72848c68a965f66fa7a88855f9f7784502a7f'
     const feeReceiver = '0xaD30f7EEBD9Bd5150a256F47DA41d4403033CdF0'
     const fullSwap = await getFullSwapERC20(
       nonce,
@@ -212,10 +212,10 @@ describe('Utils', async () => {
     expect(fullSwap).to.deep.equal({
       nonce,
       signerWallet,
-      signerToken: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      signerToken: '0xdac17f958d2ee523a2206206994597c13d831ec7',
       signerAmount: '1008438461',
-      senderWallet: '0x74de5d4FCbf63E00296fd95d33236B9794016631',
-      senderToken: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+      senderWallet: '0x74de5d4fcbf63e00296fd95d33236b9794016631',
+      senderToken: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
       senderAmount: '461545050000000000',
       feeAmount: '705906',
     })

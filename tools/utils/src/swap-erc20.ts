@@ -339,9 +339,9 @@ const parseTransfer = (log: any) => {
     parsed = erc20Interface.parseLog(log)
     if (parsed.name === 'Transfer') {
       transfer = {
-        token: log.address,
-        from: parsed.args[0],
-        to: parsed.args[1],
+        token: log.address?.toLowerCase(),
+        from: parsed.args[0]?.toLowerCase(),
+        to: parsed.args[1]?.toLowerCase(),
         amount: ethers.BigNumber.from(parsed.args[2]),
       }
     }
@@ -360,6 +360,10 @@ export const getFullSwapERC20 = async (
   const transfers = []
   let transfer: any
   let length = logs.length
+
+  feeReceiver = feeReceiver.toLowerCase()
+  signerWallet = signerWallet.toLowerCase()
+
   while (length--) {
     if ((transfer = parseTransfer(logs[length]))) {
       transfers.push(transfer)
@@ -388,6 +392,10 @@ export const getFullSwapERC20 = async (
         }
       }
     }
+  }
+
+  if (!signer || !sender) {
+    throw new Error('getFullSwapERC20: Swap not found')
   }
 
   return {
