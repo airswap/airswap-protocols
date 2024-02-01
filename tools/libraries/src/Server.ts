@@ -329,6 +329,16 @@ export class Server extends TypedEmitter<ServerEvents> {
     }
   }
 
+  public async getTags(token: string): Promise<string[]> {
+    try {
+      return Promise.resolve(
+        (await this.httpCall('getTags', [token])) as string[]
+      )
+    } catch (err) {
+      return Promise.reject(err)
+    }
+  }
+
   public disconnect(): void {
     if (this.webSocketClient) {
       if (this.webSocketClient.state !== WebsocketReadyStates.CLOSED) {
