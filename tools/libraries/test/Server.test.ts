@@ -12,11 +12,14 @@ import {
   isValidFullOrder,
   isValidFullOrderERC20,
   isValidPricingERC20,
+  ADDRESS_ZERO,
+  ChainIds,
+  ProtocolIds,
+  OrderERC20,
+  Levels,
 } from '@airswap/utils'
-import { ADDRESS_ZERO, ChainIds, Protocols } from '@airswap/constants'
 
 import { Server } from '../index'
-import { toSortField, toSortOrder } from '../index'
 import {
   addJSONRPCAssertions,
   createRequest,
@@ -24,7 +27,6 @@ import {
   MockSocketServer,
   nextEvent,
 } from './test-utils'
-import { OrderERC20, SortField, SortOrder, Levels } from '@airswap/types'
 import { JsonRpcErrorCodes } from '@airswap/jsonrpc-client-websocket'
 
 addJSONRPCAssertions()
@@ -58,7 +60,7 @@ function mockHttpServer(api) {
     let res
     switch (body['method']) {
       case 'getProtocols':
-        res = [Protocols.Discovery, Protocols.RequestForQuoteERC20]
+        res = [ProtocolIds.Discovery, ProtocolIds.RequestForQuoteERC20]
         break
       case 'getTokens':
         res = [USDC, USDT]
@@ -91,10 +93,8 @@ function mockHttpServer(api) {
             order,
             wallet.privateKey,
             params.swapContract,
-            ChainIds.MAINNET
+            ChainIds.SEPOLIA
           )),
-          chainId: ChainIds.MAINNET,
-          swapContract: params.swapContract,
         }
         break
       case 'getOrdersERC20':
@@ -102,27 +102,36 @@ function mockHttpServer(api) {
         res = {
           orders: [
             {
-              order: {
-                ...order,
-                ...(await createOrderERC20Signature(
-                  order,
-                  wallet.privateKey,
-                  ADDRESS_ZERO,
-                  ChainIds.MAINNET
-                )),
-                chainId: ChainIds.MAINNET,
-                swapContract: ADDRESS_ZERO,
-              },
+              ...order,
+              ...(await createOrderERC20Signature(
+                order,
+                wallet.privateKey,
+                ADDRESS_ZERO,
+                ChainIds.SEPOLIA
+              )),
+              chainId: ChainIds.SEPOLIA,
+              swapContract: ADDRESS_ZERO,
             },
           ],
         }
         break
       case 'getOrders':
-        if (params[0]['offset']) {
-          expect(params[0]['page']).to.equal(0)
-          expect(params[0]['signerAddress']).to.equal(ADDRESS_ZERO)
+        order = createOrder({})
+        res = {
+          orders: [
+            {
+              ...order,
+              ...(await createOrderSignature(
+                order,
+                wallet.privateKey,
+                ADDRESS_ZERO,
+                ChainIds.SEPOLIA
+              )),
+              chainId: ChainIds.SEPOLIA,
+              swapContract: ADDRESS_ZERO,
+            },
+          ],
         }
-        res = await forgeFullOrder()
         break
       case 'considerOrderERC20':
         res = true
@@ -142,8 +151,8 @@ describe('HTTPServer', () => {
     .it('Server getProtocols()', async () => {
       const server = await Server.at(URL)
       const result = await server.getProtocols()
-      expect(result[0]).to.be.equal(Protocols.Discovery)
-      expect(result[1]).to.be.equal(Protocols.RequestForQuoteERC20)
+      expect(result[0]).to.be.equal(ProtocolIds.Discovery)
+      expect(result[1]).to.be.equal(ProtocolIds.RequestForQuoteERC20)
     })
   fancy
     .nock('https://' + URL, mockHttpServer)
@@ -165,7 +174,10 @@ describe('HTTPServer', () => {
   fancy
     .nock('https://' + URL, mockHttpServer)
     .it('Server getSignerSideOrderERC20()', async () => {
-      const server = await Server.at(URL)
+      const server = await Server.at(URL, {
+        swapContract: ADDRESS_ZERO,
+        chainId: ChainIds.SEPOLIA,
+      })
       const order = await server.getSignerSideOrderERC20(
         '0',
         ADDRESS_ZERO,
@@ -178,23 +190,27 @@ describe('HTTPServer', () => {
     .nock('https://' + URL, mockHttpServer)
     .it('Server getOrdersERC20()', async () => {
       const server = await Server.at(URL)
-      const result = await server.getOrdersERC20({
-        signerWallet: ADDRESS_ZERO,
-        offset: 0,
-        limit: 100,
-      })
-      expect(isValidFullOrderERC20(result.orders[0].order)).to.be.true
+      const result = await server.getOrdersERC20(
+        {
+          signerWallet: ADDRESS_ZERO,
+        },
+        0,
+        100
+      )
+      expect(isValidFullOrderERC20(result.orders[0])).to.be.true
     })
   fancy
     .nock('https://' + URL, mockHttpServer)
     .it('Server getOrders()', async () => {
       const server = await Server.at(URL)
-      const result = await server.getOrders({
-        signerWallet: ADDRESS_ZERO,
-        offset: 0,
-        limit: 100,
-      })
-      expect(isValidFullOrder(result.orders[0].order)).to.be.true
+      const result = await server.getOrders(
+        {
+          signerWallet: ADDRESS_ZERO,
+        },
+        0,
+        100
+      )
+      expect(isValidFullOrder(result.orders[0])).to.be.true
     })
 })
 
@@ -273,8 +289,8 @@ describe('WebSocketServer', () => {
       }
       mockServer.setNextMessageCallback(onResponse)
     })
-    expect(server.supportsProtocol(Protocols.LastLookERC20)).to.equal(true)
-    expect(server.supportsProtocol(Protocols.RequestForQuoteERC20)).to.equal(
+    expect(server.supportsProtocol(ProtocolIds.LastLookERC20)).to.equal(true)
+    expect(server.supportsProtocol(ProtocolIds.RequestForQuoteERC20)).to.equal(
       false
     )
     await correctInitializeResponse
@@ -499,55 +515,3 @@ describe('WebSocketServer', () => {
     MockSocketServer.stopMockingWebSocket()
   })
 })
-
-describe('Storage', () => {
-  it('sort field: should match value', () => {
-    expect(toSortField('SENDER_AMOUNT')).to.equal(SortField.SENDER_AMOUNT)
-    expect(toSortField('sender_amount')).to.equal(SortField.SENDER_AMOUNT)
-    expect(toSortField('SIGNER_AMOUNT')).to.equal(SortField.SIGNER_AMOUNT)
-    expect(toSortField('signer_amount')).to.equal(SortField.SIGNER_AMOUNT)
-    expect(toSortField('EXPIRY')).to.equal(SortField.EXPIRY)
-    expect(toSortField('expiry')).to.equal(SortField.EXPIRY)
-    expect(toSortField('nonce')).to.equal(SortField.NONCE)
-    expect(toSortField('NONCE')).to.equal(SortField.NONCE)
-  })
-
-  it('sort field: should return undefined', () => {
-    expect(toSortField('')).to.equal(undefined)
-    expect(toSortField('aze')).to.equal(undefined)
-  })
-
-  it('sort order: should match value', () => {
-    expect(toSortOrder('ASC')).to.equal(SortOrder.ASC)
-    expect(toSortOrder('asc')).to.equal(SortOrder.ASC)
-    expect(toSortOrder('DESC')).to.equal(SortOrder.DESC)
-    expect(toSortOrder('desc')).to.equal(SortOrder.DESC)
-  })
-
-  it('sort order: should return undefined', () => {
-    expect(toSortOrder('')).to.equal(undefined)
-    expect(toSortOrder('aze')).to.equal(undefined)
-  })
-})
-
-async function forgeFullOrder() {
-  const unsignedOrder = createOrder({})
-  const signature = await createOrderSignature(
-    unsignedOrder,
-    wallet.privateKey,
-    ADDRESS_ZERO,
-    1
-  )
-  return {
-    orders: [
-      {
-        order: {
-          ...unsignedOrder,
-          ...signature,
-          chainId: ChainIds.MAINNET,
-          swapContract: ADDRESS_ZERO,
-        },
-      },
-    ],
-  }
-}

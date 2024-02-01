@@ -2,12 +2,13 @@
 const { ethers, run } = require('hardhat')
 const poolDeploys = require('@airswap/pool/deploys.js')
 const {
+  ChainIds,
   chainNames,
-  TokenKinds,
   protocolFeeReceiverAddresses,
-} = require('@airswap/constants')
+} = require('@airswap/utils')
 const swapDeploys = require('../deploys.js')
 const adapterDeploys = require('../deploys-adapters.js')
+const config = require('./config.js')
 
 async function main() {
   await run('compile')
@@ -16,8 +17,14 @@ async function main() {
 
   const chainId = await deployer.getChainId()
 
-  const requiredSenderKind = TokenKinds.ERC20
-  const protocolFee = 7
+  let requiredSenderKind
+  let protocolFee
+  if (config[chainId]) {
+    ;({ requiredSenderKind, protocolFee } = config[chainId])
+  } else {
+    ;({ requiredSenderKind, protocolFee } = config[ChainIds.MAINNET])
+  }
+
   let protocolFeeReceiver = poolDeploys[chainId]
   if (protocolFeeReceiverAddresses[chainId]) {
     protocolFeeReceiver = protocolFeeReceiverAddresses[chainId]

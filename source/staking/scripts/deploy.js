@@ -3,20 +3,15 @@ const fs = require('fs')
 const prettier = require('prettier')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
-const {
-  chainNames,
-  chainLabels,
-  stakingTokenAddresses,
-  ChainIds,
-} = require('@airswap/constants')
+const { chainNames, chainLabels, ChainIds } = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
 const stakingDeploys = require('../deploys.js')
 const stakingBlocks = require('../deploys-blocks.js')
+const config = require('./config.js')
 
 async function main() {
   await run('compile')
-  const config = await prettier.resolveConfig('../deploys.js')
-
+  const prettierConfig = await prettier.resolveConfig('../deploys.js')
   const [deployer] = await ethers.getSigners()
   const gasPrice = await deployer.getGasPrice()
   const chainId = await deployer.getChainId()
@@ -28,11 +23,13 @@ async function main() {
   console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
   console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
 
-  const name = 'Staked AST'
-  const symbol = 'sAST'
-  const stakingToken = stakingTokenAddresses[chainId]
-  const stakingDuration = 60 * 60 * 24 * 7 * 20 // Twenty Weeks
-  const minDurationChangeDelay = 60 * 60 * 24 * 7 // One Week
+  const {
+    name,
+    symbol,
+    stakingToken,
+    stakingDuration,
+    minDurationChangeDelay,
+  } = config[chainId]
 
   console.log(`\nname: ${name}`)
   console.log(`symbol: ${symbol}`)
@@ -61,7 +58,7 @@ async function main() {
       './deploys.js',
       prettier.format(
         `module.exports = ${JSON.stringify(stakingDeploys, null, '\t')}`,
-        { ...config, parser: 'babel' }
+        { ...prettierConfig, parser: 'babel' }
       )
     )
     stakingBlocks[chainId] = (
@@ -71,7 +68,7 @@ async function main() {
       './deploys-blocks.js',
       prettier.format(
         `module.exports = ${JSON.stringify(stakingBlocks, null, '\t')}`,
-        { ...config, parser: 'babel' }
+        { ...prettierConfig, parser: 'babel' }
       )
     )
     console.log(

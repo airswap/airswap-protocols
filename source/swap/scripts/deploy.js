@@ -7,19 +7,19 @@ const {
   chainNames,
   chainLabels,
   ChainIds,
-  TokenKinds,
   protocolFeeReceiverAddresses,
   ADDRESS_ZERO,
-} = require('@airswap/constants')
+} = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
 const poolDeploys = require('@airswap/pool/deploys.js')
 const swapDeploys = require('../deploys.js')
 const swapBlocks = require('../deploys-blocks.js')
 const adapterDeploys = require('../deploys-adapters.js')
+const config = require('./config.js')
 
 async function main() {
   await run('compile')
-  const config = await prettier.resolveConfig('../deploys.js')
+  const prettierConfig = await prettier.resolveConfig('../deploys.js')
 
   const [deployer] = await ethers.getSigners()
   const gasPrice = await deployer.getGasPrice()
@@ -28,20 +28,26 @@ async function main() {
     console.log('Value for --network flag is required')
     return
   }
+  if (!adapterDeploys[chainId]) {
+    console.log('Adapters must be deployed first.')
+    return
+  }
+
   console.log(`Deployer: ${deployer.address}`)
   console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
   console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
 
-  const requiredSenderKind = TokenKinds.ERC20
-  const protocolFee = 7
+  let requiredSenderKind
+  let protocolFee
+  if (config[chainId]) {
+    ;({ requiredSenderKind, protocolFee } = config[chainId])
+  } else {
+    ;({ requiredSenderKind, protocolFee } = config[ChainIds.MAINNET])
+  }
+
   let protocolFeeReceiver = poolDeploys[chainId] || ADDRESS_ZERO
   if (protocolFeeReceiverAddresses[chainId]) {
     protocolFeeReceiver = protocolFeeReceiverAddresses[chainId]
-  }
-
-  if (!adapterDeploys[chainId]) {
-    console.log('Adapters must be deployed first.')
-    return
   }
 
   console.log(`\nadapters: ${JSON.stringify(adapterDeploys[chainId])}`)
@@ -72,7 +78,7 @@ async function main() {
       './deploys.js',
       prettier.format(
         `module.exports = ${JSON.stringify(swapDeploys, null, '\t')}`,
-        { ...config, parser: 'babel' }
+        { ...prettierConfig, parser: 'babel' }
       )
     )
     swapBlocks[chainId] = (
@@ -82,7 +88,7 @@ async function main() {
       './deploys-blocks.js',
       prettier.format(
         `module.exports = ${JSON.stringify(swapBlocks, null, '\t')}`,
-        { ...config, parser: 'babel' }
+        { ...prettierConfig, parser: 'babel' }
       )
     )
     console.log(`Deployed: ${swapDeploys[chainId]} @ ${swapBlocks[chainId]}`)

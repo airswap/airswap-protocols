@@ -3,14 +3,14 @@ const fs = require('fs')
 const prettier = require('prettier')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
-const { chainLabels, chainNames, ChainIds } = require('@airswap/constants')
+const { chainLabels, chainNames, ChainIds } = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
 const poolDeploys = require('../deploys.js')
 const poolBlocks = require('../deploys-blocks.js')
 
 async function main() {
   await run('compile')
-  const config = await prettier.resolveConfig('../deploys.js')
+  const prettierConfig = await prettier.resolveConfig('../deploys.js')
 
   const [deployer] = await ethers.getSigners()
   const gasPrice = await deployer.getGasPrice()
@@ -43,7 +43,7 @@ async function main() {
       './deploys.js',
       prettier.format(
         `module.exports = ${JSON.stringify(poolDeploys, null, '\t')}`,
-        { ...config, parser: 'babel' }
+        { ...prettierConfig, parser: 'babel' }
       )
     )
     poolBlocks[chainId] = (
@@ -53,7 +53,7 @@ async function main() {
       './deploys-blocks.js',
       prettier.format(
         `module.exports = ${JSON.stringify(poolBlocks, null, '\t')}`,
-        { ...config, parser: 'babel' }
+        { ...prettierConfig, parser: 'babel' }
       )
     )
     console.log(`Deployed: ${poolDeploys[chainId]} @ ${poolBlocks[chainId]}`)

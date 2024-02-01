@@ -7,12 +7,12 @@ const swapDeploys = require('@airswap/swap-erc20/deploys.js')
 const wrapperDeploys = require('../deploys.js')
 const wrapperBlocks = require('../deploys-blocks.js')
 const wethDeploys = require('../deploys-weth.js')
-const { ChainIds, chainNames, chainLabels } = require('@airswap/constants')
+const { ChainIds, chainNames, chainLabels } = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
 
 async function main() {
   await run('compile')
-  const config = await prettier.resolveConfig('../deploys.js')
+  const prettierConfig = await prettier.resolveConfig('../deploys.js')
 
   const [deployer] = await ethers.getSigners()
   const gasPrice = await deployer.getGasPrice()
@@ -57,7 +57,7 @@ async function main() {
       './deploys.js',
       prettier.format(
         `module.exports = ${JSON.stringify(wrapperDeploys, null, '\t')}`,
-        { ...config, parser: 'babel' }
+        { ...prettierConfig, parser: 'babel' }
       )
     )
     wrapperBlocks[chainId] = (
@@ -67,7 +67,7 @@ async function main() {
       './deploys-blocks.js',
       prettier.format(
         `module.exports = ${JSON.stringify(wrapperBlocks, null, '\t')}`,
-        { ...config, parser: 'babel' }
+        { ...prettierConfig, parser: 'babel' }
       )
     )
     console.log(

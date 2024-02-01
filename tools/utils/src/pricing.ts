@@ -1,7 +1,25 @@
 import BigNumber from 'bignumber.js'
 import { ethers } from 'ethers'
 
-import { Levels, Formula, Pricing } from '@airswap/types'
+export type Levels = [string, string][]
+
+export type Formula = string
+
+type LevelsOrFomulae =
+  | {
+      bid: Levels
+      ask: Levels
+    }
+  | {
+      bid: Formula
+      ask: Formula
+    }
+
+export type Pricing = {
+  baseToken: string
+  quoteToken: string
+  minimum?: string
+} & LevelsOrFomulae
 
 export function isValidPricingERC20(pricing: Pricing[]): boolean {
   if (!pricing || !pricing.length) return false
@@ -28,7 +46,7 @@ export function isValidPricingERC20Pair(pricing: Pricing): boolean {
   )
 }
 
-export function getCostFromPricing(
+export function getPriceForAmount(
   side: 'buy' | 'sell',
   amount: string,
   baseToken: string,
@@ -38,14 +56,25 @@ export function getCostFromPricing(
   for (const i in pricing) {
     if (pricing[i].baseToken.toLowerCase() === baseToken.toLowerCase()) {
       if (pricing[i].quoteToken.toLowerCase() === quoteToken.toLowerCase()) {
-        if (side === 'buy') {
-          return calculateCost(amount, pricing[i].ask)
+        if (
+          pricing[i].minimum &&
+          BigNumber(amount).lt(pricing[i].minimum || 0)
+        ) {
+          throw new Error(
+            `Requested amount ${amount} does not meet minimum ${pricing[i].minimum}`
+          )
+        } else {
+          if (side === 'buy') {
+            return calculateCost(amount, pricing[i].ask)
+          }
+          return calculateCost(amount, pricing[i].bid)
         }
-        return calculateCost(amount, pricing[i].bid)
       }
     }
   }
-  return null
+  throw new Error(
+    `Requested pair ${quoteToken}/${baseToken} not found in provided pricing`
+  )
 }
 
 export function calculateCost(amount: string, pricing: Formula | Levels) {

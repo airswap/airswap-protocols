@@ -478,6 +478,10 @@ describe('Registry Unit', () => {
       expect(token1Stakers.length).to.equal(0)
       expect(token2Stakers.length).to.equal(0)
       expect(token3Stakers.length).to.equal(0)
+
+      await expect(registry.connect(account1).unsetServer()).to.be.revertedWith(
+        'NoServerURLSet'
+      )
     })
 
     it('fails to remove a list of duplicate tokens', async () => {

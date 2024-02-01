@@ -12,24 +12,24 @@ import {
 } from '@airswap/jsonrpc-client-websocket'
 
 import {
-  parseUrl,
+  ChainIds,
+  ProtocolIds,
+  ServerOptions,
+  OrderERC20,
+  FullOrderERC20,
+  FullOrder,
+  Pricing,
+  OrderFilter,
+  OrderResponse,
+  Indexes,
+  Direction,
+  SupportedProtocolInfo,
+  protocolNames,
   orderERC20PropsToStrings,
   isValidOrderERC20,
   isValidPricingERC20,
+  parseUrl,
 } from '@airswap/utils'
-import {
-  FullOrder,
-  FullOrderERC20,
-  OrderERC20,
-  Pricing,
-  ServerOptions,
-  OrderResponse,
-  SupportedProtocolInfo,
-  OrderFilter,
-  SortOrder,
-  SortField,
-} from '@airswap/types'
-import { ChainIds, Protocols, protocolNames } from '@airswap/constants'
 
 import { SwapERC20 } from './Contracts'
 
@@ -40,80 +40,8 @@ if (!isBrowser) {
   })
 }
 
-const REQUEST_TIMEOUT = 4000
-
-export function toSortOrder(key: string): SortOrder | undefined {
-  if (typeof key !== 'string') {
-    return undefined
-  }
-  if (key.toUpperCase() === SortOrder.ASC) {
-    return SortOrder.ASC
-  }
-  if (key.toUpperCase() === SortOrder.DESC) {
-    return SortOrder.DESC
-  }
-
-  return undefined
-}
-
-export function toSortField(key: string): SortField | undefined {
-  if (typeof key !== 'string') {
-    return undefined
-  }
-  key = key.toUpperCase()
-  if (Object.keys(SortField).includes(key)) {
-    return key as SortField
-  }
-
-  return undefined
-}
-
-export abstract class IndexedOrderError extends Error {
-  public code!: number
-  public constructor(message: string) {
-    super(message)
-    this.message = message
-  }
-}
-export class ErrorResponse {
-  public code: number
-  public message: string
-  public constructor(code: number, message: string) {
-    this.code = code
-    this.message = message
-  }
-}
-export class SuccessResponse {
-  public message: string
-  public constructor(message: string) {
-    this.message = message
-  }
-}
-export class JsonRpcResponse<Type> {
-  public id: string
-  public result:
-    | OrderResponse<Type>
-    | ErrorResponse
-    | SuccessResponse
-    | undefined
-  private jsonrpc = '2.0'
-
-  public constructor(
-    id: string,
-    result:
-      | OrderResponse<Type>
-      | IndexedOrderError
-      | SuccessResponse
-      | undefined
-  ) {
-    this.id = id
-    if (result instanceof Error) {
-      this.result = new ErrorResponse(result.code, result.message)
-    } else {
-      this.result = result
-    }
-  }
-}
+const DEFAULT_LIMIT = 10
+const DEFAULT_TIMEOUT = 4000
 
 export interface ServerEvents {
   'pricing-erc20': (pricing: Pricing[]) => void
@@ -329,14 +257,15 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
   /**
-   * Protocols.StorageERC20
+   * Protocols.IndexingERC20
    */
   public async addOrderERC20(
-    fullOrder: FullOrderERC20
-  ): Promise<SuccessResponse> {
+    order: FullOrderERC20,
+    tags = []
+  ): Promise<boolean> {
     try {
       return Promise.resolve(
-        (await this.httpCall('addOrderERC20', [fullOrder])) as SuccessResponse
+        (await this.httpCall('addOrderERC20', [order, tags])) as boolean
       )
     } catch (err) {
       return Promise.reject(err)
@@ -344,12 +273,20 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
   public async getOrdersERC20(
-    orderFilter: OrderFilter
+    orderFilter: OrderFilter,
+    offset = 0,
+    limit = DEFAULT_LIMIT,
+    by = Indexes.EXPIRY,
+    direction = Direction.ASC
   ): Promise<OrderResponse<FullOrderERC20>> {
     try {
       return Promise.resolve(
         (await this.httpCall('getOrdersERC20', [
           { ...this.toBigIntJson(orderFilter) },
+          offset,
+          limit,
+          by,
+          direction,
         ])) as OrderResponse<FullOrderERC20>
       )
     } catch (err) {
@@ -358,12 +295,12 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
   /**
-   * Protocols.Storage
+   * Protocols.Indexing
    */
-  public async addOrder(order: FullOrder): Promise<SuccessResponse> {
+  public async addOrder(order: FullOrder, tags = []): Promise<boolean> {
     try {
       return Promise.resolve(
-        (await this.httpCall('addOrder', [order])) as SuccessResponse
+        (await this.httpCall('addOrder', [order, tags])) as boolean
       )
     } catch (err) {
       return Promise.reject(err)
@@ -371,12 +308,20 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
   public async getOrders(
-    orderFilter: OrderFilter
+    filter: OrderFilter,
+    offset = 0,
+    limit = DEFAULT_LIMIT,
+    by = Indexes.NONCE,
+    direction = Direction.ASC
   ): Promise<OrderResponse<FullOrder>> {
     try {
       return Promise.resolve(
         (await this.httpCall('getOrders', [
-          { ...this.toBigIntJson(orderFilter) },
+          { ...this.toBigIntJson(filter) },
+          offset,
+          limit,
+          by,
+          direction,
         ])) as OrderResponse<FullOrder>
       )
     } catch (err) {
@@ -403,7 +348,7 @@ export class Server extends TypedEmitter<ServerEvents> {
     }
   }
 
-  private _init(initializeTimeout: number = REQUEST_TIMEOUT) {
+  private _init(initializeTimeout: number = DEFAULT_TIMEOUT) {
     if (this.transportProtocol === 'http') {
       return this._initHTTPClient(this.locator)
     } else {
@@ -419,12 +364,12 @@ export class Server extends TypedEmitter<ServerEvents> {
       hostname: parsedUrl.hostname,
       path: parsedUrl.path,
       port: parsedUrl.port,
-      timeout: REQUEST_TIMEOUT,
+      timeout: DEFAULT_TIMEOUT,
     }
 
     if (!clientOnly) {
       this.supportedProtocols = [
-        { name: Protocols.RequestForQuoteERC20, version: '2.0.0' },
+        { name: ProtocolIds.RequestForQuoteERC20, version: '2.0.0' },
       ]
       this.isInitialized = true
     }
@@ -467,7 +412,7 @@ export class Server extends TypedEmitter<ServerEvents> {
       (resolve, reject) => {
         this.webSocketClient = new JsonRpcWebsocket(
           url.format(locator),
-          REQUEST_TIMEOUT,
+          DEFAULT_TIMEOUT,
           (error: JsonRpcError) => {
             if (!this.isInitialized) {
               reject(error)
@@ -506,11 +451,11 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
   private requireRFQERC20Support() {
-    this.requireProtocolSupport(Protocols.RequestForQuoteERC20)
+    this.requireProtocolSupport(ProtocolIds.RequestForQuoteERC20)
   }
 
   private requireLastLookERC20Support() {
-    this.requireProtocolSupport(Protocols.LastLookERC20)
+    this.requireProtocolSupport(ProtocolIds.LastLookERC20)
   }
 
   private requireProtocolSupport(protocol: string) {
@@ -585,7 +530,7 @@ export class Server extends TypedEmitter<ServerEvents> {
     this.validateInitializeParams(supportedProtocols)
     this.supportedProtocols = supportedProtocols
     const lastLookERC20Support = supportedProtocols.find(
-      (protocol) => protocol.name === Protocols.LastLookERC20
+      (protocol) => protocol.name === ProtocolIds.LastLookERC20
     )
     if (lastLookERC20Support?.params?.senderServer) {
       this.senderServer = lastLookERC20Support.params.senderServer

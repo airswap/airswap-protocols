@@ -1,13 +1,10 @@
 import { assert, expect } from 'chai'
 import { ethers } from 'ethers'
+import { Levels, FullOrderERC20, UnsignedOrderERC20 } from '../index'
+
 import {
   ADDRESS_ZERO,
   SECONDS_IN_DAY,
-  protocolInterfaces,
-} from '@airswap/constants'
-import { Levels, FullOrderERC20, UnsignedOrderERC20 } from '@airswap/types'
-
-import {
   isValidPricingERC20,
   isValidFullOrderERC20,
   isValidOrderERC20,
@@ -17,11 +14,23 @@ import {
   decompressFullOrderERC20,
   calculateCostFromLevels,
   getInterfaceId,
+  getFullSwapERC20,
+  protocolInterfaces,
 } from '../index'
 
 const signerPrivateKey =
   '0x4934d4ff925f39f91e3729fbce52ef12f25fdf93e014e291350f7d314c1a096b'
 const wallet = new ethers.Wallet(signerPrivateKey)
+
+describe('Protocols', async () => {
+  it('InterfaceIds are correct', async () => {
+    for (const interfaceId in protocolInterfaces) {
+      expect(getInterfaceId(protocolInterfaces[interfaceId])).to.be.equal(
+        interfaceId
+      )
+    }
+  })
+})
 
 describe('Utils', async () => {
   let unsignedOrder: UnsignedOrderERC20
@@ -188,5 +197,27 @@ describe('Utils', async () => {
     const signedOrder = decompressFullOrderERC20(compressed)
     expect(isValidOrderERC20(signedOrder)).to.equal(true)
     expect(signerWallet.toLowerCase()).to.equal(wallet.address.toLowerCase())
+  })
+
+  it('Gets full SwapERC20 from signerWallet and logs', async () => {
+    const nonce = '1'
+    const signerWallet = '0x51c72848c68a965f66fa7a88855f9f7784502a7f'
+    const feeReceiver = '0xaD30f7EEBD9Bd5150a256F47DA41d4403033CdF0'
+    const fullSwap = await getFullSwapERC20(
+      nonce,
+      signerWallet,
+      feeReceiver,
+      require('./test-logs.json')
+    )
+    expect(fullSwap).to.deep.equal({
+      nonce,
+      signerWallet,
+      signerToken: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+      signerAmount: '1008438461',
+      senderWallet: '0x74de5d4fcbf63e00296fd95d33236b9794016631',
+      senderToken: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+      senderAmount: '461545050000000000',
+      feeAmount: '705906',
+    })
   })
 })

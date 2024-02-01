@@ -6,7 +6,7 @@ const {
 } = require('@airswap/utils')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
-const { ADDRESS_ZERO } = require('@airswap/constants')
+const { ADDRESS_ZERO } = require('@airswap/utils')
 
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const IWETH = require('../build/contracts/interfaces/IWETH.sol/IWETH.json')
@@ -31,8 +31,8 @@ describe('Wrapper Unit Tests', () => {
   const PROTOCOL_FEE = '30'
   const PROTOCOL_FEE_LIGHT = '7'
   const DEFAULT_AMOUNT = '10000'
-  const REBATE_SCALE = '10'
-  const REBATE_MAX = '100'
+  const BONUS_SCALE = '10'
+  const BONUS_MAX = '100'
 
   async function createSignedOrderERC20(params, signer) {
     const unsignedOrder = createOrderERC20({
@@ -93,8 +93,8 @@ describe('Wrapper Unit Tests', () => {
       PROTOCOL_FEE,
       PROTOCOL_FEE_LIGHT,
       protocolFeeWallet.address,
-      REBATE_SCALE,
-      REBATE_MAX
+      BONUS_SCALE,
+      BONUS_MAX
     )
     await swapERC20.deployed()
 

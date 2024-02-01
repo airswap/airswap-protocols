@@ -1,8 +1,7 @@
 const { ethers } = require('hardhat')
-const { getKnownTokens } = require('@airswap/metadata')
-const { chainNames, ChainIds } = require('@airswap/constants')
-const BalanceChecker = require('@airswap/balances/build/contracts/BalanceChecker.sol/BalanceChecker.json')
-const balancesDeploys = require('@airswap/balances/deploys.js')
+const { getKnownTokens, chainNames, ChainIds } = require('@airswap/utils')
+const BatchCall = require('@airswap/batch-call/build/contracts/BatchCall.sol/BatchCall.json')
+const batchCallDeploys = require('@airswap/batch-call/deploys.js')
 const poolDeploys = require('../deploys.js')
 
 async function main() {
@@ -16,7 +15,7 @@ async function main() {
   console.log('Network:', chainNames[chainId].toUpperCase())
   console.log('\nPool:', poolDeploys[chainId])
 
-  if (!balancesDeploys[chainId]) {
+  if (!batchCallDeploys[chainId]) {
     throw new Error('Unable to check balances on this chain.')
   }
 
@@ -33,8 +32,8 @@ async function main() {
   console.log(`\nScanning non-zero balances for ${tokens.length} tokens...\n`)
 
   const balancesContract = new ethers.Contract(
-    balancesDeploys[chainId],
-    BalanceChecker.abi,
+    batchCallDeploys[chainId],
+    BatchCall.abi,
     account.provider
   )
 

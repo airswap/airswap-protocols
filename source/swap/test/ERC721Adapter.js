@@ -2,7 +2,7 @@ const { expect } = require('chai')
 const { ethers, waffle } = require('hardhat')
 const IERC721 = require('@openzeppelin/contracts/build/contracts/IERC721.json')
 const { deployMockContract } = waffle
-const { ADDRESS_ZERO, TokenKinds } = require('@airswap/constants')
+const { ADDRESS_ZERO, TokenKinds } = require('@airswap/utils')
 
 let snapshotId
 let adapter
@@ -68,7 +68,7 @@ describe('ERC721Adapter Unit', () => {
         .connect(anyone)
         .transfer(party.wallet, anyone.address, '1', party.id, party.token)
     )
-      .to.be.revertedWith('InvalidArgument')
+      .to.be.revertedWith('AmountOrIDInvalid')
       .withArgs('amount')
   })
 })

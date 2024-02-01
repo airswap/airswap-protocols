@@ -10,14 +10,15 @@ const {
   chainNames,
   protocolFeeReceiverAddresses,
   ADDRESS_ZERO,
-} = require('@airswap/constants')
+} = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
 const swapERC20Deploys = require('../deploys.js')
 const swapERC20Blocks = require('../deploys-blocks.js')
+const config = require('./config.js')
 
 async function main() {
   await run('compile')
-  const config = await prettier.resolveConfig('../deploys.js')
+  const prettierConfig = await prettier.resolveConfig('../deploys.js')
 
   const [deployer] = await ethers.getSigners()
   const gasPrice = await deployer.getGasPrice()
@@ -34,10 +35,18 @@ async function main() {
   if (protocolFeeReceiverAddresses[chainId]) {
     protocolFeeReceiver = protocolFeeReceiverAddresses[chainId]
   }
-  const protocolFee = 7
-  const protocolFeeLight = 7
-  const discountScale = 10
-  const discountMax = 100
+
+  let protocolFee
+  let protocolFeeLight
+  let bonusScale
+  let bonusMax
+
+  if (config[chainId]) {
+    ;({ protocolFee, protocolFeeLight, bonusScale, bonusMax } = config[chainId])
+  } else {
+    ;({ protocolFee, protocolFeeLight, bonusScale, bonusMax } =
+      config[ChainIds.MAINNET])
+  }
 
   console.log(`protocolFee: ${protocolFee}`)
   console.log(`protocolFeeLight: ${protocolFeeLight}`)
@@ -50,8 +59,8 @@ async function main() {
       protocolFee,
       protocolFeeLight,
       protocolFeeReceiver,
-      discountScale,
-      discountMax,
+      bonusScale,
+      bonusMax,
       {
         gasPrice,
       }
@@ -67,7 +76,7 @@ async function main() {
       './deploys.js',
       prettier.format(
         `module.exports = ${JSON.stringify(swapERC20Deploys, null, '\t')}`,
-        { ...config, parser: 'babel' }
+        { ...prettierConfig, parser: 'babel' }
       )
     )
     swapERC20Blocks[chainId] = (
@@ -77,7 +86,7 @@ async function main() {
       './deploys-blocks.js',
       prettier.format(
         `module.exports = ${JSON.stringify(swapERC20Blocks, null, '\t')}`,
-        { ...config, parser: 'babel' }
+        { ...prettierConfig, parser: 'babel' }
       )
     )
     console.log(

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity 0.8.23;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import "@openzeppelin/contracts/interfaces/IERC2981.sol";
-import "./interfaces/IAdapter.sol";
 import "./interfaces/ISwap.sol";
 
 /**
@@ -12,7 +12,7 @@ import "./interfaces/ISwap.sol";
  * @notice https://www.airswap.io/
  */
 contract Swap is ISwap, Ownable2Step, EIP712 {
-  bytes32 internal constant ORDER_TYPEHASH =
+  bytes32 private constant ORDER_TYPEHASH =
     keccak256(
       abi.encodePacked(
         "Order(uint256 nonce,uint256 expiry,uint256 protocolFee,Party signer,Party sender,address affiliateWallet,uint256 affiliateAmount)",
@@ -20,22 +20,26 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       )
     );
 
-  bytes32 internal constant PARTY_TYPEHASH =
+  bytes32 private constant PARTY_TYPEHASH =
     keccak256(
       "Party(address wallet,address token,bytes4 kind,uint256 id,uint256 amount)"
     );
 
   // Domain name and version for use in EIP712 signatures
   string public constant DOMAIN_NAME = "SWAP";
-  string public constant DOMAIN_VERSION = "4";
+  string public constant DOMAIN_VERSION = "4.2";
   uint256 public immutable DOMAIN_CHAIN_ID;
   bytes32 public immutable DOMAIN_SEPARATOR;
 
   uint256 public constant FEE_DIVISOR = 10000;
-  uint256 internal constant MAX_ERROR_COUNT = 16;
+  uint256 private constant MAX_ERROR_COUNT = 16;
 
-  // Mapping of ERC165 interface ID to token adapter
-  mapping(bytes4 => IAdapter) public adapters;
+  /**
+   * @notice Double mapping of signers to nonce groups to nonce states
+   * @dev The nonce group is computed as nonce / 256, so each group of 256 sequential nonces uses the same key
+   * @dev The nonce states are encoded as 256 bits, for each nonce in the group 0 means available and 1 means used
+   */
+  mapping(address => mapping(uint256 => uint256)) private _nonceGroups;
 
   // Mapping of signer to authorized signatory
   mapping(address => address) public override authorized;
@@ -43,23 +47,19 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   // Mapping of signatory address to a minimum valid nonce
   mapping(address => uint256) public signatoryMinimumNonce;
 
-  /**
-   * @notice Double mapping of signers to nonce groups to nonce states
-   * @dev The nonce group is computed as nonce / 256, so each group of 256 sequential nonces uses the same key
-   * @dev The nonce states are encoded as 256 bits, for each nonce in the group 0 means available and 1 means used
-   */
-  mapping(address => mapping(uint256 => uint256)) internal _nonceGroups;
-
-  bytes4 public requiredSenderKind;
   uint256 public protocolFee;
   address public protocolFeeWallet;
+  bytes4 public immutable requiredSenderKind;
+
+  // Mapping of ERC165 interface ID to token adapter
+  mapping(bytes4 => IAdapter) public adapters;
 
   /**
-   * @notice Constructor
+   * @notice Swap constructor
    * @dev Sets domain and version for EIP712 signatures
    * @param _adapters IAdapter[] array of token adapters
-   * @param _protocolFee uin256 fee to be assessed on swaps
-   * @param _protocolFeeWallet address destination for fees
+   * @param _protocolFee uin256 protocol fee to be assessed on swaps
+   * @param _protocolFeeWallet address destination for protocol fees
    */
   constructor(
     IAdapter[] memory _adapters,
@@ -74,8 +74,12 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     DOMAIN_CHAIN_ID = block.chainid;
     DOMAIN_SEPARATOR = _domainSeparatorV4();
 
-    for (uint256 i = 0; i < _adapters.length; i++) {
+    uint256 adaptersLength = _adapters.length;
+    for (uint256 i; i < adaptersLength; ) {
       adapters[_adapters[i].interfaceId()] = _adapters[i];
+      unchecked {
+        ++i;
+      }
     }
     requiredSenderKind = _requiredSenderKind;
     protocolFee = _protocolFee;
@@ -84,6 +88,8 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
 
   /**
    * @notice Atomic Token Swap
+   * @param recipient address Wallet to receive sender proceeds
+   * @param maxRoyalty uint256 Max to avoid unexpected royalties
    * @param order Order to settle
    */
   function swap(
@@ -130,7 +136,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       );
     }
 
-    // Transfer protocol fee from sender if possible
+    // Transfer protocol fee from sender
     uint256 protocolFeeAmount = (order.sender.amount * protocolFee) /
       FEE_DIVISOR;
     if (protocolFeeAmount > 0) {
@@ -144,7 +150,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       );
     }
 
-    // Transfer royalty from sender if supported by signer token
+    // Transfer royalty from sender if required by signer token
     if (supportsRoyalties(order.signer.token)) {
       address royaltyRecipient;
       uint256 royaltyAmount;
@@ -179,7 +185,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   }
 
   /**
-   * @notice Set the fee
+   * @notice Set the protocol fee
    * @param _protocolFee uint256 Value of the fee in basis points
    */
   function setProtocolFee(uint256 _protocolFee) external onlyOwner {
@@ -190,7 +196,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   }
 
   /**
-   * @notice Set the fee wallet
+   * @notice Set the protocol fee wallet
    * @param _protocolFeeWallet address Wallet to transfer fee to
    */
   function setProtocolFeeWallet(address _protocolFeeWallet) external onlyOwner {
@@ -229,10 +235,13 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @param nonces uint256[] List of nonces to cancel
    */
   function cancel(uint256[] calldata nonces) external override {
-    for (uint256 i = 0; i < nonces.length; i++) {
+    for (uint256 i; i < nonces.length; ) {
       uint256 nonce = nonces[i];
       _markNonceAsUsed(msg.sender, nonce);
       emit Cancel(nonce, msg.sender);
+      unchecked {
+        ++i;
+      }
     }
   }
 
@@ -247,91 +256,72 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   }
 
   /**
-   * @notice Validates Swap Order for any potential errors
-   * @param order Order to settle
+   * @notice Checks an order for errors
+   * @param senderWallet address Wallet that would send the order
+   * @param order Order that would be settled
+   * @return bytes32[] errors
    */
   function check(
     address senderWallet,
     Order calldata order
-  ) public view returns (bytes32[] memory, uint256) {
-    uint256 errCount;
+  ) external view returns (bytes32[] memory) {
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
-    (address signatory, ) = ECDSA.tryRecover(
-      _getOrderHash(order),
-      order.v,
-      order.r,
-      order.s
-    );
+    uint256 count;
+
+    if (DOMAIN_CHAIN_ID != block.chainid) {
+      errors[count++] = "ChainIdChanged";
+    }
+
+    // Validate as the authorized signatory if set
+    address signatory = order.signer.wallet;
+    if (authorized[signatory] != address(0)) {
+      signatory = authorized[signatory];
+    }
+
+    if (
+      !SignatureChecker.isValidSignatureNow(
+        signatory,
+        _getOrderHash(order),
+        abi.encodePacked(order.r, order.s, order.v)
+      )
+    ) {
+      errors[count++] = "Unauthorized";
+    } else if (nonceUsed(signatory, order.nonce)) {
+      errors[count++] = "NonceAlreadyUsed";
+    } else if (order.nonce < signatoryMinimumNonce[signatory]) {
+      errors[count++] = "NonceTooLow";
+    }
+
+    if (order.expiry < block.timestamp) {
+      errors[count++] = "OrderExpired";
+    }
 
     if (
       order.sender.wallet != address(0) && order.sender.wallet != senderWallet
     ) {
-      errors[errCount] = "SenderInvalid";
-      errCount++;
-    }
-
-    if (signatory == address(0)) {
-      errors[errCount] = "SignatureInvalid";
-      errCount++;
-    } else {
-      if (
-        authorized[order.signer.wallet] != address(0) &&
-        signatory != authorized[order.signer.wallet]
-      ) {
-        errors[errCount] = "SignatoryUnauthorized";
-        errCount++;
-      } else if (
-        authorized[order.signer.wallet] == address(0) &&
-        signatory != order.signer.wallet
-      ) {
-        errors[errCount] = "Unauthorized";
-        errCount++;
-      } else if (nonceUsed(signatory, order.nonce)) {
-        errors[errCount] = "NonceAlreadyUsed";
-        errCount++;
-      }
-      if (order.nonce < signatoryMinimumNonce[signatory]) {
-        errors[errCount] = "NonceTooLow";
-        errCount++;
-      }
-    }
-
-    if (order.expiry < block.timestamp) {
-      errors[errCount] = "OrderExpired";
-      errCount++;
-    }
-
-    IAdapter signerTokenAdapter = adapters[order.signer.kind];
-
-    if (address(signerTokenAdapter) == address(0)) {
-      errors[errCount] = "SignerTokenKindUnknown";
-      errCount++;
-    } else {
-      if (!signerTokenAdapter.hasAllowance(order.signer)) {
-        errors[errCount] = "SignerAllowanceLow";
-        errCount++;
-      }
-      if (!signerTokenAdapter.hasBalance(order.signer)) {
-        errors[errCount] = "SignerBalanceLow";
-        errCount++;
-      }
+      errors[count++] = "SenderInvalid";
     }
 
     IAdapter senderTokenAdapter = adapters[order.sender.kind];
 
     if (address(senderTokenAdapter) == address(0)) {
-      errors[errCount] = "SenderTokenKindUnknown";
-      errCount++;
+      errors[count++] = "SenderTokenKindUnknown";
     } else {
       if (order.sender.kind != requiredSenderKind) {
-        errors[errCount] = "SenderTokenInvalid";
-        errCount++;
+        errors[count++] = "SenderTokenInvalid";
       } else {
         uint256 protocolFeeAmount = (order.sender.amount * protocolFee) /
           FEE_DIVISOR;
         uint256 totalSenderAmount = order.sender.amount +
           protocolFeeAmount +
           order.affiliateAmount;
+        if (supportsRoyalties(order.signer.token)) {
+          (, uint256 royaltyAmount) = IERC2981(order.signer.token).royaltyInfo(
+            order.signer.id,
+            order.sender.amount
+          );
+          totalSenderAmount += royaltyAmount;
+        }
         Party memory sender = Party(
           senderWallet,
           order.sender.token,
@@ -339,27 +329,47 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
           order.sender.id,
           totalSenderAmount
         );
-        if (!senderTokenAdapter.hasAllowance(sender)) {
-          errors[errCount] = "SenderAllowanceLow";
-          errCount++;
+        if (senderWallet != address(0)) {
+          if (!senderTokenAdapter.hasAllowance(sender)) {
+            errors[count++] = "SenderAllowanceLow";
+          }
+          if (!senderTokenAdapter.hasBalance(sender)) {
+            errors[count++] = "SenderBalanceLow";
+          }
         }
-        if (!senderTokenAdapter.hasBalance(sender)) {
-          errors[errCount] = "SenderBalanceLow";
-          errCount++;
+        if (!senderTokenAdapter.hasValidParams(sender)) {
+          errors[count++] = "AmountOrIDInvalid";
         }
         if (order.sender.amount < order.affiliateAmount) {
-          errors[errCount] = "AffiliateAmountInvalid";
-          errCount++;
+          errors[count++] = "AffiliateAmountInvalid";
         }
       }
     }
 
-    if (order.protocolFee != protocolFee) {
-      errors[errCount] = "FeeInvalid";
-      errCount++;
+    IAdapter signerTokenAdapter = adapters[order.signer.kind];
+
+    if (address(signerTokenAdapter) == address(0)) {
+      errors[count++] = "SignerTokenKindUnknown";
+    } else {
+      if (!signerTokenAdapter.hasAllowance(order.signer)) {
+        errors[count++] = "SignerAllowanceLow";
+      }
+      if (!signerTokenAdapter.hasBalance(order.signer)) {
+        errors[count++] = "SignerBalanceLow";
+      }
+      if (!signerTokenAdapter.hasValidParams(order.signer)) {
+        errors[count++] = "AmountOrIDInvalid";
+      }
     }
 
-    return (errors, errCount);
+    // Truncate errors array to actual count
+    if (count != errors.length) {
+      assembly {
+        mstore(errors, count)
+      }
+    }
+
+    return errors;
   }
 
   /**
@@ -381,7 +391,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @param signatory  address Address of the signer for which to mark the nonce as used
    * @param nonce uint256 Nonce to be marked as used
    */
-  function _markNonceAsUsed(address signatory, uint256 nonce) internal {
+  function _markNonceAsUsed(address signatory, uint256 nonce) private {
     uint256 groupKey = nonce / 256;
     uint256 indexInGroup = nonce % 256;
     uint256 group = _nonceGroups[signatory][groupKey];
@@ -395,10 +405,10 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   }
 
   /**
-   * @notice Function to indicate whether the party token implements EIP-2981
-   * @param token Contract address from which royalty need to be considered
+   * @notice Checks whether a token implements EIP-2981
+   * @param token address token to check
    */
-  function supportsRoyalties(address token) internal view returns (bool) {
+  function supportsRoyalties(address token) private view returns (bool) {
     try IERC165(token).supportsInterface(type(IERC2981).interfaceId) returns (
       bool result
     ) {
@@ -412,8 +422,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @notice Tests whether signature and signer are valid
    * @param order Order to validate
    */
-
-  function _check(Order calldata order) internal {
+  function _check(Order calldata order) private {
     // Ensure execution on the intended chain
     if (DOMAIN_CHAIN_ID != block.chainid) revert ChainIdChanged();
 
@@ -424,26 +433,20 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     if (order.sender.amount < order.affiliateAmount)
       revert AffiliateAmountInvalid();
 
-    // Recover the signatory from the hash and signature
-    (address signatory, ) = ECDSA.tryRecover(
-      _getOrderHash(order),
-      order.v,
-      order.r,
-      order.s
-    );
-
-    // Ensure the signatory is not null
-    if (signatory == address(0)) revert SignatureInvalid();
-
-    // Ensure signatory is authorized to sign
-    if (authorized[order.signer.wallet] != address(0)) {
-      // If one is set by signer wallet, signatory must be authorized
-      if (signatory != authorized[order.signer.wallet])
-        revert SignatoryUnauthorized();
-    } else {
-      // Otherwise, signatory must be signer wallet
-      if (signatory != order.signer.wallet) revert Unauthorized();
+    // Validate as the authorized signatory if set
+    address signatory = order.signer.wallet;
+    if (authorized[signatory] != address(0)) {
+      signatory = authorized[signatory];
     }
+
+    // Ensure the signature is correct for the order
+    if (
+      !SignatureChecker.isValidSignatureNow(
+        signatory,
+        _getOrderHash(order),
+        abi.encodePacked(order.r, order.s, order.v)
+      )
+    ) revert Unauthorized();
 
     // Ensure the nonce is not yet used and if not mark it used
     _markNonceAsUsed(signatory, order.nonce);
@@ -456,12 +459,12 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   }
 
   /**
-   * @notice Hash an order into bytes32
+   * @notice Hashes an order into bytes32
    * @dev EIP-191 header and domain separator included
    * @param order Order The order to be hashed
    * @return bytes32 A keccak256 abi.encodePacked value
    */
-  function _getOrderHash(Order calldata order) internal view returns (bytes32) {
+  function _getOrderHash(Order calldata order) private view returns (bytes32) {
     return
       keccak256(
         abi.encodePacked(
@@ -484,14 +487,11 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   }
 
   /**
-   * @notice Perform token transfer for tokens in registry
-   * @dev Transfer type specified by the bytes4 kind param
-   * @dev ERC721: uses transferFrom for transfer
-   * @dev ERC20: Takes into account non-standard ERC-20 tokens.
+   * @notice Performs token transfer
    * @param from address Wallet address to transfer from
    * @param to address Wallet address to transfer to
    * @param amount uint256 Amount for ERC-20
-   * @param id token ID for ERC-721
+   * @param id uint256 token ID for ERC-721, ERC-1155
    * @param token address Contract address of token
    * @param kind bytes4 EIP-165 interface ID of the token
    */
@@ -502,7 +502,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     uint256 id,
     address token,
     bytes4 kind
-  ) internal {
+  ) private {
     IAdapter adapter = adapters[kind];
     if (address(adapter) == address(0)) revert TokenKindUnknown();
     // Use delegatecall so underlying transfer is called as Swap

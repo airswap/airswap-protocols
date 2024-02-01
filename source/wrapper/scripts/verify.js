@@ -3,7 +3,7 @@ const { ethers, run } = require('hardhat')
 const swapERC20Deploys = require('@airswap/swap-erc20/deploys.js')
 const wrapperDeploys = require('../deploys.js')
 const wethDeploys = require('../deploys-weth.js')
-const { chainNames } = require('@airswap/constants')
+const { chainNames } = require('@airswap/utils')
 
 async function main() {
   await run('compile')

@@ -5,8 +5,8 @@ const {
   chainNames,
   ownerAddresses,
   apiUrls,
-} = require('@airswap/constants')
-const { ADDRESS_ZERO } = require('@airswap/constants')
+} = require('@airswap/utils')
+const { ADDRESS_ZERO } = require('@airswap/utils')
 
 const contracts = [
   ['pool', 'Pool'],

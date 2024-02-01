@@ -28,13 +28,11 @@
     "owners": "hardhat run ./scripts/owner.js"
   },
   "dependencies": {
-    "@airswap/swap-erc20": "4.1.6",
+    "@airswap/swap-erc20": "4.2.0",
     "@openzeppelin/contracts": "^4.8.3"
   },
   "devDependencies": {
-    "@airswap/constants": "4.1.6",
-    "@airswap/utils": "4.1.8",
-    "@airswap/types": "4.1.1",
+    "@airswap/utils": "4.2.4",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
     "prompt-confirm": "^2.0.4"
   },
