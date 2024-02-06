@@ -50,8 +50,8 @@ module.exports = {
       url: apiUrls[ChainIds.ARBITRUM],
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
-    arbitrumgoerli: {
-      url: apiUrls[ChainIds.ARBITRUMGOERLI],
+    arbitrumsepolia: {
+      url: apiUrls[ChainIds.ARBITRUMSEPOLIA],
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
     rsk: {
@@ -70,8 +70,8 @@ module.exports = {
       url: apiUrls[ChainIds.LINEA],
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
-    basegoerli: {
-      url: apiUrls[ChainIds.BASEGOERLI],
+    basesepolia: {
+      url: apiUrls[ChainIds.BASESEPOLIA],
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
     base: {
@@ -133,7 +133,7 @@ module.exports = {
       bscTestnet: process.env.BSCSCAN_API_KEY,
       polygon: process.env.POLYGONSCAN_API_KEY,
       arbitrumOne: process.env.ARBISCAN_API_KEY,
-      arbitrumGoerli: process.env.ARBISCAN_API_KEY,
+      arbitrumSepolia: process.env.ARBISCAN_API_KEY,
       avalanche: process.env.SNOWTRACE_API_KEY,
       avalancheFujiTestnet: process.env.SNOWTRACE_API_KEY,
       holesky: process.env.ETHERSCAN_API_KEY,
@@ -141,7 +141,7 @@ module.exports = {
       linea: process.env.LINEASCAN_API_KEY,
       lineagoerli: process.env.LINEASCAN_API_KEY,
       base: process.env.BASESCAN_API_KEY,
-      basegoerli: process.env.BASESCAN_API_KEY,
+      basesepolia: process.env.BASESCAN_API_KEY,
       rsk: process.env.BLOCKSCOUT_API_KEY,
       rsktestnet: process.env.BLOCKSCOUT_API_KEY,
       sepolia: process.env.ETHERSCAN_API_KEY,
@@ -149,7 +149,7 @@ module.exports = {
     customChains: [
       {
         network: 'rsk',
-        chainId: 30,
+        chainId: ChainIds.RSK,
         urls: {
           apiURL: explorerApiUrls[ChainIds.RSK],
           browserURL: explorerUrls[ChainIds.RSK],
@@ -157,7 +157,7 @@ module.exports = {
       },
       {
         network: 'rsktestnet',
-        chainId: 31,
+        chainId: ChainIds.RSKTESTNET,
         urls: {
           apiURL: explorerApiUrls[ChainIds.RSKTESTNET],
           browserURL: explorerUrls[ChainIds.RSKTESTNET],
@@ -165,7 +165,7 @@ module.exports = {
       },
       {
         network: 'holesky',
-        chainId: 17000,
+        chainId: ChainIds.HOLESKY,
         urls: {
           apiURL: explorerApiUrls[ChainIds.HOLESKY],
           browserURL: explorerUrls[ChainIds.HOLESKY],
@@ -173,7 +173,7 @@ module.exports = {
       },
       {
         network: 'linea',
-        chainId: 59144,
+        chainId: ChainIds.LINEA,
         urls: {
           apiURL: explorerApiUrls[ChainIds.LINEA],
           browserURL: explorerUrls[ChainIds.LINEA],
@@ -181,7 +181,7 @@ module.exports = {
       },
       {
         network: 'lineagoerli',
-        chainId: 59140,
+        chainId: ChainIds.LINEAGOERLI,
         urls: {
           apiURL: explorerApiUrls[ChainIds.LINEAGOERLI],
           browserURL: explorerUrls[ChainIds.LINEAGOERLI],
@@ -189,26 +189,26 @@ module.exports = {
       },
       {
         network: 'base',
-        chainId: 8453,
+        chainId: ChainIds.BASE,
         urls: {
           apiURL: explorerApiUrls[ChainIds.BASE],
           browserURL: explorerUrls[ChainIds.BASE],
         },
       },
       {
-        network: 'basegoerli',
-        chainId: 84531,
+        network: 'basesepolia',
+        chainId: ChainIds.BASESEPOLIA,
         urls: {
-          apiURL: explorerApiUrls[ChainIds.BASEGOERLI],
-          browserURL: explorerUrls[ChainIds.BASEGOERLI],
+          apiURL: explorerApiUrls[ChainIds.BASESEPOLIA],
+          browserURL: explorerUrls[ChainIds.BASESEPOLIA],
         },
       },
       {
-        network: 'arbitrumGoerli',
-        chainId: 421613,
+        network: 'arbitrumSepolia',
+        chainId: ChainIds.ARBITRUMSEPOLIA,
         urls: {
-          apiURL: explorerApiUrls[ChainIds.ARBITRUMGOERLI],
-          browserURL: explorerUrls[ChainIds.ARBITRUMGOERLI],
+          apiURL: explorerApiUrls[ChainIds.ARBITRUMSEPOLIA],
+          browserURL: explorerUrls[ChainIds.ARBITRUMSEPOLIA],
         },
       },
     ],

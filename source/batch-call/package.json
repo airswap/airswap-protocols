@@ -1,6 +1,6 @@
 {
   "name": "@airswap/batch-call",
-  "version": "4.2.0",
+  "version": "4.2.1",
   "description": "Batch balance, allowance, order validity checks",
   "license": "MIT",
   "repository": {
@@ -27,11 +27,11 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.3",
-    "@airswap/swap": "4.2.0",
-    "@airswap/swap-erc20": "4.2.0"
+    "@airswap/swap": "4.2.1",
+    "@airswap/swap-erc20": "4.2.1"
   },
   "devDependencies": {
-    "@airswap/utils": "4.2.4",
+    "@airswap/utils": "4.2.5",
     "prompt-confirm": "^2.0.4"
   },
   "publishConfig": {

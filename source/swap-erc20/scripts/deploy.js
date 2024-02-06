@@ -7,7 +7,6 @@ const poolDeploys = require('@airswap/pool/deploys.js')
 const {
   ChainIds,
   chainLabels,
-  chainNames,
   protocolFeeReceiverAddresses,
   ADDRESS_ZERO,
 } = require('@airswap/utils')
@@ -15,21 +14,18 @@ const { getReceiptUrl } = require('@airswap/utils')
 const swapERC20Deploys = require('../deploys.js')
 const swapERC20Blocks = require('../deploys-blocks.js')
 const config = require('./config.js')
+const { displayDeployerInfo } = require('../../../scripts/deployer-info')
 
 async function main() {
   await run('compile')
   const prettierConfig = await prettier.resolveConfig('../deploys.js')
-
   const [deployer] = await ethers.getSigners()
-  const gasPrice = await deployer.getGasPrice()
   const chainId = await deployer.getChainId()
   if (chainId === ChainIds.HARDHAT) {
     console.log('Value for --network flag is required')
     return
   }
-  console.log(`Deployer: ${deployer.address}`)
-  console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
+  await displayDeployerInfo(deployer)
 
   let protocolFeeReceiver = poolDeploys[chainId] || ADDRESS_ZERO
   if (protocolFeeReceiverAddresses[chainId]) {
@@ -50,7 +46,7 @@ async function main() {
 
   console.log(`protocolFee: ${protocolFee}`)
   console.log(`protocolFeeLight: ${protocolFeeLight}`)
-  console.log(`protocolFeeReceiver: ${protocolFeeReceiver}`)
+  console.log(`protocolFeeReceiver: ${protocolFeeReceiver}\n`)
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
@@ -60,10 +56,7 @@ async function main() {
       protocolFeeLight,
       protocolFeeReceiver,
       bonusScale,
-      bonusMax,
-      {
-        gasPrice,
-      }
+      bonusMax
     )
     console.log(
       'Deploying...',
