@@ -22,16 +22,17 @@ interface IStaking {
     uint256 balance;
   }
 
-  event Transfer(address indexed from, address indexed to, uint256 tokens);
+  event CancelDurationChange();
+  event CompleteDurationChange(uint256 indexed newDuration);
   event ProposeDelegate(address indexed from, address indexed to);
-  event SetDelegate(address indexed staker, address indexed delegate);
-  event UnsetDelegate(address indexed staker, address indexed delegate);
+  event Transfer(address indexed from, address indexed to, uint256 tokens);
   event ScheduleDurationChange(
     uint256 proposedStakeDuration,
     uint256 indexed unlockTimestamp
   );
-  event CancelDurationChange();
-  event CompleteDurationChange(uint256 indexed newDuration);
+  event SetDelegate(address indexed staker, address indexed delegate);
+  event SetUnlocked(bool unlock);
+  event UnsetDelegate(address indexed staker, address indexed delegate);
 
   function stake(uint256 amount) external;
 

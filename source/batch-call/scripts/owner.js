@@ -1,1 +1,1 @@
-console.log(`\n✘ Balances is not ownable.\n`)
+console.log(`\n✘ BatchCall is not ownable.\n`)
