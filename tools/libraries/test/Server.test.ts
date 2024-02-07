@@ -133,6 +133,9 @@ function mockHttpServer(api) {
           ],
         }
         break
+      case 'getTags':
+        res = []
+        break
       case 'considerOrderERC20':
         res = true
         break
@@ -211,6 +214,13 @@ describe('HTTPServer', () => {
         100
       )
       expect(isValidFullOrder(result.orders[0])).to.be.true
+    })
+  fancy
+    .nock('https://' + URL, mockHttpServer)
+    .it('Server getTags()', async () => {
+      const server = await Server.at(URL)
+      const result = await server.getTags(ADDRESS_ZERO)
+      expect(result).to.have.lengthOf(0)
     })
 })
 
