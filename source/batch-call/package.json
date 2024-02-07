@@ -31,7 +31,7 @@
     "@airswap/swap-erc20": "4.2.1"
   },
   "devDependencies": {
-    "@airswap/utils": "4.2.5",
+    "@airswap/utils": "4.2.6",
     "prompt-confirm": "^2.0.4"
   },
   "publishConfig": {
