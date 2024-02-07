@@ -18,6 +18,7 @@
     "test:ci": "lerna run test:ci",
     "owners": "node ./scripts/owners-report.js",
     "receivers": "node ./scripts/receivers-report.js",
+    "drain": "node ./scripts/drain-deployer.js",
     "prepare": "husky install",
     "pretty:check": "prettier --check \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\" \"./**/*.json\"",
     "pretty:fix": "prettier --write \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\" \"./**/*.json\""

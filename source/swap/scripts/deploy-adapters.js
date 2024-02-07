@@ -3,29 +3,25 @@ const fs = require('fs')
 const prettier = require('prettier')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
-const { chainNames, chainLabels, ChainIds } = require('@airswap/utils')
+const { chainLabels, ChainIds } = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
 const adapterDeploys = require('../deploys-adapters.js')
 const adapterBlocks = require('../deploys-adapters-blocks.js')
+const { displayDeployerInfo } = require('../../../scripts/deployer-info')
 
 async function main() {
   await run('compile')
   const prettierConfig = await prettier.resolveConfig('../deploys.js')
-
   const [deployer] = await ethers.getSigners()
-  const gasPrice = await deployer.getGasPrice()
   const chainId = await deployer.getChainId()
   if (chainId === ChainIds.HARDHAT) {
     console.log('Value for --network flag is required')
     return
   }
-  console.log(`Deployer: ${deployer.address}`)
-  console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
+  await displayDeployerInfo(deployer)
 
   const adapters = ['ERC20Adapter', 'ERC721Adapter', 'ERC1155Adapter']
-
-  console.log(`\nadapters: ${JSON.stringify(adapters)}`)
+  console.log(`adapters: ${JSON.stringify(adapters)}`)
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
@@ -33,9 +29,7 @@ async function main() {
     for (let i = 0; i < adapters.length; i++) {
       const adapterContract = await (
         await ethers.getContractFactory(adapters[i])
-      ).deploy({
-        gasPrice,
-      })
+      ).deploy()
       console.log(
         `Deploying ${adapters[i]}...`,
         getReceiptUrl(chainId, adapterContract.deployTransaction.hash)
