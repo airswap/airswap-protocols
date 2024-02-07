@@ -7,11 +7,12 @@ const {
   chainCurrencies,
   apiUrls,
   getReceiptUrl,
+  ADDRESS_ZERO,
   EVM_NATIVE_TOKEN_DECIMALS,
 } = require('@airswap/utils')
 
 const CONFIRMATIONS = 2
-const RECIPIENT = '0x5DC34C5Aed185484a46CbE522118A6d5A1946583'
+const RECIPIENT = '0x0000000000000000000000000000000000000000'
 
 async function main() {
   let chainId
@@ -38,6 +39,11 @@ async function main() {
     console.log(
       `\n✘ Balance is already 0 on ${process.argv[3].toUpperCase()}.\n`
     )
+    process.exit(0)
+  }
+
+  if (RECIPIENT === ADDRESS_ZERO) {
+    console.log(`\n✘ RECIPIENT must be set.\n`)
     process.exit(0)
   }
 

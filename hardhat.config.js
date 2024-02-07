@@ -139,11 +139,11 @@ module.exports = {
       holesky: process.env.ETHERSCAN_API_KEY,
       polygonMumbai: process.env.POLYGONSCAN_API_KEY,
       linea: process.env.LINEASCAN_API_KEY,
-      lineagoerli: process.env.LINEASCAN_API_KEY,
+      lineaGoerli: process.env.LINEASCAN_API_KEY,
       base: process.env.BASESCAN_API_KEY,
-      basesepolia: process.env.BASESCAN_API_KEY,
+      baseSepolia: process.env.BASESCAN_API_KEY,
       rsk: process.env.BLOCKSCOUT_API_KEY,
-      rsktestnet: process.env.BLOCKSCOUT_API_KEY,
+      rskTestnet: process.env.BLOCKSCOUT_API_KEY,
       sepolia: process.env.ETHERSCAN_API_KEY,
     },
     customChains: [
@@ -156,7 +156,7 @@ module.exports = {
         },
       },
       {
-        network: 'rsktestnet',
+        network: 'rskTestnet',
         chainId: ChainIds.RSKTESTNET,
         urls: {
           apiURL: explorerApiUrls[ChainIds.RSKTESTNET],
@@ -180,7 +180,7 @@ module.exports = {
         },
       },
       {
-        network: 'lineagoerli',
+        network: 'lineaGoerli',
         chainId: ChainIds.LINEAGOERLI,
         urls: {
           apiURL: explorerApiUrls[ChainIds.LINEAGOERLI],
@@ -196,7 +196,7 @@ module.exports = {
         },
       },
       {
-        network: 'basesepolia',
+        network: 'baseSepolia',
         chainId: ChainIds.BASESEPOLIA,
         urls: {
           apiURL: explorerApiUrls[ChainIds.BASESEPOLIA],
