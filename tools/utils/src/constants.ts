@@ -46,7 +46,6 @@ export const testnets: number[] = [
   ChainIds.TELOSTESTNET,
   ChainIds.BSCTESTNET,
   ChainIds.HOLESKY,
-  ChainIds.HARDHAT,
   ChainIds.FUJI,
   ChainIds.LINEAGOERLI,
   ChainIds.MUMBAI,
