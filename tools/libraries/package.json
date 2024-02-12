@@ -18,10 +18,6 @@
   "scripts": {
     "clean": "rm -rf ./build",
     "compile": "yarn clean && tsc -b",
-    "lint:check": "yarn eslint . --ext .js,.ts",
-    "lint:fix": "yarn eslint . --ext .js,.ts --fix",
-    "pretty:check": "prettier --check \"./**/*.ts\" \"./**/*.js\"",
-    "pretty:fix": "prettier --write \"./**/*.ts\" \"./**/*.js\"",
     "test": "TS_NODE_COMPILER_OPTIONS='{\"strict\":false}' yarn mocha -r ts-node/esm test/*.ts",
     "test:ci": "yarn test"
   },

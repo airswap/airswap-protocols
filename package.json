@@ -10,18 +10,17 @@
     ]
   },
   "scripts": {
+    "check:owners": "node ./scripts/owners-report.js",
+    "check:receivers": "node ./scripts/receivers-report.js",
+    "check:wrappers": "node ./scripts/wrappers-report.js",
     "clean": "lerna run clean",
     "compile": "lerna run compile",
-    "lint:check": "yarn eslint . --ext .js,.ts",
-    "lint:fix": "yarn eslint . --ext .js,.ts --fix",
+    "linter": "yarn eslint . --ext .js,.ts --fix",
     "test": "lerna run test",
     "test:ci": "lerna run test:ci",
-    "owners": "node ./scripts/owners-report.js",
-    "receivers": "node ./scripts/receivers-report.js",
     "drain": "node ./scripts/drain-deployer.js",
     "prepare": "husky install",
-    "pretty:check": "prettier --check \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\" \"./**/*.json\"",
-    "pretty:fix": "prettier --write \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\" \"./**/*.json\""
+    "prettier": "prettier --write \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\" \"./**/*.json\""
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
