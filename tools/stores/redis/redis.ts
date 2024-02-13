@@ -1,5 +1,12 @@
 import { createClient } from 'redis'
-import { FullOrder, OrderFilter, Indexes, Direction } from '@airswap/utils'
+import {
+  FullOrder,
+  OrderFilter,
+  Indexes,
+  Direction,
+  THIRTY_DAYS,
+} from '@airswap/utils'
+import reset from '../redis/redis.config'
 
 function tagsKey(token: string) {
   return `tags:${token.toLowerCase()}`
@@ -19,19 +26,24 @@ function cleanTags(tags: string[]) {
   )
 }
 
-const DEFAULT_READ_LIMIT = 10
-const DEFAULT_TTL = 2592000 // 30 days
-
 export class Redis {
   private client: any
+  private ttl: number
+  private defaultReadLimit: number
 
-  public constructor(connectionUrl: any) {
+  public constructor(
+    connectionUrl: any,
+    defaultReadLimit = 10,
+    ttl = THIRTY_DAYS
+  ) {
     this.client = createClient({
       url: connectionUrl,
     })
+    this.defaultReadLimit = defaultReadLimit
+    this.ttl = ttl
   }
 
-  public async write(order: FullOrder, tags: string[]) {
+  public async write(order: FullOrder, tags: string[] = []) {
     if (!this.client.isOpen) {
       await this.client.connect()
     }
@@ -61,7 +73,7 @@ export class Redis {
     )
     await this.client.expire(
       signerKey(order.signer.wallet, order.nonce),
-      DEFAULT_TTL
+      this.ttl
     )
 
     // Set unique by signer token and signer id.
@@ -72,7 +84,7 @@ export class Redis {
     )
     await this.client.expire(
       tokenKey(order.signer.token, order.signer.id),
-      DEFAULT_TTL
+      this.ttl
     )
 
     // Add tags to set for the signer token.
@@ -92,7 +104,7 @@ export class Redis {
   public async read(
     filter: OrderFilter,
     offset = 0,
-    limit = DEFAULT_READ_LIMIT,
+    limit = this.defaultReadLimit,
     by = Indexes.EXPIRY,
     direction = Direction.ASC
   ) {
@@ -117,7 +129,7 @@ export class Redis {
       }
     )
     return {
-      documents: documents.map((res: any) => res.value),
+      orders: documents.map((res: any) => res.value),
       offset,
       total,
     }
@@ -135,5 +147,18 @@ export class Redis {
       return true
     }
     return false
+  }
+
+  public async reset() {
+    if (!this.client.isOpen) {
+      await this.client.connect()
+    }
+    await reset(this.client)
+  }
+
+  public async disconnect() {
+    if (this.client.isOpen) {
+      await this.client.disconnect()
+    }
   }
 }
