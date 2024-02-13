@@ -54,6 +54,7 @@ describe('Redis', async () => {
   it('Tags are stored', async () => {
     await store.write(orderOne, ['grass:green', 'sky:blue'])
     await store.write(orderTwo, ['grass:green', 'sky:grey'])
+    await store.write(orderThree, ['grass:green', 'grass:green'])
     const tokenTags = await store.tags(orderOne.signer.token)
     expect(tokenTags).to.deep.equal(['grass:green', 'sky:blue', 'sky:grey'])
   })
@@ -80,7 +81,16 @@ describe('Redis', async () => {
 
   it('Query by tag', async () => {
     await store.write(orderOne, ['Grass|Green', 'Sun:Bright Yellow'])
-    await store.write(orderTwo, ['Grass|Green', 'Sun=Deep Orange'])
+    await store.write(orderTwo, [
+      'Grass|Green',
+      'Sun=Deep Orange',
+      'Grass',
+      'Two Words',
+      ' ',
+      '',
+      undefined,
+      null,
+   ])
     const res = await store.read({
       signerToken: orderOne.signer.token,
       tags: ['Sun:Bright Yellow'],
