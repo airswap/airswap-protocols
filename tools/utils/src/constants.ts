@@ -4,6 +4,7 @@ export const DOMAIN_NAME_SWAP = 'SWAP'
 export const DOMAIN_VERSION_SWAP = '4.2'
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export const SECONDS_IN_DAY = 86400
+export const THIRTY_DAYS = 86400 * 30
 export const EVM_NATIVE_TOKEN_DECIMALS = 18
 
 export enum ChainIds {
