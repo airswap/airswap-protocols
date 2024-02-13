@@ -21,15 +21,16 @@ Add the package to your project:
 yarn add @airswap/stores
 ```
 
-```console
-docker run -p 6379:6379 --name redis-stack redis/redis-stack:latest
-```
-
 Import into your application:
 
 ```TypeScript
 import { Redis } from '@airswap/stores';
 const store = new Redis(process.env.REDISCLOUD_URL)
+```
+
+Dockerized Redis for local development:
+```console
+docker run -p 6379:6379 --name redis-stack redis/redis-stack:latest
 ```
 
 ## Commands
