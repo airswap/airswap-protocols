@@ -33,6 +33,11 @@ Dockerized Redis for local development:
 docker run -p 6379:6379 --name redis-stack redis/redis-stack:latest
 ```
 
+Flush and create Redis indexes:
+```
+yarn compile; yarn redis:init
+```
+
 ## Commands
 
 | Command        | Description                             |
