@@ -2,10 +2,13 @@ require('dotenv').config({ path: '../../.env' })
 const { SchemaFieldTypes } = require('redis')
 
 export default async function reset(client) {
-  await client.flushAll()
   await client.ft.create(
     'index:ordersBySigner',
     {
+      '$.chainId': {
+        type: SchemaFieldTypes.NUMERIC,
+        AS: 'chainId',
+      },
       '$.nonce': {
         type: SchemaFieldTypes.TEXT,
         AS: 'nonce',

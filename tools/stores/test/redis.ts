@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import { Redis } from '../redis/redis'
+import { ChainIds } from '@airswap/utils'
 
 import {
   createOrder,
@@ -10,10 +11,18 @@ import {
 
 const store = new Redis(process.env.REDISCLOUD_URL)
 
+const TOKEN_ADDRESS = '0x000000000000000000000000000000000000000A'
+const signerOne = '0x0000000000000000000000000000000000000001'
+const signerTwo = '0x0000000000000000000000000000000000000002'
+
+let orderOne
+let orderTwo
+
 async function createSignedOrder(
   id: string,
   signerWallet = ADDRESS_ZERO,
-  signerToken = '0x000000000000000000000000000000000000000A'
+  signerToken = TOKEN_ADDRESS,
+  chainId = 1
 ): Promise<FullOrder> {
   const unsignedOrder = createOrder({
     signer: {
@@ -23,7 +32,7 @@ async function createSignedOrder(
     },
   })
   return {
-    chainId: 1,
+    chainId,
     swapContract: ADDRESS_ZERO,
     ...unsignedOrder,
     ...(await createOrderSignature(
@@ -34,15 +43,10 @@ async function createSignedOrder(
   }
 }
 
-const signerOne = '0x0000000000000000000000000000000000000001'
-const signerTwo = '0x0000000000000000000000000000000000000002'
-
-let orderOne
-let orderTwo
-
 describe('Redis', async () => {
-  before(async () => {
-    await store.reset()
+  beforeEach(async () => {
+    await store.flush()
+    await store.setup()
     orderOne = await createSignedOrder('1', signerOne)
     orderTwo = await createSignedOrder('2', signerTwo)
   })
@@ -54,15 +58,26 @@ describe('Redis', async () => {
   it('Tags are stored', async () => {
     await store.write(orderOne, ['grass:green', 'sky:blue'])
     await store.write(orderTwo, ['grass:green', 'grass:green', 'sky:grey'])
-    const tokenTags = await store.tags(orderOne.signer.token)
+    const tokenTags = await store.tags(TOKEN_ADDRESS)
     expect(tokenTags).to.deep.equal(['grass:green', 'sky:blue', 'sky:grey'])
+  })
+
+  it('Query by chain id', async () => {
+    await store.write(orderOne)
+    await store.write(
+      await createSignedOrder('2', signerTwo, TOKEN_ADDRESS, ChainIds.SEPOLIA)
+    )
+    const res = await store.read({
+      chainId: ChainIds.SEPOLIA,
+    })
+    expect(res.total).to.equal(1)
   })
 
   it('Query by signer token', async () => {
     await store.write(orderOne)
     await store.write(orderTwo)
     const res = await store.read({
-      signerToken: orderOne.signer.token,
+      signerToken: TOKEN_ADDRESS,
     })
     expect(res.total).to.equal(2)
     expect(res.orders[0].signer.id).to.equal('1')
@@ -89,10 +104,21 @@ describe('Redis', async () => {
       '',
     ])
     const res = await store.read({
-      signerToken: orderOne.signer.token,
+      signerToken: TOKEN_ADDRESS,
       tags: ['Sun:Bright Yellow'],
     })
     expect(res.total).to.equal(1)
+    expect(res.orders[0].signer.id).to.equal('1')
+  })
+
+  it('Query with empty tags', async () => {
+    await store.write(orderOne)
+    await store.write(orderTwo)
+    const res = await store.read({
+      signerToken: TOKEN_ADDRESS,
+      tags: [],
+    })
+    expect(res.total).to.equal(2)
     expect(res.orders[0].signer.id).to.equal('1')
   })
 
@@ -106,7 +132,7 @@ describe('Redis', async () => {
     }
     const res = await store.read(
       {
-        signerToken: orderOne.signer.token,
+        signerToken: TOKEN_ADDRESS,
       },
       OFFSET,
       LIMIT
