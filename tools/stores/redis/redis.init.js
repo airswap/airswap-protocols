@@ -13,6 +13,7 @@ async function main() {
   })
   try {
     await client.connect()
+    await client.flushAll()
     await config['default'](client)
     console.log('Flushed and created Redis indexes.')
     process.exit(0)

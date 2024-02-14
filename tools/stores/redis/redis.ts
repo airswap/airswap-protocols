@@ -12,17 +12,21 @@ function tagsKey(token: string) {
   return `tags:${token.toLowerCase()}`
 }
 
-function tokenKey(token: string, id: string) {
-  return `ordersByToken:${token.toLowerCase()}:${id}`
+function tokenKey(chainId: number, signerToken: string, id: string) {
+  return `ordersByToken:${chainId}:${signerToken.toLowerCase()}:${id}`
 }
 
-function signerKey(signer: string, nonce: string) {
-  return `ordersBySigner:${signer.toLowerCase()}:${nonce}`
+function signerKey(chainId: number, signerWallet: string, nonce: string) {
+  return `ordersBySigner:${chainId}:${signerWallet.toLowerCase()}:${nonce}`
 }
 
 function cleanTags(tags: string[]) {
   return tags.map((tag) =>
-    tag.replace(/\:/g, '\\:').replace(/\=/g, '\\=').replace(/\|/g, '\\|')
+    tag
+      .replace(/\s/g, '\\ ')
+      .replace(/\:/g, '\\:')
+      .replace(/\=/g, '\\=')
+      .replace(/\|/g, '\\|')
   )
 }
 
@@ -49,41 +53,45 @@ export class Redis {
     }
 
     const existing = await this.client.json.get(
-      tokenKey(order.signer.token, order.signer.id)
+      tokenKey(order.chainId, order.signer.token, order.signer.id)
     )
 
     // Delete existing order if found.
     if (existing) {
       const existingOrder = await this.client.json.get(
-        signerKey(existing.signerWallet, existing.nonce)
+        signerKey(existing[0], existing[1], existing[2])
       )
       await this.client.json.del(
-        signerKey(existing.signerWallet, existing.nonce)
+        signerKey(existing[0], existing[1], existing[2])
       )
       await this.client.json.del(
-        tokenKey(existingOrder.signer.token, existingOrder.signer.id)
+        tokenKey(
+          existingOrder.chainId,
+          existingOrder.signer.token,
+          existingOrder.signer.id
+        )
       )
     }
 
     // Set order by signer wallet and nonce.
     await this.client.json.set(
-      signerKey(order.signer.wallet, order.nonce),
+      signerKey(order.chainId, order.signer.wallet, order.nonce),
       '$',
       { ...order, tags: tags || [] }
     )
     await this.client.expire(
-      signerKey(order.signer.wallet, order.nonce),
+      signerKey(order.chainId, order.signer.wallet, order.nonce),
       this.ttl
     )
 
     // Set unique by signer token and signer id.
     await this.client.json.set(
-      tokenKey(order.signer.token, order.signer.id),
+      tokenKey(order.chainId, order.signer.token, order.signer.id),
       '$',
-      { nonce: order.nonce, signerWallet: order.signer.wallet.toLowerCase() }
+      [order.chainId, order.signer.wallet.toLowerCase(), order.nonce]
     )
     await this.client.expire(
-      tokenKey(order.signer.token, order.signer.id),
+      tokenKey(order.chainId, order.signer.token, order.signer.id),
       this.ttl
     )
 
@@ -113,12 +121,20 @@ export class Redis {
     }
 
     const args = []
-    if (filter.senderToken) args.push(`@senderToken:${filter.senderToken}`)
-    if (filter.signerToken) args.push(`@signerToken:${filter.signerToken}`)
-    if (filter.signerId) args.push(`@signerId:${filter.signerId}`)
-    if (filter.signerWallet) args.push(`@signerWallet:${filter.signerWallet}`)
-    if (filter.tags?.length)
-      args.push(`@tags:{${cleanTags(filter.tags).join('|')}}`)
+    for (const prop in filter) {
+      switch (prop) {
+        case 'chainId':
+          args.push(`@chainId:[${filter.chainId} ${filter.chainId}]`)
+          break
+        case 'tags':
+          if (filter.tags.length) {
+            args.push(`@tags:{${cleanTags(filter.tags).join('|')}}`)
+          }
+          break
+        default:
+          args.push(`@${prop}:(${filter[prop]})`)
+      }
+    }
 
     const { total, documents } = await this.client.ft.search(
       'index:ordersBySigner',
@@ -135,25 +151,38 @@ export class Redis {
     }
   }
 
-  public async delete(signerWallet: string, nonce: string) {
+  public async delete(chainId: number, signerWallet: string, nonce: string) {
     if (!this.client.isOpen) {
       await this.client.connect()
     }
 
-    const order = await this.client.json.get(signerKey(signerWallet, nonce))
+    const order = await this.client.json.get(
+      signerKey(chainId, signerWallet, nonce)
+    )
     if (order) {
-      await this.client.json.del(signerKey(order.signer.wallet, order.nonce))
-      await this.client.json.del(tokenKey(order.signer.token, order.signer.id))
+      await this.client.json.del(
+        signerKey(order.chainId, order.signer.wallet, order.nonce)
+      )
+      await this.client.json.del(
+        tokenKey(order.chainId, order.signer.token, order.signer.id)
+      )
       return true
     }
     return false
   }
 
-  public async reset() {
+  public async setup() {
     if (!this.client.isOpen) {
       await this.client.connect()
     }
     await reset(this.client)
+  }
+
+  public async flush() {
+    if (!this.client.isOpen) {
+      await this.client.connect()
+    }
+    await this.client.flushAll()
   }
 
   public async disconnect() {
