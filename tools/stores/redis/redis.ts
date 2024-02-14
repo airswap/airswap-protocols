@@ -12,12 +12,12 @@ function tagsKey(token: string) {
   return `tags:${token.toLowerCase()}`
 }
 
-function tokenKey(chainId: number, token: string, id: string) {
-  return `ordersByToken:${chainId}:${token.toLowerCase()}:${id}`
+function tokenKey(chainId: number, signerToken: string, id: string) {
+  return `ordersByToken:${chainId}:${signerToken.toLowerCase()}:${id}`
 }
 
-function signerKey(chainId: number, signer: string, nonce: string) {
-  return `ordersBySigner:${chainId}:${signer.toLowerCase()}:${nonce}`
+function signerKey(chainId: number, signerWallet: string, nonce: string) {
+  return `ordersBySigner:${chainId}:${signerWallet.toLowerCase()}:${nonce}`
 }
 
 function cleanTags(tags: string[]) {
@@ -62,7 +62,7 @@ export class Redis {
         signerKey(existing[0], existing[1], existing[2])
       )
       await this.client.json.del(
-        signerKey(existing.chainId, existing.signerWallet, existing.nonce)
+        signerKey(existing[0], existing[1], existing[2])
       )
       await this.client.json.del(
         tokenKey(
