@@ -6,8 +6,11 @@ import {
   findTokenByAddress,
 } from '../index'
 
-describe('Metadata: Ethereum', async () => {
+const METADATA_FETCH_TIMEOUT = 5000
+
+describe('Metadata: Ethereum', async function go() {
   let result: any
+  this.timeout(METADATA_FETCH_TIMEOUT)
 
   it('fetches all known tokens', async () => {
     result = await getKnownTokens(ChainIds.MAINNET)
