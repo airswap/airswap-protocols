@@ -1,5 +1,4 @@
 import { ethers } from 'ethers'
-import { ServerOptions } from '@airswap/utils'
 import { Registry__factory } from '@airswap/registry/typechain/factories/contracts'
 import registryDeploys from '@airswap/registry/deploys.js'
 import registryBlocks from '@airswap/registry/deploys-blocks.js'
@@ -16,23 +15,29 @@ class ServerRegistry extends Contract {
     chainId: number,
     protocol: string,
     baseToken?: string,
-    quoteToken?: string
+    quoteToken?: string,
+    address = registryDeploys[chainId]
   ): Promise<string[]> {
-    const contract = Registry__factory.connect(
-      registryDeploys[chainId],
-      providerOrSigner
-    )
+    const contract = Registry__factory.connect(address, providerOrSigner)
     const protocolStakers: string[] = await contract.getStakersForProtocol(
       protocol
     )
-    const stakers = protocolStakers.filter(async (staker) => {
-      const tokens = await contract.getTokensForStaker(staker)
-      let include = false
-      if (!tokens.length) include = true
-      else if (baseToken) include = tokens.includes(baseToken)
-      else if (quoteToken) include = tokens.includes(quoteToken)
-      return include
-    })
+    const results = await Promise.all(
+      protocolStakers.map(async (staker) => {
+        const tokens = await contract.getTokensForStaker(staker)
+        let toInclude = false
+        if (baseToken)
+          toInclude = tokens
+            .map((token) => token.toLowerCase())
+            .includes(baseToken.toLowerCase())
+        else if (quoteToken)
+          toInclude = tokens
+            .map((token) => token.toLowerCase())
+            .includes(quoteToken.toLowerCase())
+        return toInclude
+      })
+    )
+    const stakers = protocolStakers.filter((_v, index) => results[index])
     return await contract.getServerURLsForStakers(stakers)
   }
   public async getServers(
@@ -41,21 +46,21 @@ class ServerRegistry extends Contract {
     protocol: string,
     baseToken?: string,
     quoteToken?: string,
-    options?: ServerOptions
+    address = registryDeploys[chainId]
   ): Promise<Array<Server>> {
     const urls = await this.getServerURLs(
       providerOrSigner,
       chainId,
       protocol,
       baseToken,
-      quoteToken
+      quoteToken,
+      address
     )
     const serverPromises = await Promise.allSettled(
       urls.map((url) => {
         return Server.at(url, {
-          swapContract: options?.swapContract || SwapERC20.addresses[chainId],
-          chainId: chainId,
-          initializeTimeout: options?.initializeTimeout,
+          chainId,
+          swapContract: SwapERC20.addresses[chainId],
         })
       })
     )
