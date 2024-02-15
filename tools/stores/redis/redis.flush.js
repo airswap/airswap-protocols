@@ -1,7 +1,6 @@
 require('dotenv').config({ path: '../../.env' })
 
 const { createClient } = require('redis')
-const config = require('../build/redis/redis.config.js')
 
 async function main() {
   if (!process.env.REDISCLOUD_URL) {
@@ -14,8 +13,7 @@ async function main() {
   try {
     await client.connect()
     await client.flushAll()
-    await config['default'](client)
-    console.log('Flushed and created Redis indexes.')
+    console.log(`Flushed Redis instance at ${process.env.REDISCLOUD_URL}.`)
     process.exit(0)
   } catch (e) {
     console.error(e)
