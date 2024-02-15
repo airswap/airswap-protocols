@@ -6,7 +6,7 @@ import {
   Direction,
   THIRTY_DAYS,
 } from '@airswap/utils'
-import reset from '../redis/redis.config'
+import { createIndex } from './redis.index'
 
 function tagsKey(token: string) {
   return `tags:${token.toLowerCase()}`
@@ -24,6 +24,7 @@ function cleanTags(tags: string[]) {
   return tags.map((tag) =>
     tag
       .replace(/\s/g, '\\ ')
+      .replace(/\-/g, '\\-')
       .replace(/\:/g, '\\:')
       .replace(/\=/g, '\\=')
       .replace(/\|/g, '\\|')
@@ -175,7 +176,7 @@ export class Redis {
     if (!this.client.isOpen) {
       await this.client.connect()
     }
-    await reset(this.client)
+    await createIndex(this.client)
   }
 
   public async flush() {
