@@ -1,6 +1,6 @@
 {
   "name": "@airswap/stores",
-  "version": "4.2.1",
+  "version": "4.2.2",
   "description": "AirSwap: Storage for Indexing",
   "repository": {
     "type": "git",
@@ -18,7 +18,7 @@
     "clean": "rm -rf ./build",
     "compile": "yarn clean && tsc -b",
     "redis:flush": "REDISCLOUD_URL=redis://localhost:6379 node ./redis/redis.flush.js",
-    "redis:recreate": "REDISCLOUD_URL=redis://localhost:6379 node ./redis/redis.recreate.js",
+    "redis:create": "yarn compile && REDISCLOUD_URL=redis://localhost:6379 node ./redis/redis.create.js",
     "test": "REDISCLOUD_URL=redis://localhost:6379 TS_NODE_COMPILER_OPTIONS='{\"strict\":false}' yarn mocha -r ts-node/esm test/*.ts"
   },
   "dependencies": {

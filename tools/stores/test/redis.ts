@@ -100,15 +100,21 @@ describe('Redis', async () => {
       'Sun=Deep Orange',
       'Grass',
       'Two Words',
+      'Eyes:Big Yellow Side-eye',
       ' ',
       '',
     ])
     const res = await store.read({
       signerToken: TOKEN_ADDRESS,
-      tags: ['Sun:Bright Yellow'],
+      tags: [
+        'Sun:Bright Yellow',
+        'Eyes:Big Yellow Side-eye',
+        'Sun=Deep Orange',
+      ],
     })
-    expect(res.total).to.equal(1)
+    expect(res.total).to.equal(2)
     expect(res.orders[0].signer.id).to.equal('1')
+    expect(res.orders[1].signer.id).to.equal('2')
   })
 
   it('Query with empty tags', async () => {

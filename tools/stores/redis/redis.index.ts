@@ -1,8 +1,10 @@
 require('dotenv').config({ path: '../../.env' })
 const { SchemaFieldTypes } = require('redis')
 
-export default async function reset(client) {
-  await client.ft.dropIndex('index:ordersBySigner')
+export async function createIndex(client) {
+  try {
+    await client.ft.dropIndex('index:ordersBySigner')
+  } catch (e) {}
   await client.ft.create(
     'index:ordersBySigner',
     {
