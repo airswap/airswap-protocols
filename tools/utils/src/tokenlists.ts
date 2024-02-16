@@ -1,4 +1,4 @@
-import { ChainIds } from '@airswap/utils'
+import { ChainIds } from './constants'
 
 export default {
   [ChainIds.MAINNET]: [

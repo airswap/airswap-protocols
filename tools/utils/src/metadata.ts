@@ -4,14 +4,16 @@ import {
   CollectionTokenInfo,
   CollectionTokenMetadata,
   CollectionTokenAttribute,
+} from './types'
+import {
   TokenKinds,
   chainCurrencies,
   chainNames,
   stakingTokenAddresses,
-} from '@airswap/utils'
+  wrappedNativeTokenAddresses,
+} from './constants'
 import TOKEN_LISTS from './tokenlists'
 import TOKEN_DEFAULTS from './tokendefaults'
-import wethDeploys from '@airswap/wrapper/deploys-weth.js'
 import validUrl from 'valid-url'
 
 const AIRSWAP_LOGO_URI =
@@ -77,7 +79,7 @@ export async function getKnownTokens(
       }
     }
   }
-  if (wethDeploys[chainId]) {
+  if (wrappedNativeTokenAddresses[chainId]) {
     const wrappedTokens = getWrappedTokens()
     for (let i = 0; i < wrappedTokens.length; i++) {
       if (wrappedTokens[i].chainId == chainId) {
@@ -130,12 +132,12 @@ export function firstTokenBySymbol(
 
 export function getWrappedTokens(): TokenInfo[] {
   const _wrappedTokens: TokenInfo[] = []
-  for (const chainId in wethDeploys) {
+  for (const chainId in wrappedNativeTokenAddresses) {
     const _chainId = Number(chainId)
     _wrappedTokens.push({
       name: `Wrapped ${chainCurrencies[_chainId]}`,
       symbol: `W${chainCurrencies[_chainId]}`,
-      address: wethDeploys[_chainId],
+      address: wrappedNativeTokenAddresses[_chainId],
       decimals: 18,
       chainId: Number(_chainId),
     })
