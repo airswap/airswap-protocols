@@ -1,7 +1,7 @@
 require('dotenv').config({ path: '../../.env' })
 
 const { createClient } = require('redis')
-const { createIndex } = require('../build/redis/redis.index.js')
+const { createIndex } = require('../build/redis/redis.js')
 
 async function main() {
   if (!process.env.REDISCLOUD_URL) {

@@ -1,4 +1,4 @@
-import { createClient } from 'redis'
+import { createClient, SchemaFieldTypes } from 'redis'
 import {
   FullOrder,
   OrderFilter,
@@ -6,7 +6,6 @@ import {
   Direction,
   THIRTY_DAYS,
 } from '@airswap/utils'
-import { createIndex } from './redis.index'
 
 function tagsKey(token: string) {
   return `tags:${token.toLowerCase()}`
@@ -32,9 +31,9 @@ function cleanTags(tags: string[]) {
 }
 
 export class Redis {
-  private client: any
-  private ttl: number
-  private defaultReadLimit: number
+  public client: any
+  public ttl: number
+  public defaultReadLimit: number
 
   public constructor(
     connectionUrl: any,
@@ -172,13 +171,6 @@ export class Redis {
     return false
   }
 
-  public async setup() {
-    if (!this.client.isOpen) {
-      await this.client.connect()
-    }
-    await createIndex(this.client)
-  }
-
   public async flush() {
     if (!this.client.isOpen) {
       await this.client.connect()
@@ -191,4 +183,58 @@ export class Redis {
       await this.client.disconnect()
     }
   }
+}
+
+export async function createIndex(client) {
+  try {
+    await client.ft.dropIndex('index:ordersBySigner')
+  } catch (e) {}
+  await client.ft.create(
+    'index:ordersBySigner',
+    {
+      '$.chainId': {
+        type: SchemaFieldTypes.NUMERIC,
+        AS: 'chainId',
+      },
+      '$.nonce': {
+        type: SchemaFieldTypes.TEXT,
+        AS: 'nonce',
+      },
+      '$.expiry': {
+        type: SchemaFieldTypes.TEXT,
+        AS: 'expiry',
+      },
+      '$.signer.wallet': {
+        type: SchemaFieldTypes.TEXT,
+        AS: 'signerWallet',
+      },
+      '$.signer.token': {
+        type: SchemaFieldTypes.TEXT,
+        AS: 'signerToken',
+      },
+      '$.signer.amount': {
+        type: SchemaFieldTypes.TEXT,
+        AS: 'signerAmount',
+      },
+      '$.signer.id': {
+        type: SchemaFieldTypes.TEXT,
+        AS: 'signerId',
+      },
+      '$.sender.amount': {
+        type: SchemaFieldTypes.TEXT,
+        AS: 'senderAmount',
+      },
+      '$.sender.token': {
+        type: SchemaFieldTypes.TEXT,
+        AS: 'senderToken',
+      },
+      '$.tags.*': {
+        type: SchemaFieldTypes.TAG,
+        AS: 'tags',
+      },
+    },
+    {
+      ON: 'JSON',
+    }
+  )
 }
