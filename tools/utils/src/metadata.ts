@@ -290,6 +290,7 @@ const transformERC721ToCollectionToken = (
   name: metadata.name || DEFAULT_NAME,
   description: metadata.description,
   image: metadata.image?.replace('ipfs://', ipfsUri),
+  animation_url: metadata.animation_url?.replace('ipfs://', ipfsUri),
   attributes: (metadata.attributes || []).map(
     transformErc721TokenAttributeToCollectionTokenAttribute
   ),
@@ -311,8 +312,9 @@ const transformERC1155ToCollectionToken = (
   image:
     (metadata.image_url || metadata.image || '').replace('ipfs://', ipfsUri) ||
     undefined,
+  animation_url: metadata.animation_url?.replace('ipfs://', ipfsUri),
+  createdBy: metadata.created_by,
   attributes: (metadata.attributes || []).map(
     transformErc1155TokenAttributeToCollectionTokenAttribute
   ),
-  createdBy: metadata.created_by,
 })
