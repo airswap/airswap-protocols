@@ -293,7 +293,7 @@ contract BatchCall {
     return nonceUsed;
   }
 
-    /**
+  /**
    * @notice provides the tokens supported by multiple Stakers
    * @param stakers address[] list of stakers to be checked
    * @param registryContract IRegistry Registry contract to call
