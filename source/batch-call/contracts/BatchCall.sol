@@ -6,6 +6,8 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
+import "@airswap/registry/contracts/interfaces/IRegistry.sol";
+import "hardhat/console.sol";
 
 /**
  * @title BatchCall: Batch balance, allowance, order validity checks, nonce usage check
@@ -289,5 +291,27 @@ contract BatchCall {
       }
     }
     return nonceUsed;
+  }
+
+    /**
+   * @notice provides the tokens supported by multiple Stakers
+   * @param stakers address[] list of stakers to be checked
+   * @param registryContract IRegistry Registry contract to call
+   * @return bool[] true indicates the nonce is used
+   */
+  function getTokensForStakers(
+    address[] calldata stakers,
+    IRegistry registryContract
+  ) external view returns (address[][] memory) {
+    if (stakers.length == 0) revert ArgumentInvalid();
+    address[][] memory tokensSupported = new address[][](stakers.length);
+
+    for (uint256 i; i < stakers.length; ) {
+      tokensSupported[i] = registryContract.getTokensForStaker(stakers[i]);
+      unchecked {
+        ++i;
+      }
+    }
+    return tokensSupported;
   }
 }
