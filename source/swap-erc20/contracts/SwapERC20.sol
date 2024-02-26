@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import "solady/src/auth/Ownable.sol";
-import "solady/src/tokens/ERC20.sol";
-import "solady/src/utils/SafeTransferLib.sol";
-import "solady/src/utils/SignatureCheckerLib.sol";
-import "solady/src/utils/EIP712.sol";
+import { EIP712 } from "solady/src/utils/EIP712.sol";
+import { ERC20 } from "solady/src/tokens/ERC20.sol";
+import { Ownable } from "solady/src/auth/Ownable.sol";
+import { SafeTransferLib } from "solady/src/utils/SafeTransferLib.sol";
+import { SignatureCheckerLib } from "solady/src/utils/SignatureCheckerLib.sol";
+
 import "./interfaces/ISwapERC20.sol";
 
 /**
