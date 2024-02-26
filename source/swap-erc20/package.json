@@ -26,7 +26,7 @@
     "owners": "hardhat run ./scripts/owner.js"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.8.3"
+    "solady": "0.0.172"
   },
   "devDependencies": {
     "@airswap/staking": "4.2.1",
