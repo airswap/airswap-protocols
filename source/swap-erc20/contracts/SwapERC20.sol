@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import { ECDSA } from "solady/src/utils/ECDSA.sol";
 import { EIP712 } from "solady/src/utils/EIP712.sol";
 import { ERC20 } from "solady/src/tokens/ERC20.sol";
 import { Ownable } from "solady/src/auth/Ownable.sol";
@@ -255,7 +256,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     if (expiry <= block.timestamp) revert OrderExpired();
 
     // Recover the signatory from the hash and signature
-    address signatory = ecrecover(
+    address signatory = ECDSA.tryRecover(
       keccak256(
         abi.encodePacked(
           "\x19\x01", // EIP191: Indicates EIP712
@@ -280,7 +281,6 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
       r,
       s
     );
-
     // Ensure the signatory is not null
     if (signatory == address(0)) revert SignatureInvalid();
 
