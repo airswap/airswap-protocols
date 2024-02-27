@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@airswap/staking": "4.2.1",
-    "@airswap/utils": "4.2.8",
+    "@airswap/utils": "4.2.10",
     "prompt-confirm": "^2.0.4"
   },
   "publishConfig": {

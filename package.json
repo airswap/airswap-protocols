@@ -41,7 +41,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
     "ethereum-waffle": "^4.0.10",
-    "ethers": "^5.6.9",
+    "ethers": "^5.7.2",
     "hardhat": "^2.12.7",
     "hardhat-gas-reporter": "^1.0.9",
     "husky": "^8.0.1",

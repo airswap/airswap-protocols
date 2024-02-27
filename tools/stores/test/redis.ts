@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { Redis } from '../redis/redis'
+import { Redis, createIndex } from '../redis/redis'
 import { ChainIds } from '@airswap/utils'
 
 import {
@@ -46,7 +46,7 @@ async function createSignedOrder(
 describe('Redis', async () => {
   beforeEach(async () => {
     await store.flush()
-    await store.setup()
+    await createIndex(store.client)
     orderOne = await createSignedOrder('1', signerOne)
     orderTwo = await createSignedOrder('2', signerTwo)
   })
