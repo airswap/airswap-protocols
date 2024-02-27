@@ -39,6 +39,7 @@ interface ISwapERC20 {
   error ScaleTooHigh();
   error SignatoryInvalid();
   error SignatureInvalid();
+  error TransferFromFailed();
 
   function swap(
     address recipient,
