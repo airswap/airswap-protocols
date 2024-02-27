@@ -38,7 +38,8 @@ interface ISwapERC20 {
   error NonceAlreadyUsed(uint256);
   error ScaleTooHigh();
   error SignatoryInvalid();
-  error Unauthorized();
+  error SignatureInvalid();
+  error TransferFromFailed();
 
   function swap(
     address recipient,

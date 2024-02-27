@@ -255,7 +255,7 @@ describe('SwapERC20 Unit', () => {
     it('test setProtocolFee as non-owner', async () => {
       await expect(
         swap.connect(anyone).setProtocolFee(FEE_DIVISOR)
-      ).to.be.revertedWith('Ownable: caller is not the owner')
+      ).to.be.revertedWith('Unauthorized')
     })
     it('test setProtocolFeeLight', async () => {
       await expect(
@@ -270,7 +270,7 @@ describe('SwapERC20 Unit', () => {
     it('test setProtocolFeeLight as non-owner', async () => {
       await expect(
         swap.connect(anyone).setProtocolFeeLight(FEE_DIVISOR)
-      ).to.be.revertedWith('Ownable: caller is not the owner')
+      ).to.be.revertedWith('Unauthorized')
     })
     it('test protocolFeeWallet', async () => {
       await expect(
@@ -291,7 +291,7 @@ describe('SwapERC20 Unit', () => {
     it('test setBonusScale as non-owner', async () => {
       await expect(
         swap.connect(anyone).setBonusScale(BONUS_SCALE)
-      ).to.be.revertedWith('Ownable: caller is not the owner')
+      ).to.be.revertedWith('Unauthorized')
     })
     it('test setBonusMax', async () => {
       await expect(await swap.connect(deployer).setBonusMax(BONUS_MAX)).to.emit(
@@ -307,7 +307,7 @@ describe('SwapERC20 Unit', () => {
     it('test setBonusMax as non-owner', async () => {
       await expect(
         swap.connect(anyone).setBonusMax(BONUS_MAX)
-      ).to.be.revertedWith('Ownable: caller is not the owner')
+      ).to.be.revertedWith('Unauthorized')
     })
     it('test setStaking', async () => {
       await expect(swap.connect(deployer).setStaking(staking.address)).to.emit(
@@ -421,7 +421,7 @@ describe('SwapERC20 Unit', () => {
 
       await expect(
         swap.connect(sender).swap(sender.address, ...order)
-      ).to.be.revertedWith('Unauthorized')
+      ).to.be.revertedWith('SignatureInvalid')
     })
 
     it('test when signer not authorized', async () => {
@@ -434,7 +434,7 @@ describe('SwapERC20 Unit', () => {
 
       await expect(
         swap.connect(sender).swap(sender.address, ...order)
-      ).to.be.revertedWith('Unauthorized')
+      ).to.be.revertedWith('SignatureInvalid')
     })
 
     it('test when order is expired', async () => {
@@ -484,7 +484,7 @@ describe('SwapERC20 Unit', () => {
 
       await expect(
         swap.connect(sender).swap(sender.address, ...order)
-      ).to.be.revertedWith('Unauthorized')
+      ).to.be.revertedWith('SignatureInvalid')
     })
   })
 
@@ -524,7 +524,7 @@ describe('SwapERC20 Unit', () => {
 
       await expect(
         swap.connect(sender).swapAnySender(sender.address, ...order)
-      ).to.be.revertedWith('Unauthorized')
+      ).to.be.revertedWith('SignatureInvalid')
     })
 
     it('test when order is expired', async () => {
@@ -570,7 +570,7 @@ describe('SwapERC20 Unit', () => {
       order[7] = '29' // Change "v" of signature
       await expect(
         swap.connect(sender).swapAnySender(sender.address, ...order)
-      ).to.be.revertedWith('Unauthorized')
+      ).to.be.revertedWith('SignatureInvalid')
     })
   })
 
@@ -621,7 +621,7 @@ describe('SwapERC20 Unit', () => {
         .withArgs(signer.address, anyone.address)
 
       await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
-        'Unauthorized'
+        'SignatureInvalid'
       )
     })
     it('test when expiration has passed', async () => {
@@ -641,7 +641,7 @@ describe('SwapERC20 Unit', () => {
       const order = await createSignedOrderERC20({}, signer)
       order[7] = '29' // Change "v" of signature
       await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
-        'Unauthorized'
+        'SignatureInvalid'
       )
     })
     it('test when nonce has already been used', async () => {
@@ -666,7 +666,7 @@ describe('SwapERC20 Unit', () => {
         anyone
       )
       await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
-        'Unauthorized'
+        'SignatureInvalid'
       )
     })
   })
@@ -682,7 +682,7 @@ describe('SwapERC20 Unit', () => {
     it('test only deployer can change fee wallet', async () => {
       await expect(
         swap.connect(anyone).setProtocolFeeWallet(anyone.address)
-      ).to.be.revertedWith('Ownable: caller is not the owner')
+      ).to.be.revertedWith('Unauthorized')
     })
 
     it('test invalid fee wallet', async () => {
@@ -700,7 +700,7 @@ describe('SwapERC20 Unit', () => {
 
     it('test only deployer can change fee', async () => {
       await expect(swap.connect(anyone).setProtocolFee('0')).to.be.revertedWith(
-        'Ownable: caller is not the owner'
+        'Unauthorized'
       )
     })
 
@@ -733,7 +733,7 @@ describe('SwapERC20 Unit', () => {
       )
       await expect(
         swap.connect(sender).swap(sender.address, ...order)
-      ).to.be.revertedWith('Unauthorized')
+      ).to.be.revertedWith('SignatureInvalid')
     })
   })
 
@@ -741,7 +741,7 @@ describe('SwapERC20 Unit', () => {
     it('test set staking by non-owner', async () => {
       await expect(
         swap.connect(anyone).setStaking(staking.address)
-      ).to.be.revertedWith('Ownable: caller is not the owner')
+      ).to.be.revertedWith('Unauthorized')
     })
 
     it('test set staking', async () => {
@@ -842,7 +842,7 @@ describe('SwapERC20 Unit', () => {
       const order = await createSignedOrderERC20({}, anyone)
       const errors = await checkForErrors(order)
       expect(errors).to.include(
-        ethers.utils.formatBytes32String('Unauthorized')
+        ethers.utils.formatBytes32String('SignatureInvalid')
       )
     })
     it('test with low signer allowance', async () => {

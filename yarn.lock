@@ -9448,6 +9448,11 @@ socks@^2.6.2:
     ip "^2.0.0"
     smart-buffer "^4.2.0"
 
+solady@0.0.172:
+  version "0.0.172"
+  resolved "https://registry.yarnpkg.com/solady/-/solady-0.0.172.tgz#aea9071c1ba41d805c74c9423201173b8d05246c"
+  integrity sha512-8YkQr78PuaGKb1jWQzVgLcCtAOYXc6Xczh/wB6YUEZO/ioidzbGYoFSmYCA1nN0Ln+K9+NZSqDhyuyv/q4N8XQ==
+
 solc@0.7.3:
   version "0.7.3"
   resolved "https://registry.yarnpkg.com/solc/-/solc-0.7.3.tgz#04646961bd867a744f63d2b4e3c0701ffdc7d78a"
