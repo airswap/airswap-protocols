@@ -510,8 +510,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     }
 
     if (order.senderWallet != address(0)) {
-      uint256 senderBalance = SafeTransferLib.balanceOf(
-        order.senderToken,
+      uint256 senderBalance = ERC20(order.senderToken).balanceOf(
         order.senderWallet
       );
 
@@ -752,7 +751,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
       if (stakingToken != address(0)) {
         // Only check bonus if staking is set
         bonusAmount = calculateBonus(
-          SafeTransferLib.balanceOf(stakingToken, msg.sender),
+          ERC20(stakingToken).balanceOf(msg.sender),
           feeAmount
         );
       }
