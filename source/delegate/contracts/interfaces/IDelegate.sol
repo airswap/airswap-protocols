@@ -2,7 +2,7 @@
 
 import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
 
-pragma solidity 0.8.17;
+pragma solidity 0.8.23;
 
 interface IDelegate {
   struct Rule {
@@ -11,59 +11,39 @@ interface IDelegate {
     uint256 priceExp; // Indicates location of the decimal priceCoef * 10^(-priceExp)
   }
 
+  event DelegateSwap(uint256 _nonce, address _signerWallet);
+
   event SetRule(
-    address indexed owner,
-    address indexed senderToken,
-    address indexed signerToken,
-    uint256 maxSenderAmount,
-    uint256 priceCoef,
-    uint256 priceExp
+    address owner,
+    address signerToken,
+    uint256 maxSignerAmount,
+    address senderToken,
+    uint256 maxSenderAmount
   );
 
-  event UnsetRule(
-    address indexed owner,
-    address indexed senderToken,
-    address indexed signerToken
-  );
-
-  event ProvideOrder(
-    address indexed owner,
-    address tradeWallet,
-    address indexed senderToken,
-    address indexed signerToken,
-    uint256 senderAmount,
-    uint256 priceCoef,
-    uint256 priceExp
-  );
+  event UnsetRule(address owner, address signerToken);
 
   function setRule(
-    address senderToken,
-    address signerToken,
-    uint256 maxSenderAmount,
-    uint256 priceCoef,
-    uint256 priceExp
+    address _signerToken,
+    uint256 _maxSignerAmount,
+    address _senderToken,
+    uint256 _minSenderAmount
   ) external;
 
-  function unsetRule(address senderToken, address signerToken) external;
+  function swap(
+    address _delegator,
+    address _recipient,
+    uint256 _nonce,
+    uint256 _expiry,
+    address _signerWallet,
+    address _signerToken,
+    uint256 _signerAmount,
+    address _senderToken,
+    uint256 _senderAmount,
+    uint8 _v,
+    bytes32 _r,
+    bytes32 _s
+  ) external;
 
-  function provideOrder(ISwapERC20.OrderERC20 calldata order) external;
-
-  function getSignerSideQuote(
-    uint256 senderAmount,
-    address senderToken,
-    address signerToken
-  ) external view returns (uint256 signerAmount);
-
-  function getSenderSideQuote(
-    uint256 signerAmount,
-    address signerToken,
-    address senderToken
-  ) external view returns (uint256 senderAmount);
-
-  function getMaxQuote(
-    address senderToken,
-    address signerToken
-  ) external view returns (uint256 senderAmount, uint256 signerAmount);
-
-  function tradeWallet() external view returns (address);
+  function unsetRule(address _signerToken) external;
 }
