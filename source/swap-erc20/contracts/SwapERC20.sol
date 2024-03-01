@@ -734,7 +734,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   }
 
   /**
-   * @notice Calculates and transfers protocol fee and bonus
+   * @notice Calculates and transfers protocol fee and staking bonus
    * @param sourceToken address
    * @param sourceWallet address
    * @param amount uint256
@@ -744,26 +744,26 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     address sourceWallet,
     uint256 amount
   ) private {
-    // Transfer fee from signer to feeWallet
+    // Determine protocol fee from amount
     uint256 feeAmount = (amount * protocolFee) / FEE_DIVISOR;
     if (feeAmount > 0) {
       uint256 bonusAmount;
       if (stakingToken != address(0)) {
-        // Only check bonus if staking is set
+        // Only check staking bonus if staking token set
         bonusAmount = calculateBonus(
           ERC20(stakingToken).balanceOf(msg.sender),
           feeAmount
         );
       }
       if (bonusAmount > 0) {
-        // Transfer fee from signer to sender
+        // Transfer staking bonus from source to msg.sender
         SafeTransferLib.safeTransferFrom(
           sourceToken,
           sourceWallet,
           msg.sender,
           bonusAmount
         );
-        // Transfer fee from signer to feeWallet
+        // Transfer remaining protocol fee from source to fee wallet
         SafeTransferLib.safeTransferFrom(
           sourceToken,
           sourceWallet,
@@ -771,6 +771,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
           feeAmount - bonusAmount
         );
       } else {
+        // Transfer full protocol fee from source to fee wallet
         SafeTransferLib.safeTransferFrom(
           sourceToken,
           sourceWallet,
