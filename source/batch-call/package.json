@@ -28,10 +28,10 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.3",
     "@airswap/swap": "4.2.1",
-    "@airswap/swap-erc20": "4.2.1"
+    "@airswap/swap-erc20": "4.3.0"
   },
   "devDependencies": {
-    "@airswap/utils": "4.2.10",
+    "@airswap/utils": "4.3.0",
     "prompt-confirm": "^2.0.4"
   },
   "publishConfig": {

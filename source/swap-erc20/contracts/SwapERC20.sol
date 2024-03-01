@@ -93,7 +93,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     returns (string memory name, string memory version)
   {
     name = "SWAP_ERC20";
-    version = "4.2";
+    version = "4.3";
   }
 
   /**
