@@ -8795,10 +8795,10 @@ socks@^2.6.2:
     ip-address "^9.0.5"
     smart-buffer "^4.2.0"
 
-solady@0.0.172:
-  version "0.0.172"
-  resolved "https://registry.yarnpkg.com/solady/-/solady-0.0.172.tgz#aea9071c1ba41d805c74c9423201173b8d05246c"
-  integrity sha512-8YkQr78PuaGKb1jWQzVgLcCtAOYXc6Xczh/wB6YUEZO/ioidzbGYoFSmYCA1nN0Ln+K9+NZSqDhyuyv/q4N8XQ==
+solady@0.0.173:
+  version "0.0.173"
+  resolved "https://registry.yarnpkg.com/solady/-/solady-0.0.173.tgz#6b51b541ca1697b5bbb0e83916852bf48dcb4c5d"
+  integrity sha512-6DAm9wdjN5NRQMkdy93Sh2Se7KQDX2fI9Ioj4hw0LHxAZn4vYg1sRSvodCn41RrDa1BVZWwLz0AGAG4mhzPJIQ==
 
 solc@0.7.3:
   version "0.7.3"
