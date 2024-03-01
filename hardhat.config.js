@@ -2,7 +2,7 @@ require('dotenv').config({ path: '../../.env' })
 require('@typechain/hardhat')
 require('@nomiclabs/hardhat-ethers')
 require('@nomiclabs/hardhat-waffle')
-require('@nomiclabs/hardhat-etherscan')
+require('@nomicfoundation/hardhat-verify')
 require('hardhat-gas-reporter')
 require('solidity-coverage')
 
