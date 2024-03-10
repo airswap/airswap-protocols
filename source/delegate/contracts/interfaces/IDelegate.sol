@@ -32,7 +32,6 @@ interface IDelegate {
 
   function swap(
     address _delegator,
-    address _recipient,
     uint256 _nonce,
     uint256 _expiry,
     address _signerWallet,

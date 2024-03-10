@@ -210,9 +210,10 @@ describe('Delegate Unit', () => {
         .withArgs(swapERC20.address, DEFAULT_AMOUNT)
         .returns(true)
 
-      await expect(
-        delegate.connect(bob).swap(alice.address, delegate.address, ...order)
-      ).to.emit(delegate, 'DelegateSwap')
+      await expect(delegate.connect(bob).swap(alice.address, ...order)).to.emit(
+        delegate,
+        'DelegateSwap'
+      )
     })
   })
 })

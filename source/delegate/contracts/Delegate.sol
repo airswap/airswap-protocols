@@ -58,7 +58,6 @@ contract Delegate is IDelegate, Ownable {
 
   function swap(
     address _delegator,
-    address _recipient,
     uint256 _nonce,
     uint256 _expiry,
     address _signerWallet,
@@ -79,7 +78,7 @@ contract Delegate is IDelegate, Ownable {
     IERC20(_senderToken).approve(address(swapERC20), _senderAmount);
 
     swapERC20.swap(
-      _recipient,
+      address(this),
       _nonce,
       _expiry,
       _signerWallet,
