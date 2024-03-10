@@ -1,5 +1,4 @@
 const { expect } = require('chai')
-const { toAtomicString } = require('@airswap/utils')
 
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
