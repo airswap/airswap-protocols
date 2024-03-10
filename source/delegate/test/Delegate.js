@@ -1,7 +1,5 @@
 const { expect } = require('chai')
 const { toAtomicString } = require('@airswap/utils')
-const { generateTreeFromData, getRoot, getProof } = require('@airswap/merkle')
-const { soliditySha3 } = require('web3-utils')
 
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
@@ -33,10 +31,6 @@ describe('Delegate Unit', () => {
 
   let delegate
   let snapshotId
-
-  function toWei(value, places) {
-    return toAtomicString(value, places || 18)
-  }
 
   async function createSignedOrderERC20(params, signatory) {
     const unsignedOrder = createOrderERC20({
