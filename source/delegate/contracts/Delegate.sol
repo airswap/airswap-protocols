@@ -70,7 +70,7 @@ contract Delegate is IDelegate, Ownable {
     bytes32 _r,
     bytes32 _s
   ) external {
-    IERC20(_signerToken).safeTransferFrom(
+    IERC20(_senderToken).safeTransferFrom(
       _delegator,
       address(this),
       _signerAmount
@@ -92,9 +92,9 @@ contract Delegate is IDelegate, Ownable {
       _s
     );
 
-    IERC20(_senderToken).safeTransferFrom(
+    IERC20(_signerToken).safeTransferFrom(
       address(this),
-      _signerWallet,
+      _delegator,
       _senderAmount
     );
 
