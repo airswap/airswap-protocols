@@ -78,7 +78,7 @@ contract Delegate is IDelegate, Ownable {
     IERC20(_senderToken).approve(address(swapERC20), _senderAmount);
 
     swapERC20.swap(
-      address(this),
+      _delegator,
       _nonce,
       _expiry,
       _signerWallet,
