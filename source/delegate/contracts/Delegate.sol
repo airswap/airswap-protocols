@@ -72,7 +72,7 @@ contract Delegate is IDelegate, Ownable {
     IERC20(_senderToken).safeTransferFrom(
       _delegator,
       address(this),
-      _signerAmount
+      _senderAmount
     );
 
     IERC20(_senderToken).approve(address(swapERC20), _senderAmount);
@@ -94,7 +94,7 @@ contract Delegate is IDelegate, Ownable {
     IERC20(_signerToken).safeTransferFrom(
       address(this),
       _delegator,
-      _senderAmount
+      _signerAmount
     );
 
     emit DelegateSwap(_nonce, _signerWallet);
