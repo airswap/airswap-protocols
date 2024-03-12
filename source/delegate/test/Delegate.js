@@ -165,9 +165,13 @@ describe('Delegate Unit', () => {
     })
 
     it('unsets a Rule', async () => {
-      await expect(delegate.connect(alice).unsetRule(signerToken.address))
+      await expect(
+        delegate
+          .connect(alice)
+          .unsetRule(signerToken.address, senderToken.address)
+      )
         .to.emit(delegate, 'UnsetRule')
-        .withArgs(alice.address, signerToken.address)
+        .withArgs(alice.address, signerToken.address, senderToken.address)
     })
   })
 
@@ -198,6 +202,10 @@ describe('Delegate Unit', () => {
         alice.address
       )
       await setUpBalances(bob.address, alice.address)
+
+      await signerToken.mock.approve
+        .withArgs(swapERC20.address, DEFAULT_AMOUNT)
+        .returns(true)
 
       await senderToken.mock.approve
         .withArgs(swapERC20.address, DEFAULT_AMOUNT)
