@@ -162,7 +162,7 @@ export const apiUrls: Record<number, string> = {
   [ChainIds.AVALANCHE]: 'https://api.avax.network/ext/bc/C/rpc',
   [ChainIds.LINEAGOERLI]: 'https://rpc.goerli.linea.build',
   [ChainIds.LINEA]: 'https://rpc.linea.build',
-  [ChainIds.MUMBAI]: 'https://rpc-mumbai.maticvigil.com',
+  [ChainIds.MUMBAI]: 'https://gateway.tenderly.co/public/polygon-mumbai',
   [ChainIds.BASESEPOLIA]: 'https://sepolia.base.org',
   [ChainIds.ARBITRUMSEPOLIA]: 'https://sepolia-rollup.arbitrum.io/rpc',
   [ChainIds.SEPOLIA]: 'https://ethereum-sepolia.publicnode.com',
