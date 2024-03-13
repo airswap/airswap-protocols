@@ -9,7 +9,6 @@ const {
   orderERC20ToParams,
   createOrderERC20Signature,
 } = require('@airswap/utils')
-const { ADDRESS_ZERO } = require('@airswap/constants')
 const CHAIN_ID = 31337
 const DEFAULT_BALANCE = '100000'
 const DEFAULT_AMOUNT = '10000'
@@ -22,7 +21,6 @@ describe('Delegate Unit', () => {
   let deployer
   let delegator
   let taker
-  let anyone
   let swapERC20
   let delegatorToken
   let takerToken

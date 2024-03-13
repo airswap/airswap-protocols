@@ -10,14 +10,12 @@ const SWAP_ERC20 = require('@airswap/swap-erc20/build/contracts/SwapERC20.sol/Sw
 
 describe('Delegate Integration', () => {
   let snapshotId
-  let swap
   let takerToken
   let delegatorToken
 
   let deployer
   let delegator
   let taker
-  let protocolFeeWallet
 
   const CHAIN_ID = 31337
   const BONUS_SCALE = '10'
