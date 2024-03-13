@@ -11,6 +11,8 @@ interface IDelegate {
     uint256 priceExp; // Indicates location of the decimal priceCoef * 10^(-priceExp)
   }
 
+  error InsufficientDelegatorAmount();
+
   event DelegateSwap(uint256 _nonce, address _signerWallet);
 
   event SetRule(

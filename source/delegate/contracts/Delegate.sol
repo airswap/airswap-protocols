@@ -7,6 +7,7 @@ import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "hardhat/console.sol";
 
 /**
  * @title Delegate: Deployable Trading Rules for the AirSwap Network
@@ -17,6 +18,10 @@ contract Delegate is IDelegate, Ownable {
   using SafeERC20 for IERC20;
   // The Swap contract to be used to settle trades
   ISwapERC20 public swapERC20;
+
+  // Mapping of delegator to delegatorToken to to takerToken to remaining DelegatorAmount
+  mapping(address => mapping(address => mapping(address => uint256)))
+    public rules;
 
   /**
    * @notice Contract Constructor
@@ -38,6 +43,7 @@ contract Delegate is IDelegate, Ownable {
     address _takerToken,
     uint256 _minTakerAmount
   ) external {
+    rules[msg.sender][_delegatorToken][_takerToken] = _maxDelegatorAmount;
     emit SetRule(
       msg.sender,
       _delegatorToken,
@@ -54,6 +60,7 @@ contract Delegate is IDelegate, Ownable {
    * @param _takerToken address Address of an ERC-20 token the delegate would receive
    */
   function unsetRule(address _delegatorToken, address _takerToken) external {
+    rules[msg.sender][_delegatorToken][_takerToken] = 0;
     emit UnsetRule(msg.sender, _delegatorToken, _takerToken);
   }
 
@@ -70,6 +77,10 @@ contract Delegate is IDelegate, Ownable {
     bytes32 _r,
     bytes32 _s
   ) external {
+    if (rules[_delegator][_delegatorToken][_takerToken] < _delegatorAmount) {
+      revert InsufficientDelegatorAmount();
+    }
+
     IERC20(_delegatorToken).safeTransferFrom(
       _delegator,
       address(this),
@@ -98,6 +109,7 @@ contract Delegate is IDelegate, Ownable {
       _takerAmount
     );
 
+    rules[_delegator][_delegatorToken][_takerToken] -= _delegatorAmount;
     emit DelegateSwap(_nonce, _signerWallet);
   }
 }
