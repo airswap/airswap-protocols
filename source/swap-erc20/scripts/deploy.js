@@ -8,7 +8,6 @@ const {
   ChainIds,
   chainLabels,
   protocolFeeReceiverAddresses,
-  ADDRESS_ZERO,
 } = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
 const swapERC20Deploys = require('../deploys.js')
@@ -27,7 +26,7 @@ async function main() {
   }
   await displayDeployerInfo(deployer)
 
-  let protocolFeeReceiver = poolDeploys[chainId] || ADDRESS_ZERO
+  let protocolFeeReceiver = poolDeploys[chainId]
   if (protocolFeeReceiverAddresses[chainId]) {
     protocolFeeReceiver = protocolFeeReceiverAddresses[chainId]
   }

@@ -1,6 +1,6 @@
 {
   "name": "@airswap/swap",
-  "version": "4.2.1",
+  "version": "4.2.2",
   "description": "AirSwap: Atomic Token Swap",
   "license": "MIT",
   "repository": {
@@ -28,12 +28,10 @@
     "verify-adapters": "hardhat run ./scripts/verify-adapters.js",
     "owners": "hardhat run ./scripts/owner.js"
   },
-  "dependencies": {
-    "@openzeppelin/contracts": "^4.8.3"
-  },
   "devDependencies": {
     "@airswap/utils": "4.3.0",
-    "@nomicfoundation/hardhat-network-helpers": "^1.0.7"
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.7",
+    "@openzeppelin/contracts": "^4.8.3"
   },
   "publishConfig": {
     "access": "public"
