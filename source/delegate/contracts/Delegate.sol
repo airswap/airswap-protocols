@@ -106,7 +106,7 @@ contract Delegate is IDelegate, Ownable {
     IERC20(_takerToken).safeTransferFrom(
       address(this),
       _delegator,
-      _takerAmount
+      IERC20(_takerToken).balanceOf(address(this))
     );
 
     rules[_delegator][_delegatorToken][_takerToken] -= _delegatorAmount;

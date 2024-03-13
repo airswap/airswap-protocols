@@ -176,6 +176,10 @@ describe('Delegate Unit', () => {
         .withArgs(swapERC20.address, DEFAULT_AMOUNT)
         .returns(true)
 
+      await takerToken.mock.balanceOf
+        .withArgs(delegate.address)
+        .returns(DEFAULT_AMOUNT)
+
       await expect(
         delegate.connect(taker).swap(delegator.address, ...order)
       ).to.emit(delegate, 'DelegateSwap')
@@ -205,6 +209,10 @@ describe('Delegate Unit', () => {
       await takerToken.mock.approve
         .withArgs(swapERC20.address, DEFAULT_AMOUNT)
         .returns(true)
+
+      await takerToken.mock.balanceOf
+        .withArgs(delegate.address)
+        .returns(DEFAULT_AMOUNT)
 
       await expect(delegate.connect(taker).swap(delegator.address, ...order)).to
         .be.reverted
