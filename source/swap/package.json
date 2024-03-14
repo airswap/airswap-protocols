@@ -29,7 +29,7 @@
     "owners": "hardhat run ./scripts/owner.js"
   },
   "devDependencies": {
-    "@airswap/utils": "4.3.1",
+    "@airswap/utils": "4.3.2",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.7",
     "@openzeppelin/contracts": "^4.8.3"
   },
