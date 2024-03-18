@@ -1,5 +1,5 @@
 export const DOMAIN_NAME_SWAP_ERC20 = 'SWAP_ERC20'
-export const DOMAIN_VERSION_SWAP_ERC20 = '4.2'
+export const DOMAIN_VERSION_SWAP_ERC20 = '4.3'
 export const DOMAIN_NAME_SWAP = 'SWAP'
 export const DOMAIN_VERSION_SWAP = '4.2'
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
@@ -162,7 +162,7 @@ export const apiUrls: Record<number, string> = {
   [ChainIds.AVALANCHE]: 'https://api.avax.network/ext/bc/C/rpc',
   [ChainIds.LINEAGOERLI]: 'https://rpc.goerli.linea.build',
   [ChainIds.LINEA]: 'https://rpc.linea.build',
-  [ChainIds.MUMBAI]: 'https://rpc-mumbai.maticvigil.com',
+  [ChainIds.MUMBAI]: 'https://gateway.tenderly.co/public/polygon-mumbai',
   [ChainIds.BASESEPOLIA]: 'https://sepolia.base.org',
   [ChainIds.ARBITRUMSEPOLIA]: 'https://sepolia-rollup.arbitrum.io/rpc',
   [ChainIds.SEPOLIA]: 'https://ethereum-sepolia.publicnode.com',
@@ -239,6 +239,7 @@ export const ownerAddresses: Record<number, string> = {
   [ChainIds.ARBITRUM]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
   [ChainIds.AVALANCHE]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
   [ChainIds.LINEA]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
+  [ChainIds.SEPOLIA]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
 }
 
 export const protocolFeeReceiverAddresses: Record<number, string> = {

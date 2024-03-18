@@ -26,6 +26,8 @@ describe('SwapERC20 Integration', () => {
   const PROTOCOL_FEE = '30'
   const PROTOCOL_FEE_LIGHT = '7'
   const DEFAULT_AMOUNT = '10000'
+  const MINT_AMOUNT = '1000000'
+  const STAKE_AMOUNT = '10000000000'
 
   async function createSignedOrder(params, signer) {
     const unsignedOrder = createOrderERC20({
@@ -64,7 +66,7 @@ describe('SwapERC20 Integration', () => {
       await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
     ).deploy('Staking', 'STAKE')
     await stakingToken.deployed()
-    await stakingToken.mint(sender.address, 10000000000)
+    await stakingToken.mint(sender.address, STAKE_AMOUNT)
 
     staking = await (
       await ethers.getContractFactory(STAKING.abi, STAKING.bytecode)
@@ -75,13 +77,11 @@ describe('SwapERC20 Integration', () => {
       await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
     ).deploy('A', 'A')
     await signerToken.deployed()
-    await signerToken.mint(signer.address, 1000000)
 
     senderToken = await (
       await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
     ).deploy('B', 'B')
     await senderToken.deployed()
-    await senderToken.mint(sender.address, 1000000)
 
     swap = await (
       await ethers.getContractFactory('SwapERC20')
@@ -93,33 +93,63 @@ describe('SwapERC20 Integration', () => {
       BONUS_MAX
     )
     await swap.deployed()
-
-    signerToken.connect(signer).approve(swap.address, 1000000)
-    senderToken.connect(sender).approve(swap.address, 1000000)
   })
 
   describe('Test token holder bonuss', async () => {
-    it('test swap without staking', async () => {
+    it('swap fails without sender balance', async () => {
+      await signerToken.mint(signer.address, MINT_AMOUNT)
+      signerToken.connect(signer).approve(swap.address, MINT_AMOUNT)
+      senderToken.connect(sender).approve(swap.address, MINT_AMOUNT)
+
       const order = await createSignedOrder({}, signer)
 
-      await expect(swap.connect(sender).swap(sender.address, ...order)).to.emit(
-        swap,
-        'SwapERC20'
-      )
-
-      // Expect full 30 to be taken from signer
-      expect(await signerToken.balanceOf(signer.address)).to.equal('989970')
-
-      // Expect full amount to have been sent to sender
-      expect(await signerToken.balanceOf(sender.address)).to.equal('10000')
-
-      // Expect full fee to have been sent to fee wallet
-      expect(await signerToken.balanceOf(protocolFeeWallet.address)).to.equal(
-        '30'
-      )
+      await expect(
+        swap.connect(sender).swap(sender.address, ...order)
+      ).to.be.revertedWith('TransferFromFailed')
     })
 
-    it('test swap without bonus', async () => {
+    it('swap fails without sender allowance', async () => {
+      await signerToken.mint(signer.address, MINT_AMOUNT)
+      await senderToken.mint(sender.address, MINT_AMOUNT)
+      signerToken.connect(signer).approve(swap.address, MINT_AMOUNT)
+
+      const order = await createSignedOrder({}, signer)
+
+      await expect(
+        swap.connect(sender).swap(sender.address, ...order)
+      ).to.be.revertedWith('TransferFromFailed')
+    })
+
+    it('swap fails without signer balance', async () => {
+      await senderToken.mint(sender.address, MINT_AMOUNT)
+      signerToken.connect(signer).approve(swap.address, MINT_AMOUNT)
+      senderToken.connect(sender).approve(swap.address, MINT_AMOUNT)
+
+      const order = await createSignedOrder({}, signer)
+
+      await expect(
+        swap.connect(sender).swap(sender.address, ...order)
+      ).to.be.revertedWith('TransferFromFailed')
+    })
+
+    it('swap fails without signer allowance', async () => {
+      await signerToken.mint(signer.address, MINT_AMOUNT)
+      await senderToken.mint(sender.address, MINT_AMOUNT)
+      senderToken.connect(sender).approve(swap.address, MINT_AMOUNT)
+
+      const order = await createSignedOrder({}, signer)
+
+      await expect(
+        swap.connect(sender).swap(sender.address, ...order)
+      ).to.be.revertedWith('TransferFromFailed')
+    })
+
+    it('swap succeeds, no staking bonus', async () => {
+      await signerToken.mint(signer.address, MINT_AMOUNT)
+      await senderToken.mint(sender.address, MINT_AMOUNT)
+      signerToken.connect(signer).approve(swap.address, MINT_AMOUNT)
+      senderToken.connect(sender).approve(swap.address, MINT_AMOUNT)
+
       const order = await createSignedOrder({}, signer)
 
       await expect(swap.connect(sender).swap(sender.address, ...order)).to.emit(
@@ -139,9 +169,14 @@ describe('SwapERC20 Integration', () => {
       )
     })
 
-    it('test swap with bonus', async () => {
-      await stakingToken.connect(sender).approve(staking.address, 10000000000)
-      await staking.connect(sender).stake(10000000000)
+    it('swap succeeds, staking bonus', async () => {
+      await signerToken.mint(signer.address, MINT_AMOUNT)
+      await senderToken.mint(sender.address, MINT_AMOUNT)
+      signerToken.connect(signer).approve(swap.address, MINT_AMOUNT)
+      senderToken.connect(sender).approve(swap.address, MINT_AMOUNT)
+
+      await stakingToken.connect(sender).approve(staking.address, STAKE_AMOUNT)
+      await staking.connect(sender).stake(STAKE_AMOUNT)
 
       await expect(swap.connect(deployer).setStaking(staking.address)).to.emit(
         swap,
@@ -167,6 +202,11 @@ describe('SwapERC20 Integration', () => {
     })
 
     it('test light swap', async () => {
+      await signerToken.mint(signer.address, MINT_AMOUNT)
+      await senderToken.mint(sender.address, MINT_AMOUNT)
+      signerToken.connect(signer).approve(swap.address, MINT_AMOUNT)
+      senderToken.connect(sender).approve(swap.address, MINT_AMOUNT)
+
       const order = await createSignedOrder(
         {
           protocolFee: PROTOCOL_FEE_LIGHT,
