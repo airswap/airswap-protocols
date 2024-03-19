@@ -1,6 +1,6 @@
 {
   "name": "@airswap/wrapper",
-  "version": "4.1.5",
+  "version": "4.2.3",
   "description": "AirSwap: Wrap and Unwrap Native Tokens",
   "license": "MIT",
   "repository": {
@@ -27,12 +27,10 @@
     "verify": "hardhat run ./scripts/verify.js",
     "owners": "hardhat run ./scripts/owner.js"
   },
-  "dependencies": {
-    "@airswap/swap-erc20": "4.2.0",
-    "@openzeppelin/contracts": "^4.8.3"
-  },
   "devDependencies": {
-    "@airswap/utils": "4.2.4",
+    "@airswap/utils": "4.3.0",
+    "@airswap/swap-erc20": "4.3.1",
+    "@openzeppelin/contracts": "^4.8.3",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
     "prompt-confirm": "^2.0.4"
   },

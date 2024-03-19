@@ -1,9 +1,11 @@
 export const DOMAIN_NAME_SWAP_ERC20 = 'SWAP_ERC20'
-export const DOMAIN_VERSION_SWAP_ERC20 = '4.2'
+export const DOMAIN_VERSION_SWAP_ERC20 = '4.3'
 export const DOMAIN_NAME_SWAP = 'SWAP'
 export const DOMAIN_VERSION_SWAP = '4.2'
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export const SECONDS_IN_DAY = 86400
+export const THIRTY_DAYS = 86400 * 30
+export const EVM_NATIVE_TOKEN_DECIMALS = 18
 
 export enum ChainIds {
   MAINNET = 1,
@@ -23,8 +25,8 @@ export enum ChainIds {
   LINEAGOERLI = 59140,
   LINEA = 59144,
   MUMBAI = 80001,
-  BASEGOERLI = 84531,
-  ARBITRUMGOERLI = 421613,
+  BASESEPOLIA = 84532,
+  ARBITRUMSEPOLIA = 421614,
   SEPOLIA = 11155111,
 }
 
@@ -45,12 +47,11 @@ export const testnets: number[] = [
   ChainIds.TELOSTESTNET,
   ChainIds.BSCTESTNET,
   ChainIds.HOLESKY,
-  ChainIds.HARDHAT,
   ChainIds.FUJI,
   ChainIds.LINEAGOERLI,
   ChainIds.MUMBAI,
-  ChainIds.BASEGOERLI,
-  ChainIds.ARBITRUMGOERLI,
+  ChainIds.BASESEPOLIA,
+  ChainIds.ARBITRUMSEPOLIA,
   ChainIds.SEPOLIA,
 ]
 
@@ -72,8 +73,8 @@ export const chainLabels: Record<number, string> = {
   [ChainIds.LINEAGOERLI]: 'LINEAGOERLI',
   [ChainIds.LINEA]: 'LINEA',
   [ChainIds.MUMBAI]: 'MUMBAI',
-  [ChainIds.BASEGOERLI]: 'BASEGOERLI',
-  [ChainIds.ARBITRUMGOERLI]: 'ARBITRUMGOERLI',
+  [ChainIds.BASESEPOLIA]: 'BASESEPOLIA',
+  [ChainIds.ARBITRUMSEPOLIA]: 'ARBITRUMSEPOLIA',
   [ChainIds.SEPOLIA]: 'SEPOLIA',
 }
 
@@ -95,8 +96,8 @@ export const chainNames: Record<number, string> = {
   [ChainIds.LINEAGOERLI]: 'Linea Goerli',
   [ChainIds.LINEA]: 'Linea',
   [ChainIds.MUMBAI]: 'Mumbai Testnet',
-  [ChainIds.BASEGOERLI]: 'Base Goerli',
-  [ChainIds.ARBITRUMGOERLI]: 'Arbitrum Goerli',
+  [ChainIds.BASESEPOLIA]: 'Base Sepolia',
+  [ChainIds.ARBITRUMSEPOLIA]: 'Arbitrum Sepolia',
   [ChainIds.SEPOLIA]: 'Sepolia',
 }
 
@@ -118,8 +119,8 @@ export const chainCurrencies: Record<number, string> = {
   [ChainIds.LINEAGOERLI]: 'ETH',
   [ChainIds.LINEA]: 'ETH',
   [ChainIds.MUMBAI]: 'MATIC',
-  [ChainIds.BASEGOERLI]: 'ETH',
-  [ChainIds.ARBITRUMGOERLI]: 'AETH',
+  [ChainIds.BASESEPOLIA]: 'ETH',
+  [ChainIds.ARBITRUMSEPOLIA]: 'AETH',
   [ChainIds.SEPOLIA]: 'SepoliaETH',
 }
 
@@ -140,8 +141,8 @@ export const currencyIcons: Record<number, number> = {
   [ChainIds.LINEAGOERLI]: ChainIds.MAINNET,
   [ChainIds.LINEA]: ChainIds.MAINNET,
   [ChainIds.MUMBAI]: ChainIds.POLYGON,
-  [ChainIds.BASEGOERLI]: ChainIds.MAINNET,
-  [ChainIds.ARBITRUMGOERLI]: ChainIds.MAINNET,
+  [ChainIds.BASESEPOLIA]: ChainIds.MAINNET,
+  [ChainIds.ARBITRUMSEPOLIA]: ChainIds.MAINNET,
   [ChainIds.SEPOLIA]: ChainIds.MAINNET,
 }
 
@@ -154,16 +155,16 @@ export const apiUrls: Record<number, string> = {
   [ChainIds.BSC]: 'https://bsc-dataseed.binance.org',
   [ChainIds.BSCTESTNET]: 'https://data-seed-prebsc-1-s1.binance.org:8545',
   [ChainIds.POLYGON]: 'https://polygon-rpc.com',
-  [ChainIds.BASE]: 'https://mainnet.base.org',
+  [ChainIds.BASE]: 'https://base.publicnode.com',
   [ChainIds.HOLESKY]: 'https://ethereum-holesky.publicnode.com',
   [ChainIds.ARBITRUM]: 'https://arb1.arbitrum.io/rpc',
   [ChainIds.FUJI]: 'https://api.avax-test.network/ext/bc/C/rpc',
   [ChainIds.AVALANCHE]: 'https://api.avax.network/ext/bc/C/rpc',
   [ChainIds.LINEAGOERLI]: 'https://rpc.goerli.linea.build',
   [ChainIds.LINEA]: 'https://rpc.linea.build',
-  [ChainIds.MUMBAI]: 'https://rpc-mumbai.maticvigil.com',
-  [ChainIds.BASEGOERLI]: 'https://goerli.base.org',
-  [ChainIds.ARBITRUMGOERLI]: 'https://goerli-rollup.arbitrum.io/rpc',
+  [ChainIds.MUMBAI]: 'https://gateway.tenderly.co/public/polygon-mumbai',
+  [ChainIds.BASESEPOLIA]: 'https://sepolia.base.org',
+  [ChainIds.ARBITRUMSEPOLIA]: 'https://sepolia-rollup.arbitrum.io/rpc',
   [ChainIds.SEPOLIA]: 'https://ethereum-sepolia.publicnode.com',
 }
 
@@ -184,8 +185,8 @@ export const explorerUrls: Record<number, string> = {
   [ChainIds.LINEAGOERLI]: 'https://goerli.lineascan.build',
   [ChainIds.LINEA]: 'https://lineascan.build',
   [ChainIds.MUMBAI]: 'https://mumbai.polygonscan.com',
-  [ChainIds.BASEGOERLI]: 'https://goerli.basescan.org',
-  [ChainIds.ARBITRUMGOERLI]: 'https://goerli.arbiscan.io',
+  [ChainIds.BASESEPOLIA]: 'https://sepolia.basescan.org',
+  [ChainIds.ARBITRUMSEPOLIA]: 'https://sepolia.arbiscan.io',
   [ChainIds.SEPOLIA]: 'https://sepolia.etherscan.io',
 }
 
@@ -195,15 +196,37 @@ export const explorerApiUrls: Record<number, string> = {
   [ChainIds.HOLESKY]: 'https://api-holesky.etherscan.io/api',
   [ChainIds.LINEAGOERLI]: 'https://api-testnet.lineascan.build/api',
   [ChainIds.LINEA]: 'https://api.lineascan.build/api',
-  [ChainIds.BASEGOERLI]: 'https://api-goerli.basescan.org/api',
+  [ChainIds.BASESEPOLIA]: 'https://api-sepolia.basescan.org/api',
   [ChainIds.BASE]: 'https://api.basescan.org/api',
-  [ChainIds.ARBITRUMGOERLI]: 'https://api-goerli.arbiscan.io/api',
+  [ChainIds.ARBITRUMSEPOLIA]: 'https://api-sepolia.arbiscan.io/api',
 }
 
 export const stakingTokenAddresses: Record<number, string> = {
   [ChainIds.MAINNET]: '0x27054b13b1b798b345b591a4d22e6562d47ea75a',
   [ChainIds.SEPOLIA]: '0x4092d6dba9abb7450b9d91aa7ed2712935d63b39',
   [ChainIds.HOLESKY]: '0x4092d6dba9abb7450b9d91aa7ed2712935d63b39',
+}
+
+export const wrappedNativeTokenAddresses: Record<number, string> = {
+  [ChainIds.MAINNET]: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+  [ChainIds.RSK]: '0x967f8799af07df1534d48a95a5c9febe92c53ae0',
+  [ChainIds.RSKTESTNET]: '0x09b6ca5e4496238a1f176aea6bb607db96c2286e',
+  [ChainIds.TELOS]: '0xD102cE6A4dB07D247fcc28F366A623Df0938CA9E',
+  [ChainIds.TELOSTESTNET]: '0xaE85Bf723A9e74d6c663dd226996AC1b8d075AA9',
+  [ChainIds.BSC]: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+  [ChainIds.BSCTESTNET]: '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd',
+  [ChainIds.POLYGON]: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
+  [ChainIds.BASE]: '0x4200000000000000000000000000000000000006',
+  [ChainIds.HOLESKY]: '0x94373a4919b3240d86ea41593d5eba789fef3848',
+  [ChainIds.ARBITRUM]: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
+  [ChainIds.FUJI]: '0xd9d01a9f7c810ec035c0e42cb9e80ef44d7f8692',
+  [ChainIds.AVALANCHE]: '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
+  [ChainIds.LINEAGOERLI]: '0x2C1b868d6596a18e32E61B901E4060C872647b6C',
+  [ChainIds.LINEA]: '0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f',
+  [ChainIds.MUMBAI]: '0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889',
+  [ChainIds.BASESEPOLIA]: '0x4200000000000000000000000000000000000006',
+  [ChainIds.ARBITRUMSEPOLIA]: '0x0091f4e75a03c11cb9be8e3717219005eb780d89',
+  [ChainIds.SEPOLIA]: '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
 }
 
 export const ownerAddresses: Record<number, string> = {
@@ -216,6 +239,7 @@ export const ownerAddresses: Record<number, string> = {
   [ChainIds.ARBITRUM]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
   [ChainIds.AVALANCHE]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
   [ChainIds.LINEA]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
+  [ChainIds.SEPOLIA]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
 }
 
 export const protocolFeeReceiverAddresses: Record<number, string> = {

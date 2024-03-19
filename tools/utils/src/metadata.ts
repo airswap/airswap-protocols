@@ -4,36 +4,17 @@ import {
   CollectionTokenInfo,
   CollectionTokenMetadata,
   CollectionTokenAttribute,
+} from './types'
+import {
   TokenKinds,
-  ChainIds,
   chainCurrencies,
   chainNames,
   stakingTokenAddresses,
-} from '@airswap/utils'
-import tokenlists from './tokenlists'
-import wethDeploys from '@airswap/wrapper/deploys-weth.js'
+  wrappedNativeTokenAddresses,
+} from './constants'
+import TOKEN_LISTS from './tokenlists'
+import TOKEN_DEFAULTS from './tokendefaults'
 import validUrl from 'valid-url'
-
-const TEST_TOKEN_DECIMALS = 6
-
-// Test tokens for Sepolia
-
-const defaults = [
-  {
-    address: '0x20aaebad8c7c6ffb6fdaa5a622c399561562beea',
-    chainId: ChainIds.SEPOLIA,
-    decimals: TEST_TOKEN_DECIMALS,
-    name: 'Mintable USDT',
-    symbol: 'USDT',
-  },
-  {
-    address: '0xf450ef4f268eaf2d3d8f9ed0354852e255a5eaef',
-    chainId: ChainIds.SEPOLIA,
-    decimals: TEST_TOKEN_DECIMALS,
-    name: 'Mintable USDC',
-    symbol: 'USDC',
-  },
-] as TokenInfo[]
 
 const AIRSWAP_LOGO_URI =
   'https://storage.googleapis.com/subgraph-images/158680119781426823563.png'
@@ -52,14 +33,14 @@ export async function getKnownTokens(
   const errors: Array<string> = []
   let tokens = []
   tokens.push(
-    ...defaults.map((token) => ({
+    ...TOKEN_DEFAULTS.map((token) => ({
       ...token,
       address: token.address.toLowerCase(),
     }))
   )
-  if (tokenlists[chainId]) {
+  if (TOKEN_LISTS[chainId]) {
     const promises = await Promise.allSettled(
-      tokenlists[chainId].map(async (url) => {
+      TOKEN_LISTS[chainId].map(async (url) => {
         try {
           const data = await (await fetch(url)).json()
           if (data.tokens) {
@@ -98,7 +79,7 @@ export async function getKnownTokens(
       }
     }
   }
-  if (wethDeploys[chainId]) {
+  if (wrappedNativeTokenAddresses[chainId]) {
     const wrappedTokens = getWrappedTokens()
     for (let i = 0; i < wrappedTokens.length; i++) {
       if (wrappedTokens[i].chainId == chainId) {
@@ -151,12 +132,12 @@ export function firstTokenBySymbol(
 
 export function getWrappedTokens(): TokenInfo[] {
   const _wrappedTokens: TokenInfo[] = []
-  for (const chainId in wethDeploys) {
+  for (const chainId in wrappedNativeTokenAddresses) {
     const _chainId = Number(chainId)
     _wrappedTokens.push({
       name: `Wrapped ${chainCurrencies[_chainId]}`,
       symbol: `W${chainCurrencies[_chainId]}`,
-      address: wethDeploys[_chainId],
+      address: wrappedNativeTokenAddresses[_chainId],
       decimals: 18,
       chainId: Number(_chainId),
     })
@@ -309,6 +290,7 @@ const transformERC721ToCollectionToken = (
   name: metadata.name || DEFAULT_NAME,
   description: metadata.description,
   image: metadata.image?.replace('ipfs://', ipfsUri),
+  animation_url: metadata.animation_url?.replace('ipfs://', ipfsUri),
   attributes: (metadata.attributes || []).map(
     transformErc721TokenAttributeToCollectionTokenAttribute
   ),
@@ -330,8 +312,9 @@ const transformERC1155ToCollectionToken = (
   image:
     (metadata.image_url || metadata.image || '').replace('ipfs://', ipfsUri) ||
     undefined,
+  animation_url: metadata.animation_url?.replace('ipfs://', ipfsUri),
+  createdBy: metadata.created_by,
   attributes: (metadata.attributes || []).map(
     transformErc1155TokenAttributeToCollectionTokenAttribute
   ),
-  createdBy: metadata.created_by,
 })

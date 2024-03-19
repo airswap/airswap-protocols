@@ -24,10 +24,11 @@ export interface CollectionTokenAttribute {
 
 export type CollectionTokenMetadata = {
   name?: string
-  image?: string
   description?: string
-  attributes?: CollectionTokenAttribute[]
+  image?: string
+  animation_url?: string
   createdBy?: string
+  attributes?: CollectionTokenAttribute[]
 }
 
 export type CollectionTokenInfo = {
