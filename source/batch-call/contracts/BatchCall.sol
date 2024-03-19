@@ -1,19 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { ERC20 } from "solady/src/tokens/ERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
 import "@airswap/registry/contracts/interfaces/IRegistry.sol";
-import "hardhat/console.sol";
 
 /**
  * @title BatchCall: Batch balance, allowance, order validity checks, nonce usage check
  */
 contract BatchCall {
-  using SafeERC20 for IERC20;
   using Address for address;
 
   error ArgumentInvalid();
@@ -30,7 +27,7 @@ contract BatchCall {
     address tokenAddress
   ) public view returns (uint256) {
     if (tokenAddress.isContract()) {
-      IERC20 token = IERC20(tokenAddress);
+      ERC20 token = ERC20(tokenAddress);
       //  Check if balanceOf succeeds.
       (bool success, ) = address(token).staticcall(
         abi.encodeWithSelector(token.balanceOf.selector, userAddress)
@@ -121,7 +118,7 @@ contract BatchCall {
     address tokenAddress
   ) public view returns (uint256) {
     if (tokenAddress.isContract()) {
-      IERC20 token = IERC20(tokenAddress);
+      ERC20 token = ERC20(tokenAddress);
       // Check if allowance succeeds as a call else returns 0.
       (bool success, ) = address(token).staticcall(
         abi.encodeWithSelector(
