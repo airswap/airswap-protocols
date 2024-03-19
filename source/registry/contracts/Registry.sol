@@ -5,12 +5,13 @@ pragma solidity 0.8.23;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "./interfaces/IRegistry.sol";
 
 /**
  * @title AirSwap: Server Registry
  * @notice https://www.airswap.io/
  */
-contract Registry {
+contract Registry is IRegistry {
   using SafeERC20 for IERC20;
   using EnumerableSet for EnumerableSet.AddressSet;
   using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -24,26 +25,6 @@ contract Registry {
   mapping(bytes4 => EnumerableSet.AddressSet) internal stakersByProtocol;
   mapping(address => EnumerableSet.AddressSet) internal tokensByStaker;
   mapping(address => EnumerableSet.AddressSet) internal stakersByToken;
-
-  event SetServerURL(address indexed staker, string url);
-  event AddProtocols(address indexed staker, bytes4[] protocols);
-  event AddTokens(address indexed staker, address[] tokens);
-  event RemoveProtocols(address indexed staker, bytes4[] protocols);
-  event RemoveTokens(address indexed staker, address[] tokens);
-  event UnsetServer(
-    address indexed staker,
-    string url,
-    bytes4[] protocols,
-    address[] tokens
-  );
-
-  error ArgumentInvalid();
-  error NoServerURLSet();
-  error ProtocolDoesNotExist(bytes4);
-  error ProtocolExists(bytes4);
-  error TokenDoesNotExist(address);
-  error TokenExists(address);
-  error ServerURLInvalid();
 
   /**
    * @notice Registry constructor
