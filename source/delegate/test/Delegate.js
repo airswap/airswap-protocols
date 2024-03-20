@@ -70,6 +70,9 @@ describe('Delegate Unit', () => {
     await takerToken.mock.balanceOf
       .withArgs(takerWallet)
       .returns(DEFAULT_BALANCE)
+    await takerToken.mock.balanceOf
+      .withArgs(delegate.address)
+      .returns(DEFAULT_AMOUNT)
   }
 
   beforeEach(async () => {
@@ -83,10 +86,7 @@ describe('Delegate Unit', () => {
   before(async () => {
     ;[deployer, delegator, taker, anyone] = await ethers.getSigners()
 
-    const swapERC20Factory = await ethers.getContractFactory(
-      SWAP_ERC20.abi,
-      SWAP_ERC20.bytecode
-    )
+    const swapERC20Factory = await ethers.getContractFactory('SwapERC20')
     swapERC20 = await swapERC20Factory.deploy(
       PROTOCOL_FEE,
       PROTOCOL_FEE_LIGHT,
@@ -167,6 +167,10 @@ describe('Delegate Unit', () => {
       await setUpBalances(taker.address, delegator.address)
 
       await delegatorToken.mock.approve
+        .withArgs(delegate.address, DEFAULT_AMOUNT)
+        .returns(true)
+
+      await delegatorToken.mock.approve
         .withArgs(swapERC20.address, DEFAULT_AMOUNT)
         .returns(true)
 
@@ -174,9 +178,9 @@ describe('Delegate Unit', () => {
         .withArgs(swapERC20.address, DEFAULT_AMOUNT)
         .returns(true)
 
-      await takerToken.mock.balanceOf
-        .withArgs(delegate.address)
-        .returns(DEFAULT_AMOUNT)
+      await takerToken.mock.approve
+        .withArgs(delegate.address, DEFAULT_AMOUNT)
+        .returns(true)
 
       await expect(
         delegate.connect(taker).swap(delegator.address, ...order)
@@ -184,13 +188,7 @@ describe('Delegate Unit', () => {
     })
 
     it('fails to swap with no rule', async () => {
-      const order = await createSignedOrderERC20(
-        {
-          signerWallet: taker.address,
-          senderWallet: delegate.address,
-        },
-        taker
-      )
+      const order = await createSignedOrderERC20({}, taker)
 
       await setUpAllowances(
         taker.address,

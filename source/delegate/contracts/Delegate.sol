@@ -3,11 +3,9 @@
 pragma solidity 0.8.23;
 
 import "./interfaces/IDelegate.sol";
-import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "hardhat/console.sol";
+import { ERC20 } from "solady/src/tokens/ERC20.sol";
+import { Ownable } from "solady/src/auth/Ownable.sol";
+import { SafeTransferLib } from "solady/src/utils/SafeTransferLib.sol";
 
 /**
  * @title Delegate: Deployable Trading Rules for the AirSwap Network
@@ -15,7 +13,6 @@ import "hardhat/console.sol";
  * @dev inherits IDelegate, Ownable uses SafeMath library
  */
 contract Delegate is IDelegate, Ownable {
-  using SafeERC20 for IERC20;
   // The Swap contract to be used to settle trades
   ISwapERC20 public swapERC20;
 
@@ -68,7 +65,7 @@ contract Delegate is IDelegate, Ownable {
     address _delegator,
     uint256 _nonce,
     uint256 _expiry,
-    address _signerWallet,
+    address _takerWallet,
     address _takerToken,
     uint256 _takerAmount,
     address _delegatorToken,
@@ -81,19 +78,20 @@ contract Delegate is IDelegate, Ownable {
       revert InsufficientDelegatorAmount();
     }
 
-    IERC20(_delegatorToken).safeTransferFrom(
+    SafeTransferLib.safeTransferFrom(
+      _delegatorToken,
       _delegator,
       address(this),
       _delegatorAmount
     );
 
-    IERC20(_delegatorToken).approve(address(swapERC20), _delegatorAmount);
+    ERC20(_delegatorToken).approve(address(swapERC20), _delegatorAmount);
 
     swapERC20.swap(
-      _delegator,
+      address(this),
       _nonce,
       _expiry,
-      _signerWallet,
+      _takerWallet,
       _takerToken,
       _takerAmount,
       _delegatorToken,
@@ -103,13 +101,14 @@ contract Delegate is IDelegate, Ownable {
       _s
     );
 
-    IERC20(_takerToken).safeTransferFrom(
+    SafeTransferLib.safeTransferFrom(
+      _takerToken,
       address(this),
       _delegator,
-      IERC20(_takerToken).balanceOf(address(this))
+      ERC20(_takerToken).balanceOf(address(this))
     );
 
     rules[_delegator][_delegatorToken][_takerToken] -= _delegatorAmount;
-    emit DelegateSwap(_nonce, _signerWallet);
+    emit DelegateSwap(_nonce, _takerWallet);
   }
 }
