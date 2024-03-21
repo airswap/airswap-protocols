@@ -12,6 +12,7 @@ interface IDelegate {
   }
 
   error InsufficientDelegatorAmount();
+  error TransferFromFailed();
 
   event DelegateSwap(uint256 _nonce, address _signerWallet);
 

@@ -86,7 +86,10 @@ describe('Delegate Unit', () => {
   before(async () => {
     ;[deployer, delegator, taker, anyone] = await ethers.getSigners()
 
-    const swapERC20Factory = await ethers.getContractFactory('SwapERC20')
+    const swapERC20Factory = await ethers.getContractFactory(
+      SWAP_ERC20.abi,
+      SWAP_ERC20.bytecode
+    )
     swapERC20 = await swapERC20Factory.deploy(
       PROTOCOL_FEE,
       PROTOCOL_FEE_LIGHT,
