@@ -12,29 +12,28 @@ const {
 const CHAIN_ID = 31337
 const DEFAULT_BALANCE = '100000'
 const DEFAULT_AMOUNT = '10000'
-const PROTOCOL_FEE = '30'
-const PROTOCOL_FEE_LIGHT = '7'
+const PROTOCOL_FEE = '5'
 const REBATE_SCALE = '10'
 const REBATE_MAX = '100'
 
 describe('Delegate Unit', () => {
   let deployer
-  let delegator
-  let taker
+  let sender
+  let signer
   let swapERC20
-  let delegatorToken
-  let takerToken
+  let senderToken
+  let signerToken
   let delegate
   let snapshotId
 
   async function createSignedOrderERC20(params, signatory) {
     const unsignedOrder = createOrderERC20({
       protocolFee: PROTOCOL_FEE,
-      signerWallet: taker.address,
-      signerToken: takerToken.address,
+      signerWallet: signer.address,
+      signerToken: signerToken.address,
       signerAmount: DEFAULT_AMOUNT,
       senderWallet: delegate.address,
-      senderToken: delegatorToken.address,
+      senderToken: senderToken.address,
       senderAmount: DEFAULT_AMOUNT,
       ...params,
     })
@@ -50,27 +49,27 @@ describe('Delegate Unit', () => {
   }
 
   async function setUpAllowances(
-    delegatorWallet,
-    delegatorAmount,
-    takerWallet,
-    takerAmount
+    senderWallet,
+    senderAmount,
+    signerWallet,
+    signerAmount
   ) {
-    await delegatorToken.mock.allowance
-      .withArgs(delegatorWallet, delegate.address)
-      .returns(delegatorAmount)
-    await takerToken.mock.allowance
-      .withArgs(takerWallet, swapERC20.address)
-      .returns(takerAmount)
+    await senderToken.mock.allowance
+      .withArgs(senderWallet, delegate.address)
+      .returns(senderAmount)
+    await signerToken.mock.allowance
+      .withArgs(signerWallet, swapERC20.address)
+      .returns(signerAmount)
   }
 
-  async function setUpBalances(delegatorWallet, takerWallet) {
-    await delegatorToken.mock.balanceOf
-      .withArgs(delegatorWallet)
+  async function setUpBalances(senderWallet, signerWallet) {
+    await senderToken.mock.balanceOf
+      .withArgs(senderWallet)
       .returns(DEFAULT_BALANCE)
-    await takerToken.mock.balanceOf
-      .withArgs(takerWallet)
+    await signerToken.mock.balanceOf
+      .withArgs(signerWallet)
       .returns(DEFAULT_BALANCE)
-    await takerToken.mock.balanceOf
+    await signerToken.mock.balanceOf
       .withArgs(delegate.address)
       .returns(DEFAULT_AMOUNT)
   }
@@ -84,7 +83,7 @@ describe('Delegate Unit', () => {
   })
 
   before(async () => {
-    ;[deployer, delegator, taker, anyone] = await ethers.getSigners()
+    ;[deployer, sender, signer, anyone] = await ethers.getSigners()
 
     const swapERC20Factory = await ethers.getContractFactory(
       SWAP_ERC20.abi,
@@ -92,7 +91,7 @@ describe('Delegate Unit', () => {
     )
     swapERC20 = await swapERC20Factory.deploy(
       PROTOCOL_FEE,
-      PROTOCOL_FEE_LIGHT,
+      PROTOCOL_FEE,
       deployer.address,
       REBATE_SCALE,
       REBATE_MAX
@@ -103,10 +102,12 @@ describe('Delegate Unit', () => {
     ).deploy(swapERC20.address)
     await delegate.deployed()
 
-    delegatorToken = await deployMockContract(deployer, IERC20.abi)
-    takerToken = await deployMockContract(deployer, IERC20.abi)
-    await delegatorToken.mock.transferFrom.returns(true)
-    await takerToken.mock.transferFrom.returns(true)
+    senderToken = await deployMockContract(deployer, IERC20.abi)
+    signerToken = await deployMockContract(deployer, IERC20.abi)
+    await senderToken.mock.transferFrom.returns(true)
+    await signerToken.mock.transferFrom.returns(true)
+    await senderToken.mock.transfer.returns(true)
+    await signerToken.mock.transfer.returns(true)
   })
 
   describe('Constructor', async () => {
@@ -119,20 +120,20 @@ describe('Delegate Unit', () => {
     it('sets a Rule', async () => {
       await expect(
         delegate
-          .connect(delegator)
+          .connect(sender)
           .setRule(
-            delegatorToken.address,
+            senderToken.address,
             DEFAULT_AMOUNT,
-            takerToken.address,
+            signerToken.address,
             DEFAULT_AMOUNT
           )
       )
         .to.emit(delegate, 'SetRule')
         .withArgs(
-          delegator.address,
-          delegatorToken.address,
+          sender.address,
+          senderToken.address,
           DEFAULT_AMOUNT,
-          takerToken.address,
+          signerToken.address,
           DEFAULT_AMOUNT
         )
     })
@@ -140,80 +141,80 @@ describe('Delegate Unit', () => {
     it('unsets a Rule', async () => {
       await expect(
         delegate
-          .connect(delegator)
-          .unsetRule(delegatorToken.address, takerToken.address)
+          .connect(sender)
+          .unsetRule(senderToken.address, signerToken.address)
       )
         .to.emit(delegate, 'UnsetRule')
-        .withArgs(delegator.address, delegatorToken.address, takerToken.address)
+        .withArgs(sender.address, senderToken.address, signerToken.address)
     })
   })
 
   describe('Swap', async () => {
     it('successfully swaps', async () => {
       await delegate
-        .connect(delegator)
+        .connect(sender)
         .setRule(
-          delegatorToken.address,
+          senderToken.address,
           DEFAULT_AMOUNT,
-          takerToken.address,
+          signerToken.address,
           DEFAULT_AMOUNT
         )
 
-      const order = await createSignedOrderERC20({}, taker)
+      const order = await createSignedOrderERC20({}, signer)
 
       await setUpAllowances(
-        delegator.address,
+        sender.address,
         DEFAULT_AMOUNT,
-        taker.address,
+        signer.address,
         DEFAULT_AMOUNT + PROTOCOL_FEE
       )
-      await setUpBalances(taker.address, delegator.address)
+      await setUpBalances(signer.address, sender.address)
 
-      await delegatorToken.mock.approve
+      await senderToken.mock.approve
         .withArgs(delegate.address, DEFAULT_AMOUNT)
         .returns(true)
 
-      await delegatorToken.mock.approve
+      await senderToken.mock.approve
         .withArgs(swapERC20.address, DEFAULT_AMOUNT)
         .returns(true)
 
-      await takerToken.mock.approve
+      await signerToken.mock.approve
         .withArgs(swapERC20.address, DEFAULT_AMOUNT)
         .returns(true)
 
-      await takerToken.mock.approve
+      await signerToken.mock.approve
         .withArgs(delegate.address, DEFAULT_AMOUNT)
         .returns(true)
 
       await expect(
-        delegate.connect(taker).swap(delegator.address, ...order)
+        delegate.connect(signer).swap(sender.address, ...order)
       ).to.emit(delegate, 'DelegateSwap')
     })
 
     it('fails to swap with no rule', async () => {
-      const order = await createSignedOrderERC20({}, taker)
+      const order = await createSignedOrderERC20({}, signer)
 
       await setUpAllowances(
-        taker.address,
+        signer.address,
         DEFAULT_AMOUNT + PROTOCOL_FEE,
-        delegator.address,
+        sender.address,
         DEFAULT_AMOUNT
       )
-      await setUpBalances(taker.address, delegator.address)
+      await setUpBalances(signer.address, sender.address)
 
-      await delegatorToken.mock.approve
+      await senderToken.mock.approve
         .withArgs(swapERC20.address, DEFAULT_AMOUNT)
         .returns(true)
 
-      await takerToken.mock.approve
+      await signerToken.mock.approve
         .withArgs(swapERC20.address, DEFAULT_AMOUNT)
         .returns(true)
 
-      await takerToken.mock.balanceOf
+      await signerToken.mock.balanceOf
         .withArgs(delegate.address)
         .returns(DEFAULT_AMOUNT)
 
-      await expect(delegate.connect(taker).swap(delegator.address, ...order)).to
+      await expect(delegate.connect(signer).swap(sender.address, ...order)).to
         .be.reverted
     })
   })

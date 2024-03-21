@@ -17,7 +17,7 @@ contract Delegate is IDelegate, Ownable {
   // The Swap contract to be used to settle trades
   ISwapERC20 public swapERC20;
 
-  // Mapping of delegator to delegatorToken to to takerToken to remaining DelegatorAmount
+  // Mapping of sender to senderToken to to signerToken to remaining amount
   mapping(address => mapping(address => mapping(address => uint256)))
     public rules;
 
@@ -30,86 +30,84 @@ contract Delegate is IDelegate, Ownable {
 
   /**
    * @notice Set a Trading Rule
-   * @param _delegatorToken address Address of an ERC-20 token the consumer would send
+   * @param _senderToken address Address of an ERC-20 token the consumer would send
    * @param _maxDelegatorAmount uint256 Maximum amount of ERC-20 token the delegate would send
-   * @param _takerToken address Address of an ERC-20 token the delegate would recieve
-   * @param _minTakerAmount uint256 Minimum amount of ERC-20 token the delegate would recieve
+   * @param _signerToken address Address of an ERC-20 token the delegate would recieve
+   * @param _minSignerAmount uint256 Minimum amount of ERC-20 token the delegate would recieve
    */
   function setRule(
-    address _delegatorToken,
+    address _senderToken,
     uint256 _maxDelegatorAmount,
-    address _takerToken,
-    uint256 _minTakerAmount
+    address _signerToken,
+    uint256 _minSignerAmount
   ) external {
-    rules[msg.sender][_delegatorToken][_takerToken] = _maxDelegatorAmount;
+    rules[msg.sender][_senderToken][_signerToken] = _maxDelegatorAmount;
     emit SetRule(
       msg.sender,
-      _delegatorToken,
+      _senderToken,
       _maxDelegatorAmount,
-      _takerToken,
-      _minTakerAmount
+      _signerToken,
+      _minSignerAmount
     );
   }
 
   /**
    * @notice Unset a Trading Rule
    * @dev only callable by the owner of the contract, removes from a mapping
-   * @param _delegatorToken address Address of an ERC-20 token the delegator would send
-   * @param _takerToken address Address of an ERC-20 token the delegate would receive
+   * @param _senderToken address Address of an ERC-20 token the sender would send
+   * @param _signerToken address Address of an ERC-20 token the delegate would receive
    */
-  function unsetRule(address _delegatorToken, address _takerToken) external {
-    rules[msg.sender][_delegatorToken][_takerToken] = 0;
-    emit UnsetRule(msg.sender, _delegatorToken, _takerToken);
+  function unsetRule(address _senderToken, address _signerToken) external {
+    rules[msg.sender][_senderToken][_signerToken] = 0;
+    emit UnsetRule(msg.sender, _senderToken, _signerToken);
   }
 
   function swap(
-    address _delegator,
+    address _delegatorWallet,
     uint256 _nonce,
     uint256 _expiry,
-    address _takerWallet,
-    address _takerToken,
-    uint256 _takerAmount,
-    address _delegatorToken,
-    uint256 _delegatorAmount,
+    address _signerWallet,
+    address _signerToken,
+    uint256 _signerAmount,
+    address _senderToken,
+    uint256 _senderAmount,
     uint8 _v,
     bytes32 _r,
     bytes32 _s
   ) external {
-    if (rules[_delegator][_delegatorToken][_takerToken] < _delegatorAmount) {
+    if (rules[_delegatorWallet][_senderToken][_signerToken] < _senderAmount) {
       revert InsufficientDelegatorAmount();
     }
 
     SafeTransferLib.safeTransferFrom(
-      _delegatorToken,
-      _delegator,
+      _senderToken,
+      _delegatorWallet,
       address(this),
-      _delegatorAmount
+      _senderAmount
     );
 
-    ERC20(_delegatorToken).approve(address(swapERC20), _delegatorAmount);
+    ERC20(_senderToken).approve(address(swapERC20), _senderAmount);
 
-    swapERC20.swap(
-      address(this),
+    swapERC20.swapLight(
       _nonce,
       _expiry,
-      _takerWallet,
-      _takerToken,
-      _takerAmount,
-      _delegatorToken,
-      _delegatorAmount,
+      _signerWallet,
+      _signerToken,
+      _signerAmount,
+      _senderToken,
+      _senderAmount,
       _v,
       _r,
       _s
     );
 
-    SafeTransferLib.safeTransferFrom(
-      _takerToken,
-      address(this),
-      _delegator,
-      ERC20(_takerToken).balanceOf(address(this))
+    SafeTransferLib.safeTransfer(
+      _signerToken,
+      _delegatorWallet,
+      _signerAmount
     );
 
-    rules[_delegator][_delegatorToken][_takerToken] -= _delegatorAmount;
-    emit DelegateSwap(_nonce, _takerWallet);
+    rules[_delegatorWallet][_senderToken][_signerToken] -= _senderAmount;
+    emit DelegateSwap(_nonce, _signerWallet);
   }
 }

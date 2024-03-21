@@ -17,39 +17,39 @@ interface IDelegate {
   event DelegateSwap(uint256 _nonce, address _signerWallet);
 
   event SetRule(
-    address _delegator,
-    address _delegatorToken,
+    address _signer,
+    address _signerToken,
     uint256 _maxDelegatorAmount,
-    address _takerToken,
+    address _senderToken,
     uint256 _minTakerAmount
   );
 
   event UnsetRule(
-    address _delegator,
-    address _delegatorToken,
-    address _takerToken
+    address _signer,
+    address _signerToken,
+    address _senderToken
   );
 
   function setRule(
-    address _delegatorToken,
+    address _signerToken,
     uint256 _maxDelegatorAmount,
-    address _takerToken,
+    address _senderToken,
     uint256 _minTakerAmount
   ) external;
 
   function swap(
-    address _delegator,
+    address _senderWallet,
     uint256 _nonce,
     uint256 _expiry,
-    address _takerWallet,
-    address _delegatorToken,
-    uint256 _delegatorAmount,
-    address _takerToken,
-    uint256 _takerAmount,
+    address _signerWallet,
+    address _signerToken,
+    uint256 _signerAmount,
+    address _senderToken,
+    uint256 _senderAmount,
     uint8 _v,
     bytes32 _r,
     bytes32 _s
   ) external;
 
-  function unsetRule(address _delegatorToken, address _takerToken) external;
+  function unsetRule(address _signerToken, address _senderToken) external;
 }

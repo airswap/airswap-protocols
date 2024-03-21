@@ -10,29 +10,28 @@ const SWAP_ERC20 = require('@airswap/swap-erc20/build/contracts/SwapERC20.sol/Sw
 
 describe('Delegate Integration', () => {
   let snapshotId
-  let takerToken
-  let delegatorToken
+  let signerToken
+  let senderToken
 
   let deployer
-  let delegator
-  let taker
+  let sender
+  let signer
 
   const CHAIN_ID = 31337
   const BONUS_SCALE = '10'
   const BONUS_MAX = '100'
-  const PROTOCOL_FEE = '30'
-  const PROTOCOL_FEE_LIGHT = '7'
+  const PROTOCOL_FEE = '5'
   const DEFAULT_AMOUNT = '10000'
   const DEFAULT_BALANCE = '1000000'
 
-  async function createSignedOrderERC20(params, taker) {
+  async function createSignedOrderERC20(params, signer) {
     const unsignedOrder = createOrderERC20({
       protocolFee: PROTOCOL_FEE,
-      signerWallet: taker.address,
-      signerToken: takerToken.address,
+      signerWallet: signer.address,
+      signerToken: signerToken.address,
       signerAmount: DEFAULT_AMOUNT,
       senderWallet: delegate.address,
-      senderToken: delegatorToken.address,
+      senderToken: senderToken.address,
       senderAmount: DEFAULT_AMOUNT,
       ...params,
     })
@@ -40,7 +39,7 @@ describe('Delegate Integration', () => {
       ...unsignedOrder,
       ...(await createOrderERC20Signature(
         unsignedOrder,
-        taker,
+        signer,
         swapERC20.address,
         CHAIN_ID
       )),
@@ -56,13 +55,13 @@ describe('Delegate Integration', () => {
   })
 
   before('get signers and deploy', async () => {
-    ;[deployer, delegator, taker, protocolFeeWallet] = await ethers.getSigners()
+    ;[deployer, sender, signer, protocolFeeWallet] = await ethers.getSigners()
 
     swapERC20 = await (
       await ethers.getContractFactory(SWAP_ERC20.abi, SWAP_ERC20.bytecode)
     ).deploy(
       PROTOCOL_FEE,
-      PROTOCOL_FEE_LIGHT,
+      PROTOCOL_FEE,
       deployer.address,
       BONUS_SCALE,
       BONUS_MAX
@@ -74,67 +73,63 @@ describe('Delegate Integration', () => {
     ).deploy(swapERC20.address)
     await delegate.deployed()
 
-    takerToken = await (
+    signerToken = await (
       await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
     ).deploy('A', 'A')
-    await takerToken.deployed()
-    await takerToken.mint(taker.address, DEFAULT_BALANCE)
+    await signerToken.deployed()
+    await signerToken.mint(signer.address, DEFAULT_BALANCE)
 
-    delegatorToken = await (
+    senderToken = await (
       await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
     ).deploy('B', 'B')
-    await delegatorToken.deployed()
-    await delegatorToken.mint(delegator.address, DEFAULT_BALANCE)
+    await senderToken.deployed()
+    await senderToken.mint(sender.address, DEFAULT_BALANCE)
 
-    takerToken.connect(taker).approve(swapERC20.address, DEFAULT_BALANCE)
-    delegatorToken
-      .connect(delegator)
-      .approve(swapERC20.address, DEFAULT_BALANCE)
+    signerToken.connect(signer).approve(swapERC20.address, DEFAULT_BALANCE)
+    senderToken.connect(sender).approve(delegate.address, DEFAULT_BALANCE)
   })
 
   describe('Test transfers', async () => {
     it('test a delegated swap', async () => {
       await delegate
-        .connect(delegator)
+        .connect(sender)
         .setRule(
-          delegatorToken.address,
+          senderToken.address,
           DEFAULT_AMOUNT,
-          takerToken.address,
+          signerToken.address,
           DEFAULT_AMOUNT
         )
 
-      delegatorToken
-        .connect(delegator)
-        .approve(delegate.address, DEFAULT_AMOUNT)
+      senderToken.connect(sender).approve(delegate.address, DEFAULT_AMOUNT)
 
-      takerToken
-        .connect(taker)
+      signerToken
+        .connect(signer)
         .approve(swapERC20.address, DEFAULT_AMOUNT + PROTOCOL_FEE)
 
-      const order = await createSignedOrderERC20({}, taker)
+      const order = await createSignedOrderERC20({}, signer)
 
       await expect(
-        delegate.connect(taker).swap(delegator.address, ...order)
+        delegate.connect(signer).swap(sender.address, ...order)
       ).to.emit(delegate, 'DelegateSwap')
 
-      expect(await takerToken.balanceOf(delegator.address)).to.equal(
+      expect(await signerToken.balanceOf(sender.address)).to.equal(
         DEFAULT_AMOUNT
       )
 
-      expect(await takerToken.balanceOf(taker.address)).to.equal(
+      expect(await signerToken.balanceOf(signer.address)).to.equal(
         DEFAULT_BALANCE - DEFAULT_AMOUNT - PROTOCOL_FEE
       )
 
-      expect(await delegatorToken.balanceOf(taker.address)).to.equal(
+      expect(await senderToken.balanceOf(signer.address)).to.equal(
         DEFAULT_AMOUNT
       )
 
-      expect(await delegatorToken.balanceOf(delegator.address)).to.equal(
+      expect(await senderToken.balanceOf(sender.address)).to.equal(
         DEFAULT_BALANCE - DEFAULT_AMOUNT
       )
 
-      expect(await delegatorToken.balanceOf(delegate.address)).to.equal(0)
-      expect(await takerToken.balanceOf(delegate.address)).to.equal(0)
+      expect(await senderToken.balanceOf(delegate.address)).to.equal(0)
+      expect(await signerToken.balanceOf(delegate.address)).to.equal(0)
     })
   })
 })
