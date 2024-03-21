@@ -24,11 +24,7 @@ interface IDelegate {
     uint256 _minTakerAmount
   );
 
-  event UnsetRule(
-    address _signer,
-    address _signerToken,
-    address _senderToken
-  );
+  event UnsetRule(address _signer, address _signerToken, address _senderToken);
 
   function setRule(
     address _signerToken,

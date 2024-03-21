@@ -101,11 +101,7 @@ contract Delegate is IDelegate, Ownable {
       _s
     );
 
-    SafeTransferLib.safeTransfer(
-      _signerToken,
-      _delegatorWallet,
-      _signerAmount
-    );
+    SafeTransferLib.safeTransfer(_signerToken, _delegatorWallet, _signerAmount);
 
     rules[_delegatorWallet][_senderToken][_signerToken] -= _senderAmount;
     emit DelegateSwap(_nonce, _signerWallet);
