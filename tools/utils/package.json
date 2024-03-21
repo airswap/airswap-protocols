@@ -1,6 +1,6 @@
 {
   "name": "@airswap/utils",
-  "version": "4.3.0",
+  "version": "4.3.2",
   "description": "AirSwap: Utilities for Developers",
   "repository": {
     "type": "git",
@@ -22,16 +22,12 @@
   },
   "dependencies": {
     "@metamask/eth-sig-util": "^5.0.2",
-    "@openzeppelin/contracts": "^4.8.3",
     "@uniswap/token-lists": "^1.0.0-beta.24",
     "bignumber.js": "^9.0.1",
     "ethereumjs-util": "^7.1.5",
     "ethers": "^5.7.2",
     "lz-string": "^1.5.0",
     "valid-url": "^1.0.9"
-  },
-  "devDependencies": {
-    "@openzeppelin/contracts": "^4.8.3"
   },
   "publishConfig": {
     "access": "public"
