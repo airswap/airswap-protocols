@@ -3,6 +3,7 @@ const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const IERC721 = require('@openzeppelin/contracts/build/contracts/ERC721Royalty.json')
+const REGISTRY = require('@airswap/registry/build/contracts/Registry.sol/Registry.json')
 const SWAP = require('@airswap/swap/build/contracts/Swap.sol/Swap.json')
 const SWAP_ERC20 = require('@airswap/swap-erc20/build/contracts/SwapERC20.sol/SwapERC20.json')
 const ERC20_ADAPTER = require('@airswap/swap/build/contracts/adapters/ERC20Adapter.sol/ERC20Adapter.json')
@@ -22,6 +23,8 @@ const DEFAULT_AMOUNT = '1000'
 const DEFAULT_BALANCE = '100000'
 const BONUS_SCALE = '10'
 const BONUS_MAX = '100'
+const STAKING_COST = '1000000000'
+const SUPPORT_COST = '1000000'
 
 let snapshotId
 let deployer
@@ -31,6 +34,7 @@ let erc20token
 let erc20adapter
 let erc721token
 let erc721adapter
+let registry
 let swap
 let swapERC20
 let batchCall
@@ -107,6 +111,15 @@ async function setUpAllowances(senderAmount, signerAmount) {
 async function setUpBalances(senderAmount, signerAmount) {
   await erc20token.mock.balanceOf.withArgs(sender.address).returns(senderAmount)
   await erc20token.mock.balanceOf.withArgs(signer.address).returns(signerAmount)
+  await erc20token.mock.balanceOf
+    .withArgs(staker1.address)
+    .returns(STAKING_COST)
+  await erc20token.mock.balanceOf
+    .withArgs(staker2.address)
+    .returns(STAKING_COST)
+  await erc20token.mock.balanceOf
+    .withArgs(staker3.address)
+    .returns(STAKING_COST)
 }
 
 describe('BatchCall Integration', () => {
@@ -119,8 +132,17 @@ describe('BatchCall Integration', () => {
   })
 
   before('deploy adapter and swap', async () => {
-    ;[deployer, sender, signer, affiliate, protocolFeeWallet, anyone] =
-      await ethers.getSigners()
+    ;[
+      deployer,
+      sender,
+      signer,
+      affiliate,
+      protocolFeeWallet,
+      anyone,
+      staker1,
+      staker2,
+      staker3,
+    ] = await ethers.getSigners()
     erc20token = await deployMockContract(deployer, IERC20.abi)
     await erc20token.mock.allowance.returns(DEFAULT_AMOUNT)
     await erc20token.mock.balanceOf.returns(DEFAULT_AMOUNT)
@@ -143,6 +165,12 @@ describe('BatchCall Integration', () => {
       )
     ).deploy()
     await erc721adapter.deployed()
+
+    registry = await (
+      await ethers.getContractFactory(REGISTRY.abi, REGISTRY.bytecode)
+    ).deploy(erc20token.address, STAKING_COST, SUPPORT_COST)
+    await registry.deployed()
+
     swap = await (
       await ethers.getContractFactory(SWAP.abi, SWAP.bytecode)
     ).deploy(
@@ -327,6 +355,69 @@ describe('BatchCall Integration', () => {
       expect(orderValidities.toString()).to.equal(
         [true, true, false].toString()
       )
+    })
+  })
+
+  describe('returns tokensSupported for mutiple stakers', () => {
+    it('returns all tokens supported by multiple stakers', async () => {
+      const tokensSupported = []
+      for (let i = 0; i < 10; i++) {
+        tokensSupported[i] = await deployMockContract(deployer, IERC20.abi)
+      }
+      registry
+        .connect(staker1)
+        .addTokens([
+          tokensSupported[0].address,
+          tokensSupported[1].address,
+          tokensSupported[2].address,
+        ])
+      registry
+        .connect(staker2)
+        .addTokens([
+          tokensSupported[3].address,
+          tokensSupported[4].address,
+          tokensSupported[5].address,
+        ])
+      registry
+        .connect(staker3)
+        .addTokens([
+          tokensSupported[6].address,
+          tokensSupported[7].address,
+          tokensSupported[8].address,
+          tokensSupported[9].address,
+        ])
+      const expectedTokensSupported = await batchCall
+        .connect(deployer)
+        .getTokensForStakers(
+          [staker1.address, staker2.address, staker3.address],
+          registry.address
+        )
+      expect(expectedTokensSupported.toString()).to.equal(
+        [
+          [
+            tokensSupported[0].address,
+            tokensSupported[1].address,
+            tokensSupported[2].address,
+          ],
+          [
+            tokensSupported[3].address,
+            tokensSupported[4].address,
+            tokensSupported[5].address,
+          ],
+          [
+            tokensSupported[6].address,
+            tokensSupported[7].address,
+            tokensSupported[8].address,
+            tokensSupported[9].address,
+          ],
+        ].toString()
+      )
+    })
+
+    it('reverts if a wrong argument is passed', async () => {
+      await expect(
+        batchCall.getTokensForStakers([], registry.address)
+      ).to.be.revertedWith('ArgumentInvalid')
     })
   })
 })
