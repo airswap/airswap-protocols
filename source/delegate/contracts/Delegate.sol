@@ -42,6 +42,7 @@ contract Delegate is IDelegate, Ownable {
     uint256 _minSignerAmount
   ) external {
     rules[msg.sender][_senderToken][_signerToken] = _maxSenderAmount;
+
     emit SetRule(
       msg.sender,
       _senderToken,

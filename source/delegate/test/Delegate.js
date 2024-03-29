@@ -86,10 +86,6 @@ describe('Delegate Unit', () => {
     await signerToken.mock.approve
       .withArgs(swapERC20.address, DEFAULT_AMOUNT)
       .returns(true)
-
-    await signerToken.mock.approve
-      .withArgs(delegate.address, DEFAULT_AMOUNT)
-      .returns(true)
   }
 
   beforeEach(async () => {
@@ -126,6 +122,8 @@ describe('Delegate Unit', () => {
     await signerToken.mock.transferFrom.returns(true)
     await senderToken.mock.transfer.returns(true)
     await signerToken.mock.transfer.returns(true)
+
+    setUpApprovals()
   })
 
   describe('Constructor', async () => {
@@ -165,6 +163,37 @@ describe('Delegate Unit', () => {
         .to.emit(delegate, 'UnsetRule')
         .withArgs(sender.address, senderToken.address, signerToken.address)
     })
+
+    it('setting and unsetting a Rule updates the rule balance', async () => {
+      await delegate
+        .connect(sender)
+        .setRule(
+          senderToken.address,
+          DEFAULT_AMOUNT,
+          signerToken.address,
+          DEFAULT_AMOUNT
+        )
+
+      expect(
+        await delegate.rules(
+          sender.address,
+          senderToken.address,
+          signerToken.address
+        )
+      ).to.equal(DEFAULT_AMOUNT)
+
+      await delegate
+        .connect(sender)
+        .unsetRule(senderToken.address, signerToken.address)
+
+      expect(
+        await delegate.rules(
+          sender.address,
+          senderToken.address,
+          signerToken.address
+        )
+      ).to.equal(0)
+    })
   })
 
   describe('Swap', async () => {
@@ -188,8 +217,6 @@ describe('Delegate Unit', () => {
       )
       await setUpBalances(signer.address, sender.address)
 
-      await setUpApprovals()
-
       await expect(
         delegate.connect(signer).swap(sender.address, ...order)
       ).to.emit(delegate, 'DelegateSwap')
@@ -206,8 +233,6 @@ describe('Delegate Unit', () => {
       )
       await setUpBalances(signer.address, sender.address)
 
-      setUpApprovals()
-
       await signerToken.mock.balanceOf
         .withArgs(delegate.address)
         .returns(DEFAULT_AMOUNT)
@@ -217,6 +242,10 @@ describe('Delegate Unit', () => {
     })
 
     it('fails to swap with insufficient remaining signer amount on Rule', async () => {
+      await senderToken.mock.approve
+        .withArgs(delegate.address, DEFAULT_AMOUNT - 1)
+        .returns(true)
+
       await delegate
         .connect(sender)
         .setRule(
@@ -236,15 +265,13 @@ describe('Delegate Unit', () => {
       )
       await setUpBalances(signer.address, sender.address)
 
-      await setUpApprovals()
-
       await signerToken.mock.balanceOf
         .withArgs(signer.address)
         .returns(DEFAULT_AMOUNT - 1)
 
       await expect(
         delegate.connect(signer).swap(sender.address, ...order)
-      ).to.be.revertedWith('InsufficientSenderAmount')
+      ).to.be.revertedWith('InsufficientDelegateAllowance')
     })
   })
 })

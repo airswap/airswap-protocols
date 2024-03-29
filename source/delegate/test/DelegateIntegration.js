@@ -100,8 +100,6 @@ describe('Delegate Integration', () => {
           DEFAULT_AMOUNT
         )
 
-      senderToken.connect(sender).approve(delegate.address, DEFAULT_AMOUNT)
-
       signerToken
         .connect(signer)
         .approve(swapERC20.address, DEFAULT_AMOUNT + PROTOCOL_FEE)
