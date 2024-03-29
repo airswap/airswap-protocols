@@ -31,21 +31,21 @@ contract Delegate is IDelegate, Ownable {
   /**
    * @notice Set a Trading Rule
    * @param _senderToken address Address of an ERC-20 token the consumer would send
-   * @param _maxDelegatorAmount uint256 Maximum amount of ERC-20 token the delegate would send
+   * @param _maxSenderAmount uint256 Maximum amount of ERC-20 token the sender wants to swap
    * @param _signerToken address Address of an ERC-20 token the delegate would recieve
    * @param _minSignerAmount uint256 Minimum amount of ERC-20 token the delegate would recieve
    */
   function setRule(
     address _senderToken,
-    uint256 _maxDelegatorAmount,
+    uint256 _maxSenderAmount,
     address _signerToken,
     uint256 _minSignerAmount
   ) external {
-    rules[msg.sender][_senderToken][_signerToken] = _maxDelegatorAmount;
+    rules[msg.sender][_senderToken][_signerToken] = _maxSenderAmount;
     emit SetRule(
       msg.sender,
       _senderToken,
-      _maxDelegatorAmount,
+      _maxSenderAmount,
       _signerToken,
       _minSignerAmount
     );
