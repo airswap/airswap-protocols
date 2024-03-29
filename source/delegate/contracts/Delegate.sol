@@ -76,7 +76,7 @@ contract Delegate is IDelegate, Ownable {
     bytes32 _s
   ) external {
     if (rules[_delegatorWallet][_senderToken][_signerToken] < _senderAmount) {
-      revert InsufficientDelegatorAmount();
+      revert InsufficientDelegateAllowance();
     }
 
     SafeTransferLib.safeTransferFrom(

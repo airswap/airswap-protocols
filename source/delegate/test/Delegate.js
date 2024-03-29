@@ -74,6 +74,24 @@ describe('Delegate Unit', () => {
       .returns(DEFAULT_AMOUNT)
   }
 
+  async function setUpApprovals() {
+    await senderToken.mock.approve
+      .withArgs(delegate.address, DEFAULT_AMOUNT)
+      .returns(true)
+
+    await senderToken.mock.approve
+      .withArgs(swapERC20.address, DEFAULT_AMOUNT)
+      .returns(true)
+
+    await signerToken.mock.approve
+      .withArgs(swapERC20.address, DEFAULT_AMOUNT)
+      .returns(true)
+
+    await signerToken.mock.approve
+      .withArgs(delegate.address, DEFAULT_AMOUNT)
+      .returns(true)
+  }
+
   beforeEach(async () => {
     snapshotId = await ethers.provider.send('evm_snapshot')
   })
@@ -170,21 +188,7 @@ describe('Delegate Unit', () => {
       )
       await setUpBalances(signer.address, sender.address)
 
-      await senderToken.mock.approve
-        .withArgs(delegate.address, DEFAULT_AMOUNT)
-        .returns(true)
-
-      await senderToken.mock.approve
-        .withArgs(swapERC20.address, DEFAULT_AMOUNT)
-        .returns(true)
-
-      await signerToken.mock.approve
-        .withArgs(swapERC20.address, DEFAULT_AMOUNT)
-        .returns(true)
-
-      await signerToken.mock.approve
-        .withArgs(delegate.address, DEFAULT_AMOUNT)
-        .returns(true)
+      await setUpApprovals()
 
       await expect(
         delegate.connect(signer).swap(sender.address, ...order)
@@ -202,13 +206,7 @@ describe('Delegate Unit', () => {
       )
       await setUpBalances(signer.address, sender.address)
 
-      await senderToken.mock.approve
-        .withArgs(swapERC20.address, DEFAULT_AMOUNT)
-        .returns(true)
-
-      await signerToken.mock.approve
-        .withArgs(swapERC20.address, DEFAULT_AMOUNT)
-        .returns(true)
+      setUpApprovals()
 
       await signerToken.mock.balanceOf
         .withArgs(delegate.address)
@@ -216,6 +214,37 @@ describe('Delegate Unit', () => {
 
       await expect(delegate.connect(signer).swap(sender.address, ...order)).to
         .be.reverted
+    })
+
+    it('fails to swap with insufficient remaining signer amount on Rule', async () => {
+      await delegate
+        .connect(sender)
+        .setRule(
+          senderToken.address,
+          DEFAULT_AMOUNT - 1,
+          signerToken.address,
+          DEFAULT_AMOUNT
+        )
+
+      const order = await createSignedOrderERC20({}, signer)
+
+      await setUpAllowances(
+        sender.address,
+        DEFAULT_AMOUNT,
+        signer.address,
+        DEFAULT_AMOUNT + PROTOCOL_FEE
+      )
+      await setUpBalances(signer.address, sender.address)
+
+      await setUpApprovals()
+
+      await signerToken.mock.balanceOf
+        .withArgs(signer.address)
+        .returns(DEFAULT_AMOUNT - 1)
+
+      await expect(
+        delegate.connect(signer).swap(sender.address, ...order)
+      ).to.be.revertedWith('InsufficientSenderAmount')
     })
   })
 })
