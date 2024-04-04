@@ -17,9 +17,8 @@ contract Delegate is IDelegate, Ownable {
   // The Swap contract to be used to settle trades
   ISwapERC20 public swapERC20;
 
-  // Mapping of sender to senderToken to to signerToken to remaining amount
-  mapping(address => mapping(address => mapping(address => uint256)))
-    public rules;
+  // Mapping of sender to senderToken to to signerToken to Rule
+  mapping(address => mapping(address => mapping(address => Rule))) public rules;
 
   /**
    * @notice Contract Constructor
@@ -31,24 +30,30 @@ contract Delegate is IDelegate, Ownable {
   /**
    * @notice Set a Trading Rule
    * @param _senderToken address Address of an ERC-20 token the consumer would send
-   * @param _maxSenderAmount uint256 Maximum amount of ERC-20 token the sender wants to swap
+   * @param _senderAmount uint256 Maximum amount of ERC-20 token the sender wants to swap
    * @param _signerToken address Address of an ERC-20 token the delegate would recieve
-   * @param _minSignerAmount uint256 Minimum amount of ERC-20 token the delegate would recieve
+   * @param _signerAmount uint256 Minimum amount of ERC-20 token the delegate would recieve
    */
   function setRule(
     address _senderToken,
-    uint256 _maxSenderAmount,
+    uint256 _senderAmount,
     address _signerToken,
-    uint256 _minSignerAmount
+    uint256 _signerAmount
   ) external {
-    rules[msg.sender][_senderToken][_signerToken] = _maxSenderAmount;
+    rules[msg.sender][_senderToken][_signerToken] = Rule(
+      msg.sender,
+      _senderToken,
+      _senderAmount,
+      _signerToken,
+      _signerAmount
+    );
 
     emit SetRule(
       msg.sender,
       _senderToken,
-      _maxSenderAmount,
+      _senderAmount,
       _signerToken,
-      _minSignerAmount
+      _signerAmount
     );
   }
 
@@ -59,7 +64,8 @@ contract Delegate is IDelegate, Ownable {
    * @param _signerToken address Address of an ERC-20 token the delegate would receive
    */
   function unsetRule(address _senderToken, address _signerToken) external {
-    rules[msg.sender][_senderToken][_signerToken] = 0;
+    Rule storage rule = rules[msg.sender][_senderToken][_signerToken];
+    rule.senderAmount = 0;
     emit UnsetRule(msg.sender, _senderToken, _signerToken);
   }
 
@@ -76,7 +82,15 @@ contract Delegate is IDelegate, Ownable {
     bytes32 _r,
     bytes32 _s
   ) external {
-    if (rules[_delegatorWallet][_senderToken][_signerToken] < _senderAmount) {
+    Rule storage rule = rules[_delegatorWallet][_senderToken][_signerToken];
+
+    if (
+      _senderAmount > (_signerAmount * rule.senderAmount) / rule.signerAmount
+    ) {
+      revert InsufficientSignerAmount();
+    }
+
+    if (rule.senderAmount < _senderAmount) {
       revert InsufficientDelegateAllowance();
     }
 
@@ -104,7 +118,8 @@ contract Delegate is IDelegate, Ownable {
 
     SafeTransferLib.safeTransfer(_signerToken, _delegatorWallet, _signerAmount);
 
-    rules[_delegatorWallet][_senderToken][_signerToken] -= _senderAmount;
+    rules[_delegatorWallet][_senderToken][_signerToken]
+      .senderAmount -= _senderAmount;
     emit DelegateSwap(_nonce, _signerWallet);
   }
 }

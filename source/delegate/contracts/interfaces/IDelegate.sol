@@ -6,31 +6,34 @@ pragma solidity 0.8.23;
 
 interface IDelegate {
   struct Rule {
-    uint256 maxSenderAmount; // The maximum amount of ERC-20 token the delegate would send
-    uint256 priceCoef; // Number to be multiplied by 10^(-priceExp) - the price coefficient
-    uint256 priceExp; // Indicates location of the decimal priceCoef * 10^(-priceExp)
+    address sender;
+    address senderToken;
+    uint256 senderAmount;
+    address signerToken;
+    uint256 signerAmount;
   }
 
   error InsufficientDelegateAllowance();
+  error InsufficientSignerAmount();
   error TransferFromFailed();
 
   event DelegateSwap(uint256 _nonce, address _signerWallet);
 
   event SetRule(
-    address _signer,
-    address _signerToken,
-    uint256 _maxDelegatorAmount,
+    address _sender,
     address _senderToken,
-    uint256 _minTakerAmount
+    uint256 _senderAmount,
+    address _signerToken,
+    uint256 _signerAmount
   );
 
   event UnsetRule(address _signer, address _signerToken, address _senderToken);
 
   function setRule(
-    address _signerToken,
-    uint256 _maxDelegatorAmount,
     address _senderToken,
-    uint256 _minTakerAmount
+    uint256 _senderAmount,
+    address _signerToken,
+    uint256 _signerAmount
   ) external;
 
   function swap(
