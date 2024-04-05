@@ -164,7 +164,7 @@ describe('Delegate Unit', () => {
         .withArgs(sender.address, senderToken.address, signerToken.address)
     })
 
-    it('setting and unsetting a Rule updates the rule balance', async () => {
+    it('setting a Rule updates the rule balance', async () => {
       await delegate
         .connect(sender)
         .setRule(
@@ -181,6 +181,23 @@ describe('Delegate Unit', () => {
       )
 
       expect(rule.senderAmount.toString()).to.equal(DEFAULT_AMOUNT)
+    })
+
+    it('unsetting a Rule updates the rule balance', async () => {
+      await delegate
+        .connect(sender)
+        .setRule(
+          senderToken.address,
+          DEFAULT_AMOUNT,
+          signerToken.address,
+          DEFAULT_AMOUNT
+        )
+
+      let rule = await delegate.rules(
+        sender.address,
+        senderToken.address,
+        signerToken.address
+      )
 
       await delegate
         .connect(sender)
