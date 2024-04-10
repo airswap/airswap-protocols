@@ -21,7 +21,8 @@ describe('Delegate Integration', () => {
   const BONUS_SCALE = '10'
   const BONUS_MAX = '100'
   const PROTOCOL_FEE = '5'
-  const DEFAULT_AMOUNT = '10000'
+  const DEFAULT_SENDER_AMOUNT = '10000'
+  const DEFAULT_SIGNER_AMOUNT = '10000'
   const DEFAULT_BALANCE = '1000000'
 
   async function createSignedOrderERC20(params, signer) {
@@ -29,10 +30,10 @@ describe('Delegate Integration', () => {
       protocolFee: PROTOCOL_FEE,
       signerWallet: signer.address,
       signerToken: signerToken.address,
-      signerAmount: DEFAULT_AMOUNT,
+      signerAmount: DEFAULT_SIGNER_AMOUNT,
       senderWallet: delegate.address,
       senderToken: senderToken.address,
-      senderAmount: DEFAULT_AMOUNT,
+      senderAmount: DEFAULT_SENDER_AMOUNT,
       ...params,
     })
     return orderERC20ToParams({
@@ -95,14 +96,14 @@ describe('Delegate Integration', () => {
         .connect(sender)
         .setRule(
           senderToken.address,
-          DEFAULT_AMOUNT,
+          DEFAULT_SENDER_AMOUNT,
           signerToken.address,
-          DEFAULT_AMOUNT
+          DEFAULT_SIGNER_AMOUNT
         )
 
       signerToken
         .connect(signer)
-        .approve(swapERC20.address, DEFAULT_AMOUNT + PROTOCOL_FEE)
+        .approve(swapERC20.address, DEFAULT_SIGNER_AMOUNT + PROTOCOL_FEE)
 
       const order = await createSignedOrderERC20({}, signer)
 
@@ -111,19 +112,19 @@ describe('Delegate Integration', () => {
       ).to.emit(delegate, 'DelegateSwap')
 
       expect(await signerToken.balanceOf(sender.address)).to.equal(
-        DEFAULT_AMOUNT
+        DEFAULT_SIGNER_AMOUNT
       )
 
       expect(await signerToken.balanceOf(signer.address)).to.equal(
-        DEFAULT_BALANCE - DEFAULT_AMOUNT - PROTOCOL_FEE
+        DEFAULT_BALANCE - DEFAULT_SIGNER_AMOUNT - PROTOCOL_FEE
       )
 
       expect(await senderToken.balanceOf(signer.address)).to.equal(
-        DEFAULT_AMOUNT
+        DEFAULT_SENDER_AMOUNT
       )
 
       expect(await senderToken.balanceOf(sender.address)).to.equal(
-        DEFAULT_BALANCE - DEFAULT_AMOUNT
+        DEFAULT_BALANCE - DEFAULT_SENDER_AMOUNT
       )
 
       expect(await senderToken.balanceOf(delegate.address)).to.equal(0)

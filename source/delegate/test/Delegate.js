@@ -11,7 +11,8 @@ const {
 } = require('@airswap/utils')
 const CHAIN_ID = 31337
 const DEFAULT_BALANCE = '100000'
-const DEFAULT_AMOUNT = '10000'
+const DEFAULT_SENDER_AMOUNT = '10000'
+const DEFAULT_SIGNER_AMOUNT = '10000'
 const PROTOCOL_FEE = '5'
 const REBATE_SCALE = '10'
 const REBATE_MAX = '100'
@@ -31,10 +32,10 @@ describe('Delegate Unit', () => {
       protocolFee: PROTOCOL_FEE,
       signerWallet: signer.address,
       signerToken: signerToken.address,
-      signerAmount: DEFAULT_AMOUNT,
+      signerAmount: DEFAULT_SIGNER_AMOUNT,
       senderWallet: delegate.address,
       senderToken: senderToken.address,
-      senderAmount: DEFAULT_AMOUNT,
+      senderAmount: DEFAULT_SENDER_AMOUNT,
       ...params,
     })
     return orderERC20ToParams({
@@ -71,20 +72,20 @@ describe('Delegate Unit', () => {
       .returns(DEFAULT_BALANCE)
     await signerToken.mock.balanceOf
       .withArgs(delegate.address)
-      .returns(DEFAULT_AMOUNT)
+      .returns(DEFAULT_SIGNER_AMOUNT)
   }
 
   async function setUpApprovals() {
     await senderToken.mock.approve
-      .withArgs(delegate.address, DEFAULT_AMOUNT)
+      .withArgs(delegate.address, DEFAULT_SENDER_AMOUNT)
       .returns(true)
 
     await senderToken.mock.approve
-      .withArgs(swapERC20.address, DEFAULT_AMOUNT)
+      .withArgs(swapERC20.address, DEFAULT_SENDER_AMOUNT)
       .returns(true)
 
     await signerToken.mock.approve
-      .withArgs(swapERC20.address, DEFAULT_AMOUNT)
+      .withArgs(swapERC20.address, DEFAULT_SIGNER_AMOUNT)
       .returns(true)
   }
 
@@ -139,18 +140,18 @@ describe('Delegate Unit', () => {
           .connect(sender)
           .setRule(
             senderToken.address,
-            DEFAULT_AMOUNT,
+            DEFAULT_SENDER_AMOUNT,
             signerToken.address,
-            DEFAULT_AMOUNT
+            DEFAULT_SIGNER_AMOUNT
           )
       )
         .to.emit(delegate, 'SetRule')
         .withArgs(
           sender.address,
           senderToken.address,
-          DEFAULT_AMOUNT,
+          DEFAULT_SENDER_AMOUNT,
           signerToken.address,
-          DEFAULT_AMOUNT
+          DEFAULT_SIGNER_AMOUNT
         )
     })
 
@@ -169,9 +170,9 @@ describe('Delegate Unit', () => {
         .connect(sender)
         .setRule(
           senderToken.address,
-          DEFAULT_AMOUNT,
+          DEFAULT_SENDER_AMOUNT,
           signerToken.address,
-          DEFAULT_AMOUNT
+          DEFAULT_SIGNER_AMOUNT
         )
 
       let rule = await delegate.rules(
@@ -180,7 +181,7 @@ describe('Delegate Unit', () => {
         signerToken.address
       )
 
-      expect(rule.senderAmount.toString()).to.equal(DEFAULT_AMOUNT)
+      expect(rule.senderAmount.toString()).to.equal(DEFAULT_SENDER_AMOUNT)
     })
 
     it('unsetting a Rule updates the rule balance', async () => {
@@ -188,9 +189,9 @@ describe('Delegate Unit', () => {
         .connect(sender)
         .setRule(
           senderToken.address,
-          DEFAULT_AMOUNT,
+          DEFAULT_SENDER_AMOUNT,
           signerToken.address,
-          DEFAULT_AMOUNT
+          DEFAULT_SIGNER_AMOUNT
         )
 
       let rule = await delegate.rules(
@@ -219,18 +220,48 @@ describe('Delegate Unit', () => {
         .connect(sender)
         .setRule(
           senderToken.address,
-          DEFAULT_AMOUNT,
+          DEFAULT_SENDER_AMOUNT,
           signerToken.address,
-          DEFAULT_AMOUNT
+          DEFAULT_SIGNER_AMOUNT
         )
 
       const order = await createSignedOrderERC20({}, signer)
 
       await setUpAllowances(
         sender.address,
-        DEFAULT_AMOUNT,
+        DEFAULT_SENDER_AMOUNT,
         signer.address,
-        DEFAULT_AMOUNT + PROTOCOL_FEE
+        DEFAULT_SIGNER_AMOUNT + PROTOCOL_FEE
+      )
+      await setUpBalances(signer.address, sender.address)
+
+      await expect(
+        delegate.connect(signer).swap(sender.address, ...order)
+      ).to.emit(delegate, 'DelegateSwap')
+    })
+
+    it('successfully swaps if sender amount is above the minimum', async () => {
+      await delegate
+        .connect(sender)
+        .setRule(
+          senderToken.address,
+          DEFAULT_SENDER_AMOUNT,
+          signerToken.address,
+          DEFAULT_SIGNER_AMOUNT
+        )
+
+      const order = await createSignedOrderERC20(
+        {
+          senderAmount: DEFAULT_SENDER_AMOUNT + 1,
+        },
+        signer
+      )
+
+      await setUpAllowances(
+        sender.address,
+        DEFAULT_SENDER_AMOUNT,
+        signer.address,
+        DEFAULT_SIGNER_AMOUNT + PROTOCOL_FEE
       )
       await setUpBalances(signer.address, sender.address)
 
@@ -244,15 +275,15 @@ describe('Delegate Unit', () => {
 
       await setUpAllowances(
         signer.address,
-        DEFAULT_AMOUNT + PROTOCOL_FEE,
+        DEFAULT_SENDER_AMOUNT + PROTOCOL_FEE,
         sender.address,
-        DEFAULT_AMOUNT
+        DEFAULT_SIGNER_AMOUNT
       )
       await setUpBalances(signer.address, sender.address)
 
       await signerToken.mock.balanceOf
         .withArgs(delegate.address)
-        .returns(DEFAULT_AMOUNT)
+        .returns(DEFAULT_SIGNER_AMOUNT)
 
       await expect(delegate.connect(signer).swap(sender.address, ...order)).to
         .be.reverted
@@ -260,31 +291,31 @@ describe('Delegate Unit', () => {
 
     it('fails to swap with insufficient remaining sender amount on Rule', async () => {
       await senderToken.mock.approve
-        .withArgs(delegate.address, DEFAULT_AMOUNT - 1)
+        .withArgs(delegate.address, DEFAULT_SENDER_AMOUNT - 1)
         .returns(true)
 
       await delegate
         .connect(sender)
         .setRule(
           senderToken.address,
-          DEFAULT_AMOUNT - 1,
+          DEFAULT_SENDER_AMOUNT - 1,
           signerToken.address,
-          DEFAULT_AMOUNT - 1
+          DEFAULT_SIGNER_AMOUNT - 1
         )
 
       const order = await createSignedOrderERC20({}, signer)
 
       await setUpAllowances(
         sender.address,
-        DEFAULT_AMOUNT,
+        DEFAULT_SENDER_AMOUNT,
         signer.address,
-        DEFAULT_AMOUNT + PROTOCOL_FEE
+        DEFAULT_SIGNER_AMOUNT + PROTOCOL_FEE
       )
       await setUpBalances(signer.address, sender.address)
 
       await signerToken.mock.balanceOf
         .withArgs(signer.address)
-        .returns(DEFAULT_AMOUNT - 1)
+        .returns(DEFAULT_SIGNER_AMOUNT - 1)
 
       await expect(
         delegate.connect(signer).swap(sender.address, ...order)
@@ -293,36 +324,36 @@ describe('Delegate Unit', () => {
 
     it('fails to swap with insufficient signer amount on Rule', async () => {
       await senderToken.mock.approve
-        .withArgs(delegate.address, DEFAULT_AMOUNT - 1)
+        .withArgs(delegate.address, DEFAULT_SENDER_AMOUNT - 1)
         .returns(true)
 
       await delegate
         .connect(sender)
         .setRule(
           senderToken.address,
-          DEFAULT_AMOUNT,
+          DEFAULT_SENDER_AMOUNT,
           signerToken.address,
-          DEFAULT_AMOUNT
+          DEFAULT_SIGNER_AMOUNT
         )
 
       const order = await createSignedOrderERC20(
         {
-          signerAmount: DEFAULT_AMOUNT - 1,
+          signerAmount: DEFAULT_SIGNER_AMOUNT - 1,
         },
         signer
       )
 
       await setUpAllowances(
         sender.address,
-        DEFAULT_AMOUNT,
+        DEFAULT_SENDER_AMOUNT,
         signer.address,
-        DEFAULT_AMOUNT + PROTOCOL_FEE
+        DEFAULT_SIGNER_AMOUNT + PROTOCOL_FEE
       )
       await setUpBalances(signer.address, sender.address)
 
       await signerToken.mock.balanceOf
         .withArgs(signer.address)
-        .returns(DEFAULT_AMOUNT - 1)
+        .returns(DEFAULT_SIGNER_AMOUNT - 1)
 
       await expect(
         delegate.connect(signer).swap(sender.address, ...order)
