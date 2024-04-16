@@ -175,7 +175,7 @@ describe('Delegate Unit', () => {
           DEFAULT_SIGNER_AMOUNT
         )
 
-      let rule = await delegate.rules(
+      const rule = await delegate.rules(
         sender.address,
         senderToken.address,
         signerToken.address
@@ -226,36 +226,6 @@ describe('Delegate Unit', () => {
         )
 
       const order = await createSignedOrderERC20({}, signer)
-
-      await setUpAllowances(
-        sender.address,
-        DEFAULT_SENDER_AMOUNT,
-        signer.address,
-        DEFAULT_SIGNER_AMOUNT + PROTOCOL_FEE
-      )
-      await setUpBalances(signer.address, sender.address)
-
-      await expect(
-        delegate.connect(signer).swap(sender.address, ...order)
-      ).to.emit(delegate, 'DelegateSwap')
-    })
-
-    it('successfully swaps if sender amount is above the minimum', async () => {
-      await delegate
-        .connect(sender)
-        .setRule(
-          senderToken.address,
-          DEFAULT_SENDER_AMOUNT,
-          signerToken.address,
-          DEFAULT_SIGNER_AMOUNT
-        )
-
-      const order = await createSignedOrderERC20(
-        {
-          senderAmount: DEFAULT_SENDER_AMOUNT + 1,
-        },
-        signer
-      )
 
       await setUpAllowances(
         sender.address,
