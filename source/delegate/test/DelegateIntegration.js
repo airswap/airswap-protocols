@@ -95,6 +95,7 @@ describe('Delegate Integration', () => {
       await delegate
         .connect(sender)
         .setRule(
+          sender.address,
           senderToken.address,
           DEFAULT_SENDER_AMOUNT,
           signerToken.address,

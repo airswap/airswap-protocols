@@ -15,12 +15,15 @@ interface IDelegate {
 
   error InsufficientDelegateAllowance();
   error InsufficientSignerAmount();
+  error SignatoryInvalid();
   error TransferFromFailed();
 
+  event Authorize(address _signatory, address _signer);
   event DelegateSwap(uint256 _nonce, address _signerWallet);
+  event Revoke(address _tmp, address _signer);
 
   event SetRule(
-    address _sender,
+    address _senderWallet,
     address _senderToken,
     uint256 _senderAmount,
     address _signerToken,
@@ -30,6 +33,7 @@ interface IDelegate {
   event UnsetRule(address _signer, address _signerToken, address _senderToken);
 
   function setRule(
+    address _sender,
     address _senderToken,
     uint256 _senderAmount,
     address _signerToken,
@@ -50,5 +54,9 @@ interface IDelegate {
     bytes32 _s
   ) external;
 
-  function unsetRule(address _signerToken, address _senderToken) external;
+  function unsetRule(
+    address _sender,
+    address _signerToken,
+    address _senderToken
+  ) external;
 }

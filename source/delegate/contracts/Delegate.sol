@@ -20,6 +20,9 @@ contract Delegate is IDelegate, Ownable {
   // Mapping of sender to senderToken to to signerToken to Rule
   mapping(address => mapping(address => mapping(address => Rule))) public rules;
 
+  // Mapping of signer to authorized signatory
+  mapping(address => address) public authorized;
+
   /**
    * @notice Contract Constructor
    */
@@ -35,13 +38,20 @@ contract Delegate is IDelegate, Ownable {
    * @param _signerAmount uint256 Minimum amount of ERC-20 token the delegate would recieve
    */
   function setRule(
+    address _senderWallet,
     address _senderToken,
     uint256 _senderAmount,
     address _signerToken,
     uint256 _signerAmount
   ) external {
-    rules[msg.sender][_senderToken][_signerToken] = Rule(
-      msg.sender,
+    if (authorized[_senderWallet] != address(0)) {
+      if (authorized[_senderWallet] != msg.sender) revert SignatoryInvalid();
+    } else {
+      if (_senderWallet != msg.sender) revert SignatoryInvalid();
+    }
+
+    rules[_senderWallet][_senderToken][_signerToken] = Rule(
+      _senderWallet,
       _senderToken,
       _senderAmount,
       _signerToken,
@@ -49,7 +59,7 @@ contract Delegate is IDelegate, Ownable {
     );
 
     emit SetRule(
-      msg.sender,
+      _senderWallet,
       _senderToken,
       _senderAmount,
       _signerToken,
@@ -63,14 +73,23 @@ contract Delegate is IDelegate, Ownable {
    * @param _senderToken address Address of an ERC-20 token the sender would send
    * @param _signerToken address Address of an ERC-20 token the delegate would receive
    */
-  function unsetRule(address _senderToken, address _signerToken) external {
-    Rule storage rule = rules[msg.sender][_senderToken][_signerToken];
+  function unsetRule(
+    address _senderWallet,
+    address _senderToken,
+    address _signerToken
+  ) external {
+    if (authorized[_senderWallet] != address(0)) {
+      if (authorized[_senderWallet] != msg.sender) revert SignatoryInvalid();
+    } else {
+      if (_senderWallet != msg.sender) revert SignatoryInvalid();
+    }
+    Rule storage rule = rules[_senderWallet][_senderToken][_signerToken];
     rule.senderAmount = 0;
-    emit UnsetRule(msg.sender, _senderToken, _signerToken);
+    emit UnsetRule(_senderWallet, _senderToken, _signerToken);
   }
 
   function swap(
-    address _delegatorWallet,
+    address _senderWallet,
     uint256 _nonce,
     uint256 _expiry,
     address _signerWallet,
@@ -82,7 +101,7 @@ contract Delegate is IDelegate, Ownable {
     bytes32 _r,
     bytes32 _s
   ) external {
-    Rule storage rule = rules[_delegatorWallet][_senderToken][_signerToken];
+    Rule storage rule = rules[_senderWallet][_senderToken][_signerToken];
 
     if (
       _senderAmount > (_signerAmount * rule.senderAmount) / rule.signerAmount
@@ -96,7 +115,7 @@ contract Delegate is IDelegate, Ownable {
 
     SafeTransferLib.safeTransferFrom(
       _senderToken,
-      _delegatorWallet,
+      _senderWallet,
       address(this),
       _senderAmount
     );
@@ -116,10 +135,31 @@ contract Delegate is IDelegate, Ownable {
       _s
     );
 
-    SafeTransferLib.safeTransfer(_signerToken, _delegatorWallet, _signerAmount);
+    SafeTransferLib.safeTransfer(_signerToken, _senderWallet, _signerAmount);
 
-    rules[_delegatorWallet][_senderToken][_signerToken]
+    rules[_senderWallet][_senderToken][_signerToken]
       .senderAmount -= _senderAmount;
     emit DelegateSwap(_nonce, _signerWallet);
+  }
+
+  /**
+   * @notice Authorize a signatory
+   * @param _signatory address Wallet of the signatory to authorize
+   * @dev Emits an Authorize event
+   */
+  function authorize(address _signatory) external {
+    if (_signatory == address(0)) revert SignatoryInvalid();
+    authorized[msg.sender] = _signatory;
+    emit Authorize(_signatory, msg.sender);
+  }
+
+  /**
+   * @notice Revoke the signatory
+   * @dev Emits a Revoke event
+   */
+  function revoke() external {
+    address _tmp = authorized[msg.sender];
+    delete authorized[msg.sender];
+    emit Revoke(_tmp, msg.sender);
   }
 }

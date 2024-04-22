@@ -5,6 +5,7 @@ const { deployMockContract } = waffle
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const SWAP_ERC20 = require('@airswap/swap-erc20/build/contracts/SwapERC20.sol/SwapERC20.json')
 const {
+  ADDRESS_ZERO,
   createOrderERC20,
   orderERC20ToParams,
   createOrderERC20Signature,
@@ -25,6 +26,7 @@ describe('Delegate Unit', () => {
   let senderToken
   let signerToken
   let delegate
+  let signatory
   let snapshotId
 
   async function createSignedOrderERC20(params, signatory) {
@@ -98,7 +100,7 @@ describe('Delegate Unit', () => {
   })
 
   before(async () => {
-    ;[deployer, sender, signer, anyone] = await ethers.getSigners()
+    ;[deployer, sender, signer, signatory, anyone] = await ethers.getSigners()
 
     const swapERC20Factory = await ethers.getContractFactory(
       SWAP_ERC20.abi,
@@ -139,6 +141,7 @@ describe('Delegate Unit', () => {
         delegate
           .connect(sender)
           .setRule(
+            sender.address,
             senderToken.address,
             DEFAULT_SENDER_AMOUNT,
             signerToken.address,
@@ -159,7 +162,51 @@ describe('Delegate Unit', () => {
       await expect(
         delegate
           .connect(sender)
-          .unsetRule(senderToken.address, signerToken.address)
+          .unsetRule(sender.address, senderToken.address, signerToken.address)
+      )
+        .to.emit(delegate, 'UnsetRule')
+        .withArgs(sender.address, senderToken.address, signerToken.address)
+    })
+
+    it('a signatory can set a Rule', async () => {
+      await delegate.connect(sender).authorize(signatory.address)
+      await expect(
+        delegate
+          .connect(signatory)
+          .setRule(
+            sender.address,
+            senderToken.address,
+            DEFAULT_SENDER_AMOUNT,
+            signerToken.address,
+            DEFAULT_SIGNER_AMOUNT
+          )
+      )
+        .to.emit(delegate, 'SetRule')
+        .withArgs(
+          sender.address,
+          senderToken.address,
+          DEFAULT_SENDER_AMOUNT,
+          signerToken.address,
+          DEFAULT_SIGNER_AMOUNT
+        )
+    })
+
+    it('a signatory can unset a Rule', async () => {
+      await delegate.connect(sender).authorize(signatory.address)
+      await delegate
+        .connect(signatory)
+        .setRule(
+          sender.address,
+          senderToken.address,
+          DEFAULT_SENDER_AMOUNT,
+          signerToken.address,
+          DEFAULT_SIGNER_AMOUNT
+        )
+
+      await expect(
+        delegate
+          .connect(signatory)
+          .unsetRule(sender.address, senderToken.address, signerToken.address)
       )
         .to.emit(delegate, 'UnsetRule')
         .withArgs(sender.address, senderToken.address, signerToken.address)
@@ -169,6 +216,7 @@ describe('Delegate Unit', () => {
       await delegate
         .connect(sender)
         .setRule(
+          sender.address,
           senderToken.address,
           DEFAULT_SENDER_AMOUNT,
           signerToken.address,
@@ -188,6 +236,7 @@ describe('Delegate Unit', () => {
       await delegate
         .connect(sender)
         .setRule(
+          sender.address,
           senderToken.address,
           DEFAULT_SENDER_AMOUNT,
           signerToken.address,
@@ -202,7 +251,7 @@ describe('Delegate Unit', () => {
 
       await delegate
         .connect(sender)
-        .unsetRule(senderToken.address, signerToken.address)
+        .unsetRule(sender.address, senderToken.address, signerToken.address)
 
       rule = await delegate.rules(
         sender.address,
@@ -214,11 +263,58 @@ describe('Delegate Unit', () => {
     })
   })
 
+  describe('Test authorization', async () => {
+    it('test authorized is set', async () => {
+      await delegate.connect(anyone).authorize(signer.address)
+      expect(await delegate.authorized(anyone.address)).to.equal(signer.address)
+    })
+
+    it('test authorize with zero address', async () => {
+      await expect(
+        delegate.connect(deployer).authorize(ADDRESS_ZERO)
+      ).to.be.revertedWith('SignatoryInvalid')
+    })
+
+    it('test revoke', async () => {
+      await delegate.connect(anyone).revoke()
+      expect(await delegate.authorized(anyone.address)).to.equal(ADDRESS_ZERO)
+    })
+  })
+
   describe('Swap', async () => {
     it('successfully swaps', async () => {
       await delegate
         .connect(sender)
         .setRule(
+          sender.address,
+          senderToken.address,
+          DEFAULT_SENDER_AMOUNT,
+          signerToken.address,
+          DEFAULT_SIGNER_AMOUNT
+        )
+
+      const order = await createSignedOrderERC20({}, signer)
+
+      await setUpAllowances(
+        sender.address,
+        DEFAULT_SENDER_AMOUNT,
+        signer.address,
+        DEFAULT_SIGNER_AMOUNT + PROTOCOL_FEE
+      )
+      await setUpBalances(signer.address, sender.address)
+
+      await expect(
+        delegate.connect(signer).swap(sender.address, ...order)
+      ).to.emit(delegate, 'DelegateSwap')
+    })
+
+    it('successfully swaps with a signatory', async () => {
+      await delegate.connect(sender).authorize(signatory.address)
+
+      await delegate
+        .connect(signatory)
+        .setRule(
+          sender.address,
           senderToken.address,
           DEFAULT_SENDER_AMOUNT,
           signerToken.address,
@@ -267,6 +363,7 @@ describe('Delegate Unit', () => {
       await delegate
         .connect(sender)
         .setRule(
+          sender.address,
           senderToken.address,
           DEFAULT_SENDER_AMOUNT - 1,
           signerToken.address,
@@ -300,6 +397,7 @@ describe('Delegate Unit', () => {
       await delegate
         .connect(sender)
         .setRule(
+          sender.address,
           senderToken.address,
           DEFAULT_SENDER_AMOUNT,
           signerToken.address,
