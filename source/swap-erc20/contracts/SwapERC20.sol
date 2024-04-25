@@ -710,27 +710,22 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     address senderToken,
     uint256 senderAmount
   ) private view returns (bytes32) {
-    return
+    return _hashTypedData(
       keccak256(
-        abi.encodePacked(
-          "\x19\x01", // EIP191: Indicates EIP712
-          DOMAIN_SEPARATOR,
-          keccak256(
-            abi.encode(
-              ORDER_TYPEHASH,
-              nonce,
-              expiry,
-              signerWallet,
-              signerToken,
-              signerAmount,
-              protocolFee,
-              senderWallet,
-              senderToken,
-              senderAmount
-            )
-          )
+        abi.encode(
+          ORDER_TYPEHASH,
+          nonce,
+          expiry,
+          signerWallet,
+          signerToken,
+          signerAmount,
+          protocolFee,
+          senderWallet,
+          senderToken,
+          senderAmount
         )
-      );
+      )
+    );
   }
 
   /**

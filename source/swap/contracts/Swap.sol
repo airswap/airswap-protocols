@@ -465,25 +465,20 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @return bytes32 A keccak256 abi.encodePacked value
    */
   function _getOrderHash(Order calldata order) private view returns (bytes32) {
-    return
+    return _hashTypedDataV4(
       keccak256(
-        abi.encodePacked(
-          "\x19\x01", // EIP191: Indicates EIP712
-          DOMAIN_SEPARATOR,
-          keccak256(
-            abi.encode(
-              ORDER_TYPEHASH,
-              order.nonce,
-              order.expiry,
-              protocolFee,
-              keccak256(abi.encode(PARTY_TYPEHASH, order.signer)),
-              keccak256(abi.encode(PARTY_TYPEHASH, order.sender)),
-              order.affiliateWallet,
-              order.affiliateAmount
-            )
-          )
+        abi.encode(
+          ORDER_TYPEHASH,
+          order.nonce,
+          order.expiry,
+          protocolFee,
+          keccak256(abi.encode(PARTY_TYPEHASH, order.signer)),
+          keccak256(abi.encode(PARTY_TYPEHASH, order.sender)),
+          order.affiliateWallet,
+          order.affiliateAmount
         )
-      );
+      )
+    );
   }
 
   /**
