@@ -1,2 +1,2 @@
-declare module '@airswap/pool/deploys.js'
-declare module '@airswap/pool/deploys-blocks.js'
+declare module '@airswap/delegate/deploys.js'
+declare module '@airswap/delegate/deploys-blocks.js'
