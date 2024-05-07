@@ -11,7 +11,7 @@ import { SafeTransferLib } from "solady/src/utils/SafeTransferLib.sol";
 /**
  * @title Delegate: Deployable Trading Rules for the AirSwap Network
  * @notice Supports fungible tokens (ERC-20)
- * @dev inherits IDelegate, Ownable uses SafeMath library
+ * @dev inherits IDelegate, Ownable and uses SafeTransferLib
  */
 contract Delegate is IDelegate, Ownable {
   // The Swap contract to be used to settle trades

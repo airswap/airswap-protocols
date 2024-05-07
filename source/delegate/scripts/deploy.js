@@ -3,60 +3,59 @@ const fs = require('fs')
 const prettier = require('prettier')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
-const { chainLabels, chainNames, ChainIds } = require('@airswap/constants')
+const swapERC20Deploys = require('@airswap/swap-erc20/deploys.js')
+const { ChainIds, chainLabels } = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
-const poolDeploys = require('../deploys.js')
-const poolBlocks = require('../deploys-blocks.js')
+const delegateDeploys = require('../deploys.js')
+const delegateBlocks = require('../deploys-blocks.js')
+const { displayDeployerInfo } = require('../../../scripts/deployer-info')
 
 async function main() {
   await run('compile')
-  const config = await prettier.resolveConfig('../deploys.js')
-
+  const prettierConfig = await prettier.resolveConfig('../deploys.js')
   const [deployer] = await ethers.getSigners()
-  const gasPrice = await deployer.getGasPrice()
   const chainId = await deployer.getChainId()
   if (chainId === ChainIds.HARDHAT) {
     console.log('Value for --network flag is required')
     return
   }
-  console.log(`Deployer: ${deployer.address}`)
-  console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
+  await displayDeployerInfo(deployer)
 
-  const scale = 10
-  const max = 100
+  console.log(`swapERC20Contract: ${swapERC20Deploys[chainId]}\n`)
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
-    const poolFactory = await ethers.getContractFactory('Pool')
-    const poolContract = await poolFactory.deploy(scale, max, {
-      gasPrice,
-    })
+    const delegateFactory = await ethers.getContractFactory('Delegate')
+    const delegateContract = await delegateFactory.deploy(
+      swapERC20Deploys[chainId]
+    )
     console.log(
       'Deploying...',
-      getReceiptUrl(chainId, poolContract.deployTransaction.hash)
+      getReceiptUrl(chainId, delegateContract.deployTransaction.hash)
     )
-    await poolContract.deployed()
+    await delegateContract.deployed()
 
-    poolDeploys[chainId] = poolContract.address
+    delegateDeploys[chainId] = delegateContract.address
     fs.writeFileSync(
       './deploys.js',
       prettier.format(
-        `module.exports = ${JSON.stringify(poolDeploys, null, '\t')}`,
-        { ...config, parser: 'babel' }
+        `module.exports = ${JSON.stringify(delegateDeploys, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
       )
     )
-    poolBlocks[chainId] = (
-      await poolContract.deployTransaction.wait()
+    delegateBlocks[chainId] = (
+      await delegateContract.deployTransaction.wait()
     ).blockNumber
     fs.writeFileSync(
       './deploys-blocks.js',
       prettier.format(
-        `module.exports = ${JSON.stringify(poolBlocks, null, '\t')}`,
-        { ...config, parser: 'babel' }
+        `module.exports = ${JSON.stringify(delegateBlocks, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
       )
     )
-    console.log(`Deployed: ${poolDeploys[chainId]} @ ${poolBlocks[chainId]}`)
+    console.log(
+      `Deployed: ${delegateDeploys[chainId]} @ ${delegateBlocks[chainId]}`
+    )
 
     console.log(
       `\nVerify with "yarn verify --network ${chainLabels[
