@@ -15,7 +15,8 @@ interface IDelegate {
 
   error InsufficientDelegateAllowance();
   error InsufficientSignerAmount();
-  error SignatoryInvalid();
+  error ManagerInvalid();
+  error SenderInvalid();
   error TransferFromFailed();
 
   event Authorize(address _signatory, address _signer);

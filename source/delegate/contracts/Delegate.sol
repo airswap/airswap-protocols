@@ -45,9 +45,9 @@ contract Delegate is IDelegate, Ownable {
     uint256 _signerAmount
   ) external {
     if (authorized[_senderWallet] != address(0)) {
-      if (authorized[_senderWallet] != msg.sender) revert SignatoryInvalid();
+      if (authorized[_senderWallet] != msg.sender) revert SenderInvalid();
     } else {
-      if (_senderWallet != msg.sender) revert SignatoryInvalid();
+      if (_senderWallet != msg.sender) revert SenderInvalid();
     }
 
     rules[_senderWallet][_senderToken][_signerToken] = Rule(
@@ -79,9 +79,9 @@ contract Delegate is IDelegate, Ownable {
     address _signerToken
   ) external {
     if (authorized[_senderWallet] != address(0)) {
-      if (authorized[_senderWallet] != msg.sender) revert SignatoryInvalid();
+      if (authorized[_senderWallet] != msg.sender) revert SenderInvalid();
     } else {
-      if (_senderWallet != msg.sender) revert SignatoryInvalid();
+      if (_senderWallet != msg.sender) revert SenderInvalid();
     }
     Rule storage rule = rules[_senderWallet][_senderToken][_signerToken];
     rule.senderAmount = 0;
@@ -144,13 +144,13 @@ contract Delegate is IDelegate, Ownable {
 
   /**
    * @notice Authorize a signatory
-   * @param _signatory address Wallet of the signatory to authorize
+   * @param _manager address Wallet of the signatory to authorize
    * @dev Emits an Authorize event
    */
-  function authorize(address _signatory) external {
-    if (_signatory == address(0)) revert SignatoryInvalid();
-    authorized[msg.sender] = _signatory;
-    emit Authorize(_signatory, msg.sender);
+  function authorize(address _manager) external {
+    if (_manager == address(0)) revert ManagerInvalid();
+    authorized[msg.sender] = _manager;
+    emit Authorize(_manager, msg.sender);
   }
 
   /**

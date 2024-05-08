@@ -26,7 +26,7 @@ describe('Delegate Unit', () => {
   let senderToken
   let signerToken
   let delegate
-  let signatory
+  let manager
   let snapshotId
 
   async function createSignedOrderERC20(params, signatory) {
@@ -100,7 +100,7 @@ describe('Delegate Unit', () => {
   })
 
   before(async () => {
-    ;[deployer, sender, signer, signatory, anyone] = await ethers.getSigners()
+    ;[deployer, sender, signer, manager, anyone] = await ethers.getSigners()
 
     const swapERC20Factory = await ethers.getContractFactory(
       SWAP_ERC20.abi,
@@ -168,11 +168,11 @@ describe('Delegate Unit', () => {
         .withArgs(sender.address, senderToken.address, signerToken.address)
     })
 
-    it('a signatory can set a Rule', async () => {
-      await delegate.connect(sender).authorize(signatory.address)
+    it('a manager can set a Rule', async () => {
+      await delegate.connect(sender).authorize(manager.address)
       await expect(
         delegate
-          .connect(signatory)
+          .connect(manager)
           .setRule(
             sender.address,
             senderToken.address,
@@ -191,10 +191,10 @@ describe('Delegate Unit', () => {
         )
     })
 
-    it('a signatory can unset a Rule', async () => {
-      await delegate.connect(sender).authorize(signatory.address)
+    it('a manager can unset a Rule', async () => {
+      await delegate.connect(sender).authorize(manager.address)
       await delegate
-        .connect(signatory)
+        .connect(manager)
         .setRule(
           sender.address,
           senderToken.address,
@@ -205,7 +205,7 @@ describe('Delegate Unit', () => {
 
       await expect(
         delegate
-          .connect(signatory)
+          .connect(manager)
           .unsetRule(sender.address, senderToken.address, signerToken.address)
       )
         .to.emit(delegate, 'UnsetRule')
@@ -272,7 +272,7 @@ describe('Delegate Unit', () => {
     it('test authorize with zero address', async () => {
       await expect(
         delegate.connect(deployer).authorize(ADDRESS_ZERO)
-      ).to.be.revertedWith('SignatoryInvalid')
+      ).to.be.revertedWith('ManagerInvalid')
     })
 
     it('test revoke', async () => {
@@ -308,11 +308,11 @@ describe('Delegate Unit', () => {
       ).to.emit(delegate, 'DelegateSwap')
     })
 
-    it('successfully swaps with a signatory', async () => {
-      await delegate.connect(sender).authorize(signatory.address)
+    it('successfully swaps with a manager', async () => {
+      await delegate.connect(sender).authorize(manager.address)
 
       await delegate
-        .connect(signatory)
+        .connect(manager)
         .setRule(
           sender.address,
           senderToken.address,
