@@ -1,1 +1,3 @@
-module.exports = {}
+module.exports = {
+  11155111: '0x786D24f6f45f909128278fd384244365Bb0710b7',
+}
