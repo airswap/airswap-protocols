@@ -7,7 +7,7 @@ import {
   SignTypedDataVersion,
 } from '@metamask/eth-sig-util'
 
-import { abi as ERC20_ABI } from './abis/ERC20.json'
+import { abi as ERC20_ABI } from '@openzeppelin/contracts/build/contracts/ERC20.json'
 const erc20Interface = new ethers.utils.Interface(ERC20_ABI)
 
 import {

@@ -22,10 +22,10 @@ const AIRSWAP_SYMBOL = 'AST'
 const DEFAULT_NAME = 'Unknown NFT'
 const DEFAULT_IPFS_URI = 'https://ipfs.io/ipfs/'
 
-import { abi as ERC165_ABI } from './abis/ERC165.json'
-import { abi as ERC20_ABI } from './abis/ERC20.json'
-import { abi as ERC721_ABI } from './abis/ERC721.json'
-import { abi as ERC1155_ABI } from './abis/ERC1155.json'
+import { abi as ERC165_ABI } from '@openzeppelin/contracts/build/contracts/ERC165.json'
+import { abi as ERC20_ABI } from '@openzeppelin/contracts/build/contracts/ERC20.json'
+import { abi as ERC721_ABI } from '@openzeppelin/contracts/build/contracts/ERC721.json'
+import { abi as ERC1155_ABI } from '@openzeppelin/contracts/build/contracts/ERC1155.json'
 
 export async function getKnownTokens(
   chainId: number
