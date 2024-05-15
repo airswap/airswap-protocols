@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@airswap/staking": "4.2.2",
-    "@airswap/utils": "4.3.0",
+    "@airswap/utils": "4.3.2",
     "prompt-confirm": "^2.0.4",
     "solady": "0.0.173"
   },
