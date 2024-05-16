@@ -13,8 +13,9 @@ interface IDelegate {
     uint256 signerAmount;
   }
 
-  error InsufficientDelegateAllowance();
-  error InsufficientSignerAmount();
+  error InvalidAddress();
+  error InvalidSenderAmount();
+  error InvalidSignerAmount();
   error ManagerInvalid();
   error SenderInvalid();
   error TransferFromFailed();

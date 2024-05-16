@@ -17,6 +17,7 @@ const DEFAULT_SIGNER_AMOUNT = '10000'
 const PROTOCOL_FEE = '5'
 const REBATE_SCALE = '10'
 const REBATE_MAX = '100'
+const UPDATE_SWAP_ERC20_ADDRESS = '0x0000000000000000000000000000000000001337'
 
 describe('Delegate Unit', () => {
   let deployer
@@ -129,9 +130,20 @@ describe('Delegate Unit', () => {
     setUpApprovals()
   })
 
-  describe('Constructor', async () => {
+  describe('Constructor and admin functions', async () => {
     it('swap ERC20 address is set', async () => {
       expect(await delegate.swapERC20()).to.equal(swapERC20.address)
+    })
+
+    it('sets the swapERC20Contract address', async () => {
+      await delegate.setSwapERC20Contract(UPDATE_SWAP_ERC20_ADDRESS)
+      expect(await delegate.swapERC20()).to.equal(UPDATE_SWAP_ERC20_ADDRESS)
+    })
+
+    it('only the owner can set the swapERC20Contract address', async () => {
+      await expect(
+        delegate.connect(anyone).setSwapERC20Contract(UPDATE_SWAP_ERC20_ADDRESS)
+      ).to.be.revertedWith('Unauthorized')
     })
   })
 
@@ -386,7 +398,7 @@ describe('Delegate Unit', () => {
 
       await expect(
         delegate.connect(signer).swap(sender.address, ...order)
-      ).to.be.revertedWith('InsufficientDelegateAllowance')
+      ).to.be.revertedWith('InvalidSenderAmount')
     })
 
     it('fails to swap with insufficient signer amount on Rule', async () => {
@@ -425,7 +437,7 @@ describe('Delegate Unit', () => {
 
       await expect(
         delegate.connect(signer).swap(sender.address, ...order)
-      ).to.be.revertedWith('InsufficientSignerAmount')
+      ).to.be.revertedWith('InvalidSignerAmount')
     })
   })
 })

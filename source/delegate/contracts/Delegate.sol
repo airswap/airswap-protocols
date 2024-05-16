@@ -27,6 +27,7 @@ contract Delegate is IDelegate, Ownable {
    * @notice Contract Constructor
    */
   constructor(ISwapERC20 _swapERC20) {
+    _initializeOwner(msg.sender);
     swapERC20 = _swapERC20;
   }
 
@@ -106,11 +107,11 @@ contract Delegate is IDelegate, Ownable {
     if (
       _senderAmount > (_signerAmount * rule.senderAmount) / rule.signerAmount
     ) {
-      revert InsufficientSignerAmount();
+      revert InvalidSignerAmount();
     }
 
     if (rule.senderAmount < _senderAmount) {
-      revert InsufficientDelegateAllowance();
+      revert InvalidSenderAmount();
     }
 
     SafeTransferLib.safeTransferFrom(
@@ -143,7 +144,7 @@ contract Delegate is IDelegate, Ownable {
   }
 
   /**
-   * @notice Authorize a signatory
+   * @notice Authorize a wallet to manage rules
    * @param _manager address Wallet of the signatory to authorize
    * @dev Emits an Authorize event
    */
@@ -154,12 +155,21 @@ contract Delegate is IDelegate, Ownable {
   }
 
   /**
-   * @notice Revoke the signatory
+   * @notice Revoke a manager
    * @dev Emits a Revoke event
    */
   function revoke() external {
     address _tmp = authorized[msg.sender];
     delete authorized[msg.sender];
     emit Revoke(_tmp, msg.sender);
+  }
+
+  /**
+   * @notice Sets the SwapERC20 contract
+   * @param _swapERC20 ISwapERC20 The SwapERC20 contract
+   */
+  function setSwapERC20Contract(ISwapERC20 _swapERC20) external onlyOwner {
+    if (address(_swapERC20) == address(0)) revert InvalidAddress();
+    swapERC20 = _swapERC20;
   }
 }

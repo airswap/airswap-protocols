@@ -1,4 +1,4 @@
-# Pool
+# Delegate
 
 [AirSwap](https://www.airswap.io/) is an open-source peer-to-peer trading network.
 
@@ -21,16 +21,16 @@
 
 Environment variables are set in an `.env` file in the repository root.
 
-| Command          | Description                              |
-| :--------------- | :--------------------------------------- |
-| `yarn`           | Install dependencies                     |
-| `yarn clean`     | Delete the contract `build` folder       |
-| `yarn compile`   | Compile all contracts to `build` folder  |
-| `yarn coverage`  | Report test coverage                     |
-| `yarn test`      | Run all tests in `test` folder           |
-| `yarn test:ci`   | Run CI tests in `test` folder            |
-| `yarn deploy`    | Deploy on a network using --network flag |
-| `yarn verify`    | Verify on a network using --network flag |
+| Command         | Description                              |
+| :-------------- | :--------------------------------------- |
+| `yarn`          | Install dependencies                     |
+| `yarn clean`    | Delete the contract `build` folder       |
+| `yarn compile`  | Compile all contracts to `build` folder  |
+| `yarn coverage` | Report test coverage                     |
+| `yarn test`     | Run all tests in `test` folder           |
+| `yarn test:ci`  | Run CI tests in `test` folder            |
+| `yarn deploy`   | Deploy on a network using --network flag |
+| `yarn verify`   | Verify on a network using --network flag |
 
 ## Running Tests
 
