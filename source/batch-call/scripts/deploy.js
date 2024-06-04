@@ -3,27 +3,25 @@ const fs = require('fs')
 const prettier = require('prettier')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
-const { ChainIds, chainNames, chainLabels } = require('@airswap/constants')
+const { ChainIds, chainLabels } = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
 const batchCallDeploys = require('../deploys.js')
 const batchCallBlocks = require('../deploys-blocks.js')
+const { displayDeployerInfo } = require('../../../scripts/deployer-info')
 
 async function main() {
   await run('compile')
+  const prettierConfig = await prettier.resolveConfig('../deploys.js')
   const [deployer] = await ethers.getSigners()
-  const gasPrice = await deployer.getGasPrice()
   const chainId = await deployer.getChainId()
   if (chainId === ChainIds.HARDHAT) {
     console.log('Value for --network flag is required')
     return
   }
-  console.log(`Deployer: ${deployer.address}`)
-  console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
+  await displayDeployerInfo(deployer)
 
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
-    const prettierConfig = await prettier.resolveConfig('../deploys.js')
     const batchFactory = await ethers.getContractFactory('BatchCall')
     const batchCallContract = await batchFactory.deploy()
     console.log(

@@ -3,25 +3,23 @@ const fs = require('fs')
 const prettier = require('prettier')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
-const { chainNames, chainLabels, ChainIds } = require('@airswap/constants')
+const { chainLabels, ChainIds } = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
 const stakingDeploys = require('../deploys.js')
 const stakingBlocks = require('../deploys-blocks.js')
 const config = require('./config.js')
+const { displayDeployerInfo } = require('../../../scripts/deployer-info')
 
 async function main() {
   await run('compile')
   const prettierConfig = await prettier.resolveConfig('../deploys.js')
   const [deployer] = await ethers.getSigners()
-  const gasPrice = await deployer.getGasPrice()
   const chainId = await deployer.getChainId()
   if (chainId === ChainIds.HARDHAT) {
     console.log('Value for --network flag is required')
     return
   }
-  console.log(`Deployer: ${deployer.address}`)
-  console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
+  await displayDeployerInfo(deployer)
 
   const {
     name,
@@ -31,7 +29,7 @@ async function main() {
     minDurationChangeDelay,
   } = config[chainId]
 
-  console.log(`\nname: ${name}`)
+  console.log(`name: ${name}`)
   console.log(`symbol: ${symbol}`)
   console.log(`stakingToken: ${stakingToken}`)
   console.log(`stakingDuration: ${stakingDuration}`)

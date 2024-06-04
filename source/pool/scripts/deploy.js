@@ -3,35 +3,33 @@ const fs = require('fs')
 const prettier = require('prettier')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
-const { chainLabels, chainNames, ChainIds } = require('@airswap/constants')
+const { chainLabels, ChainIds } = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
 const poolDeploys = require('../deploys.js')
 const poolBlocks = require('../deploys-blocks.js')
+const { displayDeployerInfo } = require('../../../scripts/deployer-info')
 
 async function main() {
   await run('compile')
   const prettierConfig = await prettier.resolveConfig('../deploys.js')
-
   const [deployer] = await ethers.getSigners()
-  const gasPrice = await deployer.getGasPrice()
   const chainId = await deployer.getChainId()
   if (chainId === ChainIds.HARDHAT) {
     console.log('Value for --network flag is required')
     return
   }
-  console.log(`Deployer: ${deployer.address}`)
-  console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
+  await displayDeployerInfo(deployer)
 
   const scale = 10
   const max = 100
 
+  console.log(`scale: ${scale}`)
+  console.log(`max: ${max}`)
+
   const prompt = new Confirm('Proceed to deploy?')
   if (await prompt.run()) {
     const poolFactory = await ethers.getContractFactory('Pool')
-    const poolContract = await poolFactory.deploy(scale, max, {
-      gasPrice,
-    })
+    const poolContract = await poolFactory.deploy(scale, max)
     console.log(
       'Deploying...',
       getReceiptUrl(chainId, poolContract.deployTransaction.hash)

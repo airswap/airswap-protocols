@@ -1,10 +1,15 @@
 import * as url from 'url'
 import { ethers } from 'ethers'
-import { explorerUrls } from '@airswap/constants'
+import { explorerUrls } from './src/constants'
 
+export * from './src/constants'
+export * from './src/metadata'
 export * from './src/pricing'
+export * from './src/server'
 export * from './src/swap'
-export * from './src/swapERC20'
+export * from './src/swap-erc20'
+export * from './src/tokenlists'
+export * from './src/types'
 
 export function getReceiptUrl(chainId: number, hash: string): string {
   return `${explorerUrls[chainId]}/tx/${hash}`
@@ -25,15 +30,6 @@ export function parseCheckResult(errors: Array<string>) {
   return res
 }
 
-export function getTimestamp(): string {
-  return Math.round(Date.now() / 1000).toString()
-}
-
-export function numberToBytes32(number: number): string {
-  const hexString = number.toString(16)
-  return `0x${hexString.padStart(64, '0')}`
-}
-
 export function getInterfaceId(functions: string[]): string {
   const _interface = new ethers.utils.Interface(functions)
   const interfaceId = ethers.utils.arrayify(
@@ -48,6 +44,16 @@ export function getInterfaceId(functions: string[]): string {
     }
   }
   return ethers.utils.hexlify(interfaceId)
+}
+
+export function stringifyEIP712Type(
+  types: { [key: string]: { type: string; name: string }[] },
+  primaryType: string
+): string {
+  return types[primaryType].reduce((str, value, index, values) => {
+    const isEnd = index !== values.length - 1
+    return str + `${value.type} ${value.name}${isEnd ? ',' : ')'}`
+  }, `${primaryType}(`)
 }
 
 export function parseUrl(locator: string): url.UrlWithStringQuery {
@@ -68,4 +74,13 @@ export function lowerCaseAddresses(obj: any): any {
     }
   }
   return obj
+}
+
+export function getTimestamp(): string {
+  return Math.round(Date.now() / 1000).toString()
+}
+
+export function numberToBytes32(number: number): string {
+  const hexString = number.toString(16)
+  return `0x${hexString.padStart(64, '0')}`
 }

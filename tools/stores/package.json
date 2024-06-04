@@ -1,0 +1,34 @@
+{
+  "name": "@airswap/stores",
+  "version": "4.3.2",
+  "description": "AirSwap: Storage for Indexing",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "keywords": [
+    "airswap"
+  ],
+  "license": "MIT",
+  "main": "build/index.js",
+  "files": [
+    "/build"
+  ],
+  "scripts": {
+    "clean": "rm -rf ./build",
+    "compile": "yarn clean && tsc -b",
+    "redis:flush": "REDISCLOUD_URL=redis://localhost:6379 node ./redis/redis.flush.js",
+    "redis:create": "yarn compile && REDISCLOUD_URL=redis://localhost:6379 node ./redis/redis.create.js",
+    "test": "REDISCLOUD_URL=redis://localhost:6379 TS_NODE_COMPILER_OPTIONS='{\"strict\":false}' yarn mocha -r ts-node/esm test/*.ts"
+  },
+  "dependencies": {
+    "@airswap/utils": "4.3.2",
+    "redis": "^4.6.13"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

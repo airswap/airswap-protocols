@@ -1,6 +1,5 @@
 const { ethers } = require('hardhat')
-const { getKnownTokens } = require('@airswap/metadata')
-const { chainNames, ChainIds } = require('@airswap/constants')
+const { getKnownTokens, chainNames, ChainIds } = require('@airswap/utils')
 const BatchCall = require('@airswap/batch-call/build/contracts/BatchCall.sol/BatchCall.json')
 const batchCallDeploys = require('@airswap/batch-call/deploys.js')
 const poolDeploys = require('../deploys.js')

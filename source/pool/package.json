@@ -1,6 +1,6 @@
 {
   "name": "@airswap/pool",
-  "version": "4.2.0-beta.0",
+  "version": "4.2.2",
   "description": "AirSwap: Withdrawable Token Pool",
   "license": "MIT",
   "repository": {
@@ -27,14 +27,10 @@
     "migrate": "hardhat run ./scripts/migrate.js",
     "balances": "hardhat run ./scripts/balances.js"
   },
-  "dependencies": {
-    "@openzeppelin/contracts": "^4.8.3"
-  },
   "devDependencies": {
-    "@airswap/constants": "4.2.0-beta.3",
-    "@airswap/metadata": "4.1.16",
-    "@airswap/types": "4.2.0-beta.1",
-    "@airswap/utils": "4.2.0-beta.2",
+    "@airswap/utils": "4.3.2",
+    "@airswap/merkle": "0.0.2",
+    "@openzeppelin/contracts": "^4.8.3",
     "prompt-confirm": "^2.0.4"
   },
   "publishConfig": {

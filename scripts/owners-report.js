@@ -1,12 +1,12 @@
 require('dotenv').config({ path: './.env' })
 const { ethers } = require('ethers')
 const {
+  ADDRESS_ZERO,
   mainnets,
   chainNames,
   ownerAddresses,
   apiUrls,
-} = require('@airswap/constants')
-const { ADDRESS_ZERO } = require('@airswap/constants')
+} = require('@airswap/utils')
 
 const contracts = [
   ['pool', 'Pool'],

@@ -12,8 +12,12 @@ import {
   isValidFullOrder,
   isValidFullOrderERC20,
   isValidPricingERC20,
+  ADDRESS_ZERO,
+  ChainIds,
+  ProtocolIds,
+  OrderERC20,
+  Levels,
 } from '@airswap/utils'
-import { ADDRESS_ZERO, ChainIds, Protocols } from '@airswap/constants'
 
 import { Server } from '../index'
 import {
@@ -23,7 +27,6 @@ import {
   MockSocketServer,
   nextEvent,
 } from './test-utils'
-import { OrderERC20, Levels } from '@airswap/types'
 import { JsonRpcErrorCodes } from '@airswap/jsonrpc-client-websocket'
 
 addJSONRPCAssertions()
@@ -57,7 +60,7 @@ function mockHttpServer(api) {
     let res
     switch (body['method']) {
       case 'getProtocols':
-        res = [Protocols.Discovery, Protocols.RequestForQuoteERC20]
+        res = [ProtocolIds.Discovery, ProtocolIds.RequestForQuoteERC20]
         break
       case 'getTokens':
         res = [USDC, USDT]
@@ -130,6 +133,9 @@ function mockHttpServer(api) {
           ],
         }
         break
+      case 'getTags':
+        res = []
+        break
       case 'considerOrderERC20':
         res = true
         break
@@ -148,8 +154,8 @@ describe('HTTPServer', () => {
     .it('Server getProtocols()', async () => {
       const server = await Server.at(URL)
       const result = await server.getProtocols()
-      expect(result[0]).to.be.equal(Protocols.Discovery)
-      expect(result[1]).to.be.equal(Protocols.RequestForQuoteERC20)
+      expect(result[0]).to.be.equal(ProtocolIds.Discovery)
+      expect(result[1]).to.be.equal(ProtocolIds.RequestForQuoteERC20)
     })
   fancy
     .nock('https://' + URL, mockHttpServer)
@@ -208,6 +214,13 @@ describe('HTTPServer', () => {
         100
       )
       expect(isValidFullOrder(result.orders[0])).to.be.true
+    })
+  fancy
+    .nock('https://' + URL, mockHttpServer)
+    .it('Server getTags()', async () => {
+      const server = await Server.at(URL)
+      const result = await server.getTags(ADDRESS_ZERO)
+      expect(result).to.have.lengthOf(0)
     })
 })
 
@@ -286,8 +299,8 @@ describe('WebSocketServer', () => {
       }
       mockServer.setNextMessageCallback(onResponse)
     })
-    expect(server.supportsProtocol(Protocols.LastLookERC20)).to.equal(true)
-    expect(server.supportsProtocol(Protocols.RequestForQuoteERC20)).to.equal(
+    expect(server.supportsProtocol(ProtocolIds.LastLookERC20)).to.equal(true)
+    expect(server.supportsProtocol(ProtocolIds.RequestForQuoteERC20)).to.equal(
       false
     )
     await correctInitializeResponse

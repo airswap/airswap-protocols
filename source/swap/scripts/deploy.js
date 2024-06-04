@@ -4,38 +4,29 @@ const prettier = require('prettier')
 const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const {
-  chainNames,
   chainLabels,
   ChainIds,
   protocolFeeReceiverAddresses,
   ADDRESS_ZERO,
-} = require('@airswap/constants')
+} = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
 const poolDeploys = require('@airswap/pool/deploys.js')
 const swapDeploys = require('../deploys.js')
 const swapBlocks = require('../deploys-blocks.js')
 const adapterDeploys = require('../deploys-adapters.js')
 const config = require('./config.js')
+const { displayDeployerInfo } = require('../../../scripts/deployer-info')
 
 async function main() {
   await run('compile')
   const prettierConfig = await prettier.resolveConfig('../deploys.js')
-
   const [deployer] = await ethers.getSigners()
-  const gasPrice = await deployer.getGasPrice()
   const chainId = await deployer.getChainId()
   if (chainId === ChainIds.HARDHAT) {
     console.log('Value for --network flag is required')
     return
   }
-  if (!adapterDeploys[chainId]) {
-    console.log('Adapters must be deployed first.')
-    return
-  }
-
-  console.log(`Deployer: ${deployer.address}`)
-  console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
+  await displayDeployerInfo(deployer)
 
   let requiredSenderKind
   let protocolFee
@@ -50,7 +41,7 @@ async function main() {
     protocolFeeReceiver = protocolFeeReceiverAddresses[chainId]
   }
 
-  console.log(`\nadapters: ${JSON.stringify(adapterDeploys[chainId])}`)
+  console.log(`adapters: ${JSON.stringify(adapterDeploys[chainId])}`)
   console.log(`requiredSenderKind: ${requiredSenderKind}`)
   console.log(`protocolFee: ${protocolFee}`)
   console.log(`protocolFeeReceiver: ${protocolFeeReceiver}`)
@@ -62,10 +53,7 @@ async function main() {
       adapterDeploys[chainId],
       requiredSenderKind,
       protocolFee,
-      protocolFeeReceiver,
-      {
-        gasPrice,
-      }
+      protocolFeeReceiver
     )
     console.log(
       'Deploying...',

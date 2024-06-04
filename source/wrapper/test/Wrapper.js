@@ -6,7 +6,7 @@ const {
 } = require('@airswap/utils')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
-const { ADDRESS_ZERO } = require('@airswap/constants')
+const { ADDRESS_ZERO } = require('@airswap/utils')
 
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const IWETH = require('../build/contracts/interfaces/IWETH.sol/IWETH.json')

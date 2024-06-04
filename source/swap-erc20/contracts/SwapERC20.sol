@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "./interfaces/INoReturnERC20.sol";
+import { ECDSA } from "solady/src/utils/ECDSA.sol";
+import { EIP712 } from "solady/src/utils/EIP712.sol";
+import { ERC20 } from "solady/src/tokens/ERC20.sol";
+import { Ownable } from "solady/src/auth/Ownable.sol";
+import { SafeTransferLib } from "solady/src/utils/SafeTransferLib.sol";
+import { SignatureCheckerLib } from "solady/src/utils/SignatureCheckerLib.sol";
+
 import "./interfaces/ISwapERC20.sol";
 
 /**
@@ -13,7 +15,8 @@ import "./interfaces/ISwapERC20.sol";
  * @notice https://www.airswap.io/
  */
 contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
-  using SafeERC20 for IERC20;
+  uint256 public immutable DOMAIN_CHAIN_ID;
+  bytes32 public immutable DOMAIN_SEPARATOR;
 
   bytes32 public constant ORDER_TYPEHASH =
     keccak256(
@@ -22,12 +25,6 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
         "uint256 protocolFee,address senderWallet,address senderToken,uint256 senderAmount)"
       )
     );
-
-  // Domain name and version for use in EIP712 signatures
-  string public constant DOMAIN_NAME = "SWAP_ERC20";
-  string public constant DOMAIN_VERSION = "4.2";
-  uint256 public immutable DOMAIN_CHAIN_ID;
-  bytes32 public immutable DOMAIN_SEPARATOR;
 
   uint256 public constant FEE_DIVISOR = 10000;
   uint256 private constant MAX_ERROR_COUNT = 8;
@@ -65,21 +62,38 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     address _protocolFeeWallet,
     uint256 _bonusScale,
     uint256 _bonusMax
-  ) EIP712(DOMAIN_NAME, DOMAIN_VERSION) {
+  ) {
     if (_protocolFee >= FEE_DIVISOR) revert InvalidFee();
     if (_protocolFeeLight >= FEE_DIVISOR) revert InvalidFeeLight();
     if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
     if (_bonusMax > MAX_MAX) revert MaxTooHigh();
     if (_bonusScale > MAX_SCALE) revert ScaleTooHigh();
 
+    _initializeOwner(msg.sender);
+
     DOMAIN_CHAIN_ID = block.chainid;
-    DOMAIN_SEPARATOR = _domainSeparatorV4();
+    DOMAIN_SEPARATOR = _domainSeparator();
 
     protocolFee = _protocolFee;
     protocolFeeLight = _protocolFeeLight;
     protocolFeeWallet = _protocolFeeWallet;
     bonusMax = _bonusMax;
     bonusScale = _bonusScale;
+  }
+
+  /**
+   * @notice Return EIP712 domain values
+   * @return name EIP712 domain name
+   * @return version EIP712 domain version
+   */
+  function _domainNameAndVersion()
+    internal
+    pure
+    override
+    returns (string memory name, string memory version)
+  {
+    name = "SWAP_ERC20";
+    version = "4.3";
   }
 
   /**
@@ -125,14 +139,20 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     );
 
     // Transfer token from sender to signer
-    IERC20(senderToken).safeTransferFrom(
+    SafeTransferLib.safeTransferFrom(
+      senderToken,
       msg.sender,
       signerWallet,
       senderAmount
     );
 
     // Transfer token from signer to recipient
-    IERC20(signerToken).safeTransferFrom(signerWallet, recipient, signerAmount);
+    SafeTransferLib.safeTransferFrom(
+      signerToken,
+      signerWallet,
+      recipient,
+      signerAmount
+    );
 
     // Calculate and transfer protocol fee
     _transferProtocolFee(signerToken, signerWallet, signerAmount);
@@ -184,14 +204,20 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     );
 
     // Transfer token from sender to signer
-    IERC20(senderToken).safeTransferFrom(
+    SafeTransferLib.safeTransferFrom(
+      senderToken,
       msg.sender,
       signerWallet,
       senderAmount
     );
 
     // Transfer token from signer to recipient
-    IERC20(signerToken).safeTransferFrom(signerWallet, recipient, signerAmount);
+    SafeTransferLib.safeTransferFrom(
+      signerToken,
+      signerWallet,
+      recipient,
+      signerAmount
+    );
 
     // Calculate and transfer protocol fee
     _transferProtocolFee(signerToken, signerWallet, signerAmount);
@@ -230,7 +256,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     if (expiry <= block.timestamp) revert OrderExpired();
 
     // Recover the signatory from the hash and signature
-    address signatory = ecrecover(
+    address signatory = ECDSA.tryRecover(
       keccak256(
         abi.encodePacked(
           "\x19\x01", // EIP191: Indicates EIP712
@@ -255,9 +281,8 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
       r,
       s
     );
-
     // Ensure the signatory is not null
-    if (signatory == address(0)) revert Unauthorized();
+    if (signatory == address(0)) revert SignatureInvalid();
 
     // Ensure the nonce is not yet used and if not mark it used
     if (!_markNonceAsUsed(signatory, nonce)) revert NonceAlreadyUsed(nonce);
@@ -265,28 +290,31 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     // Ensure signatory is authorized to sign
     if (authorized[signerWallet] != address(0)) {
       // If one is set by signer wallet, signatory must be authorized
-      if (signatory != authorized[signerWallet]) revert Unauthorized();
+      if (signatory != authorized[signerWallet]) revert SignatureInvalid();
     } else {
       // Otherwise, signatory must be signer wallet
-      if (signatory != signerWallet) revert Unauthorized();
+      if (signatory != signerWallet) revert SignatureInvalid();
     }
 
     // Transfer token from sender to signer
-    INoReturnERC20(senderToken).transferFrom(
+    SafeTransferLib.safeTransferFrom(
+      senderToken,
       msg.sender,
       signerWallet,
       senderAmount
     );
 
     // Transfer token from signer to sender
-    INoReturnERC20(signerToken).transferFrom(
+    SafeTransferLib.safeTransferFrom(
+      signerToken,
       signerWallet,
       msg.sender,
       signerAmount
     );
 
     // Transfer protocol fee from signer to fee wallet
-    INoReturnERC20(signerToken).transferFrom(
+    SafeTransferLib.safeTransferFrom(
+      signerToken,
       signerWallet,
       protocolFeeWallet,
       (signerAmount * protocolFeeLight) / FEE_DIVISOR
@@ -457,7 +485,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     }
 
     if (
-      !SignatureChecker.isValidSignatureNow(
+      !SignatureCheckerLib.isValidSignatureNow(
         signatory,
         _getOrderHash(
           order.nonce,
@@ -472,7 +500,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
         abi.encodePacked(r, s, v)
       )
     ) {
-      errors[count++] = "Unauthorized";
+      errors[count++] = "SignatureInvalid";
     } else if (nonceUsed(signatory, order.nonce)) {
       errors[count++] = "NonceAlreadyUsed";
     }
@@ -482,11 +510,11 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     }
 
     if (order.senderWallet != address(0)) {
-      uint256 senderBalance = IERC20(order.senderToken).balanceOf(
+      uint256 senderBalance = ERC20(order.senderToken).balanceOf(
         order.senderWallet
       );
 
-      uint256 senderAllowance = IERC20(order.senderToken).allowance(
+      uint256 senderAllowance = ERC20(order.senderToken).allowance(
         order.senderWallet,
         address(this)
       );
@@ -500,11 +528,11 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
       }
     }
 
-    uint256 signerBalance = IERC20(order.signerToken).balanceOf(
+    uint256 signerBalance = ERC20(order.signerToken).balanceOf(
       order.signerWallet
     );
 
-    uint256 signerAllowance = IERC20(order.signerToken).allowance(
+    uint256 signerAllowance = ERC20(order.signerToken).allowance(
       order.signerWallet,
       address(this)
     );
@@ -555,7 +583,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     uint256 feeAmount = (amount * protocolFee) / FEE_DIVISOR;
     if (stakingToken != address(0) && feeAmount > 0) {
       uint256 bonusAmount = calculateBonus(
-        IERC20(stakingToken).balanceOf(wallet),
+        ERC20(stakingToken).balanceOf(wallet),
         feeAmount
       );
       return feeAmount - bonusAmount;
@@ -641,7 +669,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
 
     // Ensure the signature is correct for the order
     if (
-      !SignatureChecker.isValidSignatureNow(
+      !SignatureCheckerLib.isValidSignatureNow(
         signatory,
         _getOrderHash(
           nonce,
@@ -655,7 +683,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
         ),
         abi.encodePacked(r, s, v)
       )
-    ) revert Unauthorized();
+    ) revert SignatureInvalid();
 
     // Ensure the nonce is not yet used and if not mark as used
     if (!_markNonceAsUsed(signatory, nonce)) revert NonceAlreadyUsed(nonce);
@@ -706,7 +734,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   }
 
   /**
-   * @notice Calculates and transfers protocol fee and bonus
+   * @notice Calculates and transfers protocol fee and staking bonus
    * @param sourceToken address
    * @param sourceWallet address
    * @param amount uint256
@@ -716,32 +744,36 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     address sourceWallet,
     uint256 amount
   ) private {
-    // Transfer fee from signer to feeWallet
+    // Determine protocol fee from amount
     uint256 feeAmount = (amount * protocolFee) / FEE_DIVISOR;
     if (feeAmount > 0) {
       uint256 bonusAmount;
       if (stakingToken != address(0)) {
-        // Only check bonus if staking is set
+        // Only check staking bonus if staking token set
         bonusAmount = calculateBonus(
-          IERC20(stakingToken).balanceOf(msg.sender),
+          ERC20(stakingToken).balanceOf(msg.sender),
           feeAmount
         );
       }
       if (bonusAmount > 0) {
-        // Transfer fee from signer to sender
-        IERC20(sourceToken).safeTransferFrom(
+        // Transfer staking bonus from source to msg.sender
+        SafeTransferLib.safeTransferFrom(
+          sourceToken,
           sourceWallet,
           msg.sender,
           bonusAmount
         );
-        // Transfer fee from signer to feeWallet
-        IERC20(sourceToken).safeTransferFrom(
+        // Transfer remaining protocol fee from source to fee wallet
+        SafeTransferLib.safeTransferFrom(
+          sourceToken,
           sourceWallet,
           protocolFeeWallet,
           feeAmount - bonusAmount
         );
       } else {
-        IERC20(sourceToken).safeTransferFrom(
+        // Transfer full protocol fee from source to fee wallet
+        SafeTransferLib.safeTransferFrom(
+          sourceToken,
           sourceWallet,
           protocolFeeWallet,
           feeAmount

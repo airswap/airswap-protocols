@@ -2,7 +2,7 @@ const { expect } = require('chai')
 const { ethers, waffle } = require('hardhat')
 const IERC20 = require('@openzeppelin/contracts/build/contracts/IERC20.json')
 const { deployMockContract } = waffle
-const { ADDRESS_ZERO, TokenKinds } = require('@airswap/constants')
+const { ADDRESS_ZERO, TokenKinds } = require('@airswap/utils')
 
 let snapshotId
 let adapter

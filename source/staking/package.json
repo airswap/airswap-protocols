@@ -1,6 +1,6 @@
 {
   "name": "@airswap/staking",
-  "version": "4.2.0-beta.1",
+  "version": "4.2.2",
   "description": "AirSwap: Stake Tokens",
   "license": "MIT",
   "repository": {
@@ -25,14 +25,12 @@
     "verify": "hardhat run ./scripts/verify.js",
     "owners": "hardhat run ./scripts/owner.js"
   },
-  "dependencies": {
-    "@openzeppelin/contracts": "^4.8.3"
-  },
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
-    "@airswap/utils": "4.2.0-beta.2",
+    "@airswap/utils": "4.3.2",
+    "@openzeppelin/contracts": "^4.8.3",
     "prompt-confirm": "^2.0.4"
   }
 }

@@ -1,6 +1,6 @@
 const Confirm = require('prompt-confirm')
 const { ethers } = require('hardhat')
-const { chainNames, ChainIds, ownerAddresses } = require('@airswap/constants')
+const { chainNames, ChainIds, ownerAddresses } = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
 
 const CONFIRMATIONS = 2

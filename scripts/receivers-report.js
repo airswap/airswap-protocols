@@ -5,9 +5,9 @@ const {
   chainNames,
   apiUrls,
   protocolFeeReceiverAddresses,
-} = require('@airswap/constants')
+} = require('@airswap/utils')
 const poolDeploys = require('@airswap/pool/deploys.js')
-const { ADDRESS_ZERO } = require('@airswap/constants')
+const { ADDRESS_ZERO } = require('@airswap/utils')
 
 const contracts = [
   ['swap', 'Swap'],

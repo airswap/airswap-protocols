@@ -12,24 +12,24 @@ import {
 } from '@airswap/jsonrpc-client-websocket'
 
 import {
-  parseUrl,
-  orderERC20PropsToStrings,
-  isValidOrderERC20,
-  isValidPricingERC20,
-} from '@airswap/utils'
-import {
-  FullOrder,
-  FullOrderERC20,
-  OrderERC20,
-  Pricing,
+  ChainIds,
+  ProtocolIds,
   ServerOptions,
-  SupportedProtocolInfo,
+  OrderERC20,
+  FullOrderERC20,
+  FullOrder,
+  Pricing,
   OrderFilter,
   OrderResponse,
   Indexes,
   Direction,
-} from '@airswap/types'
-import { ChainIds, Protocols, protocolNames } from '@airswap/constants'
+  SupportedProtocolInfo,
+  protocolNames,
+  orderERC20PropsToStrings,
+  isValidOrderERC20,
+  isValidPricingERC20,
+  parseUrl,
+} from '@airswap/utils'
 
 import { SwapERC20 } from './Contracts'
 
@@ -259,10 +259,13 @@ export class Server extends TypedEmitter<ServerEvents> {
   /**
    * Protocols.IndexingERC20
    */
-  public async addOrderERC20(fullOrder: FullOrderERC20): Promise<boolean> {
+  public async addOrderERC20(
+    order: FullOrderERC20,
+    tags = []
+  ): Promise<boolean> {
     try {
       return Promise.resolve(
-        (await this.httpCall('addOrderERC20', [fullOrder])) as boolean
+        (await this.httpCall('addOrderERC20', [order, tags])) as boolean
       )
     } catch (err) {
       return Promise.reject(err)
@@ -294,10 +297,10 @@ export class Server extends TypedEmitter<ServerEvents> {
   /**
    * Protocols.Indexing
    */
-  public async addOrder(order: FullOrder): Promise<boolean> {
+  public async addOrder(order: FullOrder, tags = []): Promise<boolean> {
     try {
       return Promise.resolve(
-        (await this.httpCall('addOrder', [order])) as boolean
+        (await this.httpCall('addOrder', [order, tags])) as boolean
       )
     } catch (err) {
       return Promise.reject(err)
@@ -305,7 +308,7 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
   public async getOrders(
-    orderFilter: OrderFilter,
+    filter: OrderFilter,
     offset = 0,
     limit = DEFAULT_LIMIT,
     by = Indexes.NONCE,
@@ -314,12 +317,22 @@ export class Server extends TypedEmitter<ServerEvents> {
     try {
       return Promise.resolve(
         (await this.httpCall('getOrders', [
-          { ...this.toBigIntJson(orderFilter) },
+          { ...this.toBigIntJson(filter) },
           offset,
           limit,
           by,
           direction,
         ])) as OrderResponse<FullOrder>
+      )
+    } catch (err) {
+      return Promise.reject(err)
+    }
+  }
+
+  public async getTags(token: string): Promise<string[]> {
+    try {
+      return Promise.resolve(
+        (await this.httpCall('getTags', [token])) as string[]
       )
     } catch (err) {
       return Promise.reject(err)
@@ -366,7 +379,7 @@ export class Server extends TypedEmitter<ServerEvents> {
 
     if (!clientOnly) {
       this.supportedProtocols = [
-        { name: Protocols.RequestForQuoteERC20, version: '2.0.0' },
+        { name: ProtocolIds.RequestForQuoteERC20, version: '2.0.0' },
       ]
       this.isInitialized = true
     }
@@ -448,11 +461,11 @@ export class Server extends TypedEmitter<ServerEvents> {
   }
 
   private requireRFQERC20Support() {
-    this.requireProtocolSupport(Protocols.RequestForQuoteERC20)
+    this.requireProtocolSupport(ProtocolIds.RequestForQuoteERC20)
   }
 
   private requireLastLookERC20Support() {
-    this.requireProtocolSupport(Protocols.LastLookERC20)
+    this.requireProtocolSupport(ProtocolIds.LastLookERC20)
   }
 
   private requireProtocolSupport(protocol: string) {
@@ -527,7 +540,7 @@ export class Server extends TypedEmitter<ServerEvents> {
     this.validateInitializeParams(supportedProtocols)
     this.supportedProtocols = supportedProtocols
     const lastLookERC20Support = supportedProtocols.find(
-      (protocol) => protocol.name === Protocols.LastLookERC20
+      (protocol) => protocol.name === ProtocolIds.LastLookERC20
     )
     if (lastLookERC20Support?.params?.senderServer) {
       this.senderServer = lastLookERC20Support.params.senderServer
