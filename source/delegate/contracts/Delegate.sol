@@ -84,7 +84,6 @@ contract Delegate is IDelegate, Ownable {
     } else {
       if (_senderWallet != msg.sender) revert SenderInvalid();
     }
-    Rule storage rule = rules[_senderWallet][_senderToken][_signerToken];
     delete rules[_senderWallet][_senderToken][_signerToken];
 
     emit UnsetRule(_senderWallet, _senderToken, _signerToken);
