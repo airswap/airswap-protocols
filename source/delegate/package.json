@@ -28,7 +28,7 @@
     "balances": "hardhat run ./scripts/balances.js"
   },
   "devDependencies": {
-    "@airswap/utils": "4.3.2",
+    "@airswap/utils": "4.3.3",
     "@airswap/swap-erc20": "4.3.1",
     "prompt-confirm": "^2.0.4"
   },
