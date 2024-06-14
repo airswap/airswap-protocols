@@ -6,7 +6,7 @@ export default {
     'https://raw.githubusercontent.com/SetProtocol/uniswap-tokenlist/main/set.tokenlist.json',
     'https://app.tryroll.com/tokens.json',
     'https://tokens.coingecko.com/uniswap/all.json',
-    'https://tokenlist.aave.eth.link',
+    'https://tokenlist.aave.eth.limo',
     'https://tokens.coingecko.com/ethereum/all.json',
   ],
   [ChainIds.RSK]: [
