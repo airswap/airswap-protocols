@@ -94,6 +94,14 @@ module.exports = {
       url: apiUrls[ChainIds.HOLESKY],
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
+    neon: {
+      url: apiUrls[ChainIds.NEON],
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
+    },
+    neondevnet: {
+      url: apiUrls[ChainIds.NEONDEVNET],
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
+    },
   },
   solidity: {
     compilers: [
