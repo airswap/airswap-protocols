@@ -1358,7 +1358,7 @@
   dependencies:
     "@octokit/openapi-types" "^18.0.0"
 
-"@openzeppelin/contracts@^4.8.3":
+"@openzeppelin/contracts@^4.3.1", "@openzeppelin/contracts@^4.8.3":
   version "4.9.6"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.9.6.tgz#2a880a24eb19b4f8b25adc2a5095f2aa27f39677"
   integrity sha512-xSmezSupL+y9VkHZJGDoCBpmnB2ogM13ccaYDWqJTfS3dbuHkgjuwDFUmaFauBCboQMGB/S5UqUl2y54X99BmA==
@@ -8292,6 +8292,13 @@ reduce-flatten@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/reduce-flatten/-/reduce-flatten-2.0.0.tgz#734fd84e65f375d7ca4465c69798c25c9d10ae27"
   integrity sha512-EJ4UNY/U1t2P/2k6oqotuX2Cc3T6nxJwsM0N0asT7dhrtH1ltUxDn4NalSYmPE2rCkVpcf/X6R0wDwcFpzhd4w==
+
+"registry-v3@npm:@airswap/registry@3.1.2":
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/@airswap/registry/-/registry-3.1.2.tgz#c963424c61a47bd1ec6c939a379531f6e9cc7abe"
+  integrity sha512-saicMqmZaOHbvTZZyfndSd6vmWUFHxUSpZ3qO35mDgzzez5Zg6D6rkWixmfery0cV0398NeNGXtyOj5XzD8jnw==
+  dependencies:
+    "@openzeppelin/contracts" "^4.3.1"
 
 remove-trailing-separator@^1.0.1:
   version "1.1.0"
