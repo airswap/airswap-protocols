@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const { ethers, run } = require('hardhat')
 const registryDeploys = require('../deploys.js')
-const { chainNames } = require('@airswap/utils')
+const { chainNames, ChainIds } = require('@airswap/utils')
 const config = require('./config.js')
 
 async function main() {
