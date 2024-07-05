@@ -15,7 +15,6 @@ import "./interfaces/ISwapERC20.sol";
  * @notice https://www.airswap.io/
  */
 contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
-  uint256 public immutable DOMAIN_CHAIN_ID;
   bytes32 public immutable DOMAIN_SEPARATOR;
 
   bytes32 public constant ORDER_TYPEHASH =
@@ -71,7 +70,6 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
 
     _initializeOwner(msg.sender);
 
-    DOMAIN_CHAIN_ID = block.chainid;
     DOMAIN_SEPARATOR = _domainSeparator();
 
     protocolFee = _protocolFee;
@@ -257,23 +255,19 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
 
     // Recover the signatory from the hash and signature
     address signatory = ECDSA.tryRecover(
-      keccak256(
-        abi.encodePacked(
-          "\x19\x01", // EIP191: Indicates EIP712
-          DOMAIN_SEPARATOR,
-          keccak256(
-            abi.encode(
-              ORDER_TYPEHASH,
-              nonce,
-              expiry,
-              signerWallet,
-              signerToken,
-              signerAmount,
-              protocolFeeLight,
-              msg.sender,
-              senderToken,
-              senderAmount
-            )
+      _hashTypedData(
+        keccak256(
+          abi.encode(
+            ORDER_TYPEHASH,
+            nonce,
+            expiry,
+            signerWallet,
+            signerToken,
+            signerAmount,
+            protocolFeeLight,
+            msg.sender,
+            senderToken,
+            senderAmount
           )
         )
       ),
@@ -474,10 +468,6 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     order.s = s;
     order.senderWallet = senderWallet;
 
-    if (DOMAIN_CHAIN_ID != block.chainid) {
-      errors[count++] = "ChainIdChanged";
-    }
-
     // Validate as the authorized signatory if set
     address signatory = order.signerWallet;
     if (authorized[signatory] != address(0)) {
@@ -655,9 +645,6 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     bytes32 r,
     bytes32 s
   ) private {
-    // Ensure execution on the intended chain
-    if (DOMAIN_CHAIN_ID != block.chainid) revert ChainIdChanged();
-
     // Ensure the expiry is not passed
     if (expiry <= block.timestamp) revert OrderExpired();
 
@@ -711,23 +698,19 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     uint256 senderAmount
   ) private view returns (bytes32) {
     return
-      keccak256(
-        abi.encodePacked(
-          "\x19\x01", // EIP191: Indicates EIP712
-          DOMAIN_SEPARATOR,
-          keccak256(
-            abi.encode(
-              ORDER_TYPEHASH,
-              nonce,
-              expiry,
-              signerWallet,
-              signerToken,
-              signerAmount,
-              protocolFee,
-              senderWallet,
-              senderToken,
-              senderAmount
-            )
+      _hashTypedData(
+        keccak256(
+          abi.encode(
+            ORDER_TYPEHASH,
+            nonce,
+            expiry,
+            signerWallet,
+            signerToken,
+            signerAmount,
+            protocolFee,
+            senderWallet,
+            senderToken,
+            senderAmount
           )
         )
       );
