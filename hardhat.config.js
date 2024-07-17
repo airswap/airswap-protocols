@@ -153,8 +153,8 @@ module.exports = {
       rsk: process.env.BLOCKSCOUT_API_KEY,
       rskTestnet: process.env.BLOCKSCOUT_API_KEY,
       sepolia: process.env.ETHERSCAN_API_KEY,
+      neon: process.env.NEONSCAN_API_KEY,
       neondevnet: process.env.NEONSCAN_API_KEY,
-      neonevm: process.env.NEONSCAN_API_KEY,
     },
     customChains: [
       {
@@ -223,7 +223,7 @@ module.exports = {
       },
       {
         network: 'neon',
-        chainId: 245022934,
+        chainId: ChainIds.NEON,
         urls: {
           apiURL: explorerApiUrls[ChainIds.NEON],
           browserURL: explorerUrls[ChainIds.NEON],
@@ -231,7 +231,7 @@ module.exports = {
       },
       {
         network: 'neondevnet',
-        chainId: 245022926,
+        chainId: ChainIds.NEONDEVNET,
         urls: {
           apiURL: explorerApiUrls[ChainIds.NEONDEVNET],
           browserURL: explorerUrls[ChainIds.NEONDEVNET],

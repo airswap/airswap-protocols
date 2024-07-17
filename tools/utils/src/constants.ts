@@ -202,7 +202,7 @@ export const explorerUrls: Record<number, string> = {
   [ChainIds.BASESEPOLIA]: 'https://sepolia.basescan.org',
   [ChainIds.ARBITRUMSEPOLIA]: 'https://sepolia.arbiscan.io',
   [ChainIds.SEPOLIA]: 'https://sepolia.etherscan.io',
-  [ChainIds.NEON]: 'https://neonscan.org/',
+  [ChainIds.NEON]: 'https://neonscan.org',
   [ChainIds.NEONDEVNET]: 'https://devnet.neonscan.org/',
 }
 
@@ -215,6 +215,8 @@ export const explorerApiUrls: Record<number, string> = {
   [ChainIds.BASESEPOLIA]: 'https://api-sepolia.basescan.org/api',
   [ChainIds.BASE]: 'https://api.basescan.org/api',
   [ChainIds.ARBITRUMSEPOLIA]: 'https://api-sepolia.arbiscan.io/api',
+  [ChainIds.NEON]: 'https://api.neonscan.org/hardhat/verify',
+  [ChainIds.NEONDEVNET]: 'https://devnet-api.neonscan.org/hardhat/verify',
 }
 
 export const stakingTokenAddresses: Record<number, string> = {
