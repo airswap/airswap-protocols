@@ -29,7 +29,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@airswap/utils": "4.3.3",
+    "@airswap/utils": "4.3.4",
     "@openzeppelin/contracts": "^4.8.3",
     "prompt-confirm": "^2.0.4"
   }
