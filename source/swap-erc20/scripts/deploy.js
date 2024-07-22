@@ -47,7 +47,13 @@ async function main() {
   console.log(`protocolFeeLight: ${protocolFeeLight}`)
   console.log(`protocolFeeReceiver: ${protocolFeeReceiver}\n`)
 
-  const prompt = new Confirm('Proceed to deploy?')
+  const targetAddress = await displayDeployerInfo(deployer)
+  const mainnetAddress = swapERC20Deploys['1']
+  const prompt = new Confirm(
+    targetAddress === mainnetAddress
+      ? 'Proceed to deploy?'
+      : 'Mainnet address not matching target address. Proceed to deployment anyways?'
+  )
   if (await prompt.run()) {
     const swapFactory = await ethers.getContractFactory('SwapERC20')
     const swapContract = await swapFactory.deploy(

@@ -23,7 +23,13 @@ async function main() {
   const adapters = ['ERC20Adapter', 'ERC721Adapter', 'ERC1155Adapter']
   console.log(`adapters: ${JSON.stringify(adapters)}`)
 
-  const prompt = new Confirm('Proceed to deploy?')
+  const targetAddress = await displayDeployerInfo(deployer)
+  const mainnetAddress = adapterDeploys['1'][0]
+  const prompt = new Confirm(
+    targetAddress === mainnetAddress
+      ? 'Proceed to deploy?'
+      : 'Mainnet address not matching target address. Proceed to deployment anyways?'
+  )
   if (await prompt.run()) {
     const blocks = []
     for (let i = 0; i < adapters.length; i++) {

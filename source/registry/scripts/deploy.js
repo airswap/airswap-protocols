@@ -35,7 +35,13 @@ async function main() {
   console.log(`stakingCost: ${stakingCost}`)
   console.log(`supportCost: ${supportCost}\n`)
 
-  const prompt = new Confirm('Proceed to deploy?')
+  const targetAddress = await displayDeployerInfo(deployer)
+  const mainnetAddress = registryDeploys['1']
+  const prompt = new Confirm(
+    targetAddress === mainnetAddress
+      ? 'Proceed to deploy?'
+      : 'Mainnet address not matching target address. Proceed to deployment anyways?'
+  )
   if (await prompt.run()) {
     const registryFactory = await ethers.getContractFactory('Registry')
     const registryContract = await registryFactory.deploy(

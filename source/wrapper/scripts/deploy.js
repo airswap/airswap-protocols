@@ -9,6 +9,7 @@ const wrapperBlocks = require('../deploys-blocks.js')
 const wethDeploys = require('../deploys-weth.js')
 const { ChainIds, chainNames, chainLabels } = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
+const { displayDeployerInfo } = require('../../../scripts/deployer-info')
 
 async function main() {
   await run('compile')
@@ -36,7 +37,13 @@ async function main() {
   console.log(`SwapERC20: ${swapERC20Address}`)
   console.log(`Wrapped: ${wrappedTokenAddress}`)
 
-  const prompt = new Confirm('Proceed to deploy?')
+  const targetAddress = await displayDeployerInfo(deployer)
+  const mainnetAddress = wrapperDeploys['1']
+  const prompt = new Confirm(
+    targetAddress === mainnetAddress
+      ? 'Proceed to deploy?'
+      : 'Mainnet address not matching target address. Proceed to deployment anyways?'
+  )
   if (await prompt.run()) {
     const wrapperFactory = await ethers.getContractFactory('Wrapper')
     const wrapperContract = await wrapperFactory.deploy(

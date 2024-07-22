@@ -18,9 +18,13 @@ async function main() {
     console.log('Value for --network flag is required')
     return
   }
-  await displayDeployerInfo(deployer)
-
-  const prompt = new Confirm('Proceed to deploy?')
+  const targetAddress = await displayDeployerInfo(deployer)
+  const mainnetAddress = batchCallDeploys['1']
+  const prompt = new Confirm(
+    targetAddress === mainnetAddress
+      ? 'Proceed to deploy?'
+      : 'Mainnet address not matching target address. Proceed to deployment anyways?'
+  )
   if (await prompt.run()) {
     const batchFactory = await ethers.getContractFactory('BatchCall')
     const batchCallContract = await batchFactory.deploy()

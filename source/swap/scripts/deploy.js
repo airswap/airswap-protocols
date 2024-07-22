@@ -46,7 +46,13 @@ async function main() {
   console.log(`protocolFee: ${protocolFee}`)
   console.log(`protocolFeeReceiver: ${protocolFeeReceiver}`)
 
-  const prompt = new Confirm('Proceed to deploy?')
+  const targetAddress = await displayDeployerInfo(deployer)
+  const mainnetAddress = swapDeploys['1']
+  const prompt = new Confirm(
+    targetAddress === mainnetAddress
+      ? 'Proceed to deploy?'
+      : 'Mainnet address not matching target address. Proceed to deployment anyways?'
+  )
   if (await prompt.run()) {
     const swapFactory = await ethers.getContractFactory('Swap')
     const swapContract = await swapFactory.deploy(

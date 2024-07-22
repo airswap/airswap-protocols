@@ -35,7 +35,13 @@ async function main() {
   console.log(`stakingDuration: ${stakingDuration}`)
   console.log(`minDurationChangeDelay: ${minDurationChangeDelay}\n`)
 
-  const prompt = new Confirm('Proceed to deploy?')
+  const targetAddress = await displayDeployerInfo(deployer)
+  const mainnetAddress = stakingDeploys['1']
+  const prompt = new Confirm(
+    targetAddress === mainnetAddress
+      ? 'Proceed to deploy?'
+      : 'Mainnet address not matching target address. Proceed to deployment anyways?'
+  )
   if (await prompt.run()) {
     const stakingFactory = await ethers.getContractFactory('Staking')
     const stakingContract = await stakingFactory.deploy(

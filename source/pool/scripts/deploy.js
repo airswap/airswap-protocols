@@ -26,7 +26,13 @@ async function main() {
   console.log(`scale: ${scale}`)
   console.log(`max: ${max}`)
 
-  const prompt = new Confirm('Proceed to deploy?')
+  const targetAddress = await displayDeployerInfo(deployer)
+  const mainnetAddress = poolDeploys['1']
+  const prompt = new Confirm(
+    targetAddress === mainnetAddress
+      ? 'Proceed to deploy?'
+      : 'Mainnet address not matching target address. Proceed to deployment anyways?'
+  )
   if (await prompt.run()) {
     const poolFactory = await ethers.getContractFactory('Pool')
     const poolContract = await poolFactory.deploy(scale, max)

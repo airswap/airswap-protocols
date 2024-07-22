@@ -23,7 +23,13 @@ async function main() {
 
   console.log(`swapERC20Contract: ${swapERC20Deploys[chainId]}\n`)
 
-  const prompt = new Confirm('Proceed to deploy?')
+  const targetAddress = await displayDeployerInfo(deployer)
+  const mainnetAddress = delegateDeploys['1']
+  const prompt = new Confirm(
+    targetAddress === mainnetAddress
+      ? 'Proceed to deploy?'
+      : 'Mainnet address not matching target address. Proceed to deployment anyways?'
+  )
   if (await prompt.run()) {
     const delegateFactory = await ethers.getContractFactory('Delegate')
     const delegateContract = await delegateFactory.deploy(
