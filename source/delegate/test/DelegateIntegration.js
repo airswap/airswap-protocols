@@ -3,6 +3,7 @@ const {
   createOrderERC20,
   orderERC20ToParams,
   createOrderERC20Signature,
+  SECONDS_IN_DAY,
 } = require('@airswap/utils')
 const { ethers } = require('hardhat')
 const ERC20 = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
@@ -24,6 +25,7 @@ describe('Delegate Integration', () => {
   const DEFAULT_SENDER_AMOUNT = '10000'
   const DEFAULT_SIGNER_AMOUNT = '10000'
   const DEFAULT_BALANCE = '1000000'
+  const RULE_EXPIRY = Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString()
 
   async function createSignedOrderERC20(params, signer) {
     const unsignedOrder = createOrderERC20({
@@ -99,7 +101,8 @@ describe('Delegate Integration', () => {
           senderToken.address,
           DEFAULT_SENDER_AMOUNT,
           signerToken.address,
-          DEFAULT_SIGNER_AMOUNT
+          DEFAULT_SIGNER_AMOUNT,
+          RULE_EXPIRY
         )
 
       signerToken

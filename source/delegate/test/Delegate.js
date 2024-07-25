@@ -9,6 +9,7 @@ const {
   createOrderERC20,
   orderERC20ToParams,
   createOrderERC20Signature,
+  SECONDS_IN_DAY,
 } = require('@airswap/utils')
 const CHAIN_ID = 31337
 const DEFAULT_BALANCE = '100000'
@@ -18,6 +19,7 @@ const PROTOCOL_FEE = '5'
 const REBATE_SCALE = '10'
 const REBATE_MAX = '100'
 const UPDATE_SWAP_ERC20_ADDRESS = '0x0000000000000000000000000000000000001337'
+const RULE_EXPIRY = Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString()
 
 describe('Delegate Unit', () => {
   let deployer
@@ -157,7 +159,8 @@ describe('Delegate Unit', () => {
             senderToken.address,
             DEFAULT_SENDER_AMOUNT,
             signerToken.address,
-            DEFAULT_SIGNER_AMOUNT
+            DEFAULT_SIGNER_AMOUNT,
+            RULE_EXPIRY
           )
       )
         .to.emit(delegate, 'SetRule')
@@ -165,8 +168,10 @@ describe('Delegate Unit', () => {
           sender.address,
           senderToken.address,
           DEFAULT_SENDER_AMOUNT,
+          0,
           signerToken.address,
-          DEFAULT_SIGNER_AMOUNT
+          DEFAULT_SIGNER_AMOUNT,
+          RULE_EXPIRY
         )
     })
 
@@ -190,7 +195,8 @@ describe('Delegate Unit', () => {
             senderToken.address,
             DEFAULT_SENDER_AMOUNT,
             signerToken.address,
-            DEFAULT_SIGNER_AMOUNT
+            DEFAULT_SIGNER_AMOUNT,
+            RULE_EXPIRY
           )
       )
         .to.emit(delegate, 'SetRule')
@@ -198,8 +204,10 @@ describe('Delegate Unit', () => {
           sender.address,
           senderToken.address,
           DEFAULT_SENDER_AMOUNT,
+          0,
           signerToken.address,
-          DEFAULT_SIGNER_AMOUNT
+          DEFAULT_SIGNER_AMOUNT,
+          RULE_EXPIRY
         )
     })
 
@@ -212,7 +220,8 @@ describe('Delegate Unit', () => {
           senderToken.address,
           DEFAULT_SENDER_AMOUNT,
           signerToken.address,
-          DEFAULT_SIGNER_AMOUNT
+          DEFAULT_SIGNER_AMOUNT,
+          RULE_EXPIRY
         )
 
       await expect(
@@ -232,7 +241,8 @@ describe('Delegate Unit', () => {
           senderToken.address,
           DEFAULT_SENDER_AMOUNT,
           signerToken.address,
-          DEFAULT_SIGNER_AMOUNT
+          DEFAULT_SIGNER_AMOUNT,
+          RULE_EXPIRY
         )
 
       const rule = await delegate.rules(
@@ -241,7 +251,7 @@ describe('Delegate Unit', () => {
         signerToken.address
       )
 
-      expect(rule.senderAmount.toString()).to.equal(DEFAULT_SENDER_AMOUNT)
+      expect(rule.senderRuleAmount.toString()).to.equal(DEFAULT_SENDER_AMOUNT)
     })
 
     it('unsetting a Rule updates the rule balance', async () => {
@@ -252,7 +262,8 @@ describe('Delegate Unit', () => {
           senderToken.address,
           DEFAULT_SENDER_AMOUNT,
           signerToken.address,
-          DEFAULT_SIGNER_AMOUNT
+          DEFAULT_SIGNER_AMOUNT,
+          RULE_EXPIRY
         )
 
       let rule = await delegate.rules(
@@ -271,7 +282,7 @@ describe('Delegate Unit', () => {
         signerToken.address
       )
 
-      expect(rule.senderAmount.toString()).to.equal('0')
+      expect(rule.senderRuleAmount.toString()).to.equal('0')
     })
   })
 
@@ -302,7 +313,8 @@ describe('Delegate Unit', () => {
           senderToken.address,
           DEFAULT_SENDER_AMOUNT,
           signerToken.address,
-          DEFAULT_SIGNER_AMOUNT
+          DEFAULT_SIGNER_AMOUNT,
+          RULE_EXPIRY
         )
 
       const order = await createSignedOrderERC20({}, signer)
@@ -330,7 +342,8 @@ describe('Delegate Unit', () => {
           senderToken.address,
           DEFAULT_SENDER_AMOUNT,
           signerToken.address,
-          DEFAULT_SIGNER_AMOUNT
+          DEFAULT_SIGNER_AMOUNT,
+          RULE_EXPIRY
         )
 
       const order = await createSignedOrderERC20({}, signer)
@@ -379,7 +392,8 @@ describe('Delegate Unit', () => {
           senderToken.address,
           DEFAULT_SENDER_AMOUNT - 1,
           signerToken.address,
-          DEFAULT_SIGNER_AMOUNT - 1
+          DEFAULT_SIGNER_AMOUNT,
+          RULE_EXPIRY
         )
 
       const order = await createSignedOrderERC20({}, signer)
@@ -413,7 +427,8 @@ describe('Delegate Unit', () => {
           senderToken.address,
           DEFAULT_SENDER_AMOUNT,
           signerToken.address,
-          DEFAULT_SIGNER_AMOUNT
+          DEFAULT_SIGNER_AMOUNT,
+          RULE_EXPIRY
         )
 
       const order = await createSignedOrderERC20(
