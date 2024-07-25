@@ -25,7 +25,8 @@ describe('Delegate Integration', () => {
   const DEFAULT_SENDER_AMOUNT = '10000'
   const DEFAULT_SIGNER_AMOUNT = '10000'
   const DEFAULT_BALANCE = '1000000'
-  const RULE_EXPIRY = Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString()
+  const RULE_EXPIRY =
+    Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString() + 1
 
   async function createSignedOrderERC20(params, signer) {
     const unsignedOrder = createOrderERC20({

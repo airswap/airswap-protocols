@@ -116,7 +116,7 @@ contract Delegate is IDelegate, Ownable {
     ) {
       revert InvalidSignerAmount();
     }
-    if (rule.ruleExpiry > _expiry) revert RuleExpired();
+    if (rule.ruleExpiry < _expiry) revert RuleExpired();
 
     if (_senderAmount > (rule.senderRuleAmount - rule.senderFilledAmount)) {
       revert InvalidSenderAmount();
