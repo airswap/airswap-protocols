@@ -6,6 +6,7 @@ const { ethers, run } = require('hardhat')
 const swapDeploys = require('@airswap/swap-erc20/deploys.js')
 const wrapperDeploys = require('../deploys.js')
 const wrapperBlocks = require('../deploys-blocks.js')
+const wrapperCommits = require('../deploys-commits.js')
 const wethDeploys = require('../deploys-weth.js')
 const { ChainIds, chainNames, chainLabels } = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
@@ -74,6 +75,17 @@ async function main() {
       './deploys-blocks.js',
       prettier.format(
         `module.exports = ${JSON.stringify(wrapperBlocks, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
+      )
+    )
+    wrapperCommits[chainId] = require('child_process')
+      .execSync('git rev-parse HEAD')
+      .toString()
+      .trim()
+    fs.writeFileSync(
+      './deploys-commits.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(wrapperCommits, null, '\t')}`,
         { ...prettierConfig, parser: 'babel' }
       )
     )

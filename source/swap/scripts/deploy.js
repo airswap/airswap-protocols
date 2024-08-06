@@ -13,6 +13,7 @@ const { getReceiptUrl } = require('@airswap/utils')
 const poolDeploys = require('@airswap/pool/deploys.js')
 const swapDeploys = require('../deploys.js')
 const swapBlocks = require('../deploys-blocks.js')
+const swapCommits = require('../deploys-commits.js')
 const adapterDeploys = require('../deploys-adapters.js')
 const config = require('./config.js')
 const { displayDeployerInfo } = require('../../../scripts/deployer-info')
@@ -82,6 +83,17 @@ async function main() {
       './deploys-blocks.js',
       prettier.format(
         `module.exports = ${JSON.stringify(swapBlocks, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
+      )
+    )
+    swapCommits[chainId] = require('child_process')
+      .execSync('git rev-parse HEAD')
+      .toString()
+      .trim()
+    fs.writeFileSync(
+      './deploys-commits.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(swapCommits, null, '\t')}`,
         { ...prettierConfig, parser: 'babel' }
       )
     )

@@ -7,6 +7,7 @@ const { chainLabels, ChainIds } = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
 const adapterDeploys = require('../deploys-adapters.js')
 const adapterBlocks = require('../deploys-adapters-blocks.js')
+const adapterCommits = require('../deploys-adapters-commits.js')
 const { displayDeployerInfo } = require('../../../scripts/deployer-info')
 
 async function main() {
@@ -61,7 +62,17 @@ async function main() {
         { ...prettierConfig, parser: 'babel' }
       )
     )
-
+    adapterCommits[chainId] = require('child_process')
+      .execSync('git rev-parse HEAD')
+      .toString()
+      .trim()
+    fs.writeFileSync(
+      './deploys-adapters-commits.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(adapterCommits, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
+      )
+    )
     console.log(
       `\nVerify with "yarn verify-adapters --network ${chainLabels[
         chainId

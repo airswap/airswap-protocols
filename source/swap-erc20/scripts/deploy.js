@@ -12,6 +12,7 @@ const {
 const { getReceiptUrl } = require('@airswap/utils')
 const swapERC20Deploys = require('../deploys.js')
 const swapERC20Blocks = require('../deploys-blocks.js')
+const swapERC20Commits = require('../deploys-commits.js')
 const config = require('./config.js')
 const { displayDeployerInfo } = require('../../../scripts/deployer-info')
 
@@ -84,6 +85,17 @@ async function main() {
       './deploys-blocks.js',
       prettier.format(
         `module.exports = ${JSON.stringify(swapERC20Blocks, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
+      )
+    )
+    swapERC20Commits[chainId] = require('child_process')
+      .execSync('git rev-parse HEAD')
+      .toString()
+      .trim()
+    fs.writeFileSync(
+      './deploys-commits.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(swapERC20Commits, null, '\t')}`,
         { ...prettierConfig, parser: 'babel' }
       )
     )

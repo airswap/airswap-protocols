@@ -7,6 +7,7 @@ const { ChainIds, chainLabels } = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
 const batchCallDeploys = require('../deploys.js')
 const batchCallBlocks = require('../deploys-blocks.js')
+const batchCallCommits = require('../deploys-commits.js')
 const { displayDeployerInfo } = require('../../../scripts/deployer-info')
 
 async function main() {
@@ -52,6 +53,30 @@ async function main() {
         { ...prettierConfig, parser: 'babel' }
       )
     )
+
+    batchCallBlocks[chainId] = (
+      await batchCallContract.deployTransaction.wait()
+    ).blockNumber
+    fs.writeFileSync(
+      './deploys-blocks.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(batchCallBlocks, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
+      )
+    )
+
+    batchCallCommits[chainId] = require('child_process')
+      .execSync('git rev-parse HEAD')
+      .toString()
+      .trim()
+    fs.writeFileSync(
+      './deploys-commits.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(batchCallCommits, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
+      )
+    )
+
     console.log(
       `Deployed: ${batchCallDeploys[chainId]} @ ${batchCallBlocks[chainId]}`
     )
