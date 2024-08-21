@@ -8,11 +8,14 @@ interface IDelegate {
   struct Rule {
     address sender;
     address senderToken;
-    uint256 senderAmount;
+    uint256 senderRuleAmount;
+    uint256 senderFilledAmount;
     address signerToken;
     uint256 signerAmount;
+    uint256 ruleExpiry;
   }
 
+  error RuleExpired();
   error InvalidAddress();
   error InvalidSenderAmount();
   error InvalidSignerAmount();
@@ -20,45 +23,48 @@ interface IDelegate {
   error SenderInvalid();
   error TransferFromFailed();
 
-  event Authorize(address _signatory, address _signer);
-  event DelegateSwap(uint256 _nonce, address _signerWallet);
-  event Revoke(address _tmp, address _signer);
+  event Authorize(address signatory, address signer);
+  event DelegateSwap(uint256 nonce, address signerWallet);
+  event Revoke(address tmp, address signer);
 
   event SetRule(
-    address _senderWallet,
-    address _senderToken,
-    uint256 _senderAmount,
-    address _signerToken,
-    uint256 _signerAmount
+    address senderWallet,
+    address senderToken,
+    uint256 senderRuleAmount,
+    uint256 senderFilledAmount,
+    address signerToken,
+    uint256 signerAmount,
+    uint256 ruleExpiry
   );
 
-  event UnsetRule(address _signer, address _signerToken, address _senderToken);
+  event UnsetRule(address signer, address signerToken, address senderToken);
 
   function setRule(
-    address _sender,
-    address _senderToken,
-    uint256 _senderAmount,
-    address _signerToken,
-    uint256 _signerAmount
+    address sender,
+    address senderToken,
+    uint256 senderRuleAmount,
+    address signerToken,
+    uint256 signerAmount,
+    uint256 ruleExpiry
   ) external;
 
   function swap(
-    address _senderWallet,
-    uint256 _nonce,
-    uint256 _expiry,
-    address _signerWallet,
-    address _signerToken,
-    uint256 _signerAmount,
-    address _senderToken,
-    uint256 _senderAmount,
-    uint8 _v,
-    bytes32 _r,
-    bytes32 _s
+    address senderWallet,
+    uint256 nonce,
+    uint256 expiry,
+    address signerWallet,
+    address signerToken,
+    uint256 signerAmount,
+    address senderToken,
+    uint256 senderAmount,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
   ) external;
 
   function unsetRule(
-    address _sender,
-    address _signerToken,
-    address _senderToken
+    address sender,
+    address signerToken,
+    address senderToken
   ) external;
 }
