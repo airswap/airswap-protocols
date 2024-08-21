@@ -26,7 +26,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     );
 
   uint256 public constant FEE_DIVISOR = 10000;
-  uint256 private constant MAX_ERROR_COUNT = 8;
+  uint256 private constant MAX_ERROR_COUNT = 7;
   uint256 private constant MAX_MAX = 100;
   uint256 private constant MAX_SCALE = 77;
 
