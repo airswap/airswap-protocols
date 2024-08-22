@@ -31,7 +31,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   bytes32 public immutable DOMAIN_SEPARATOR;
 
   uint256 public constant FEE_DIVISOR = 10000;
-  uint256 private constant MAX_ERROR_COUNT = 16;
+  uint256 private constant MAX_ERROR_COUNT = 15;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
