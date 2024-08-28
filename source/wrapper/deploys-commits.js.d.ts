@@ -1,1 +1,1 @@
-declare module '@airswap/batch-call/deploys-commits.js'
+declare module '@airswap/wrapper/deploys-commits.js'
