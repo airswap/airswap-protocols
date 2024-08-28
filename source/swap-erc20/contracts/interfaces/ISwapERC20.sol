@@ -28,7 +28,6 @@ interface ISwapERC20 {
   event SetBonusMax(uint256 bonusMax);
   event SetStaking(address indexed staking);
 
-  error ChainIdChanged();
   error InvalidFee();
   error InvalidFeeLight();
   error InvalidFeeWallet();
