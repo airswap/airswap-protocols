@@ -34,16 +34,17 @@ contract Delegate is IDelegate, Ownable {
   /**
    * @notice Set a Trading Rule
    * @param _senderToken address Address of an ERC-20 token the consumer would send
-   * @param _senderAmount uint256 Maximum amount of ERC-20 token the sender wants to swap
+   * @param _senderRuleAmount uint256 Maximum amount of ERC-20 token the sender wants to swap
    * @param _signerToken address Address of an ERC-20 token the delegate would recieve
    * @param _signerAmount uint256 Minimum amount of ERC-20 token the delegate would recieve
    */
   function setRule(
     address _senderWallet,
     address _senderToken,
-    uint256 _senderAmount,
+    uint256 _senderRuleAmount,
     address _signerToken,
-    uint256 _signerAmount
+    uint256 _signerAmount,
+    uint256 _ruleExpiry
   ) external {
     if (authorized[_senderWallet] != address(0)) {
       if (authorized[_senderWallet] != msg.sender) revert SenderInvalid();
@@ -54,17 +55,21 @@ contract Delegate is IDelegate, Ownable {
     rules[_senderWallet][_senderToken][_signerToken] = Rule(
       _senderWallet,
       _senderToken,
-      _senderAmount,
+      _senderRuleAmount,
+      0,
       _signerToken,
-      _signerAmount
+      _signerAmount,
+      _ruleExpiry
     );
 
     emit SetRule(
       _senderWallet,
       _senderToken,
-      _senderAmount,
+      _senderRuleAmount,
+      0,
       _signerToken,
-      _signerAmount
+      _signerAmount,
+      _ruleExpiry
     );
   }
 
@@ -84,7 +89,6 @@ contract Delegate is IDelegate, Ownable {
     } else {
       if (_senderWallet != msg.sender) revert SenderInvalid();
     }
-    Rule storage rule = rules[_senderWallet][_senderToken][_signerToken];
     delete rules[_senderWallet][_senderToken][_signerToken];
 
     emit UnsetRule(_senderWallet, _senderToken, _signerToken);
@@ -106,12 +110,15 @@ contract Delegate is IDelegate, Ownable {
     Rule storage rule = rules[_senderWallet][_senderToken][_signerToken];
 
     if (
-      _senderAmount > (_signerAmount * rule.senderAmount) / rule.signerAmount
+      _signerAmount <
+      (rule.signerAmount * (rule.senderRuleAmount - rule.senderFilledAmount)) /
+        rule.senderRuleAmount
     ) {
       revert InvalidSignerAmount();
     }
+    if (rule.ruleExpiry < block.timestamp) revert RuleExpired();
 
-    if (rule.senderAmount < _senderAmount) {
+    if (_senderAmount > (rule.senderRuleAmount - rule.senderFilledAmount)) {
       revert InvalidSenderAmount();
     }
 
@@ -140,7 +147,7 @@ contract Delegate is IDelegate, Ownable {
     SafeTransferLib.safeTransfer(_signerToken, _senderWallet, _signerAmount);
 
     rules[_senderWallet][_senderToken][_signerToken]
-      .senderAmount -= _senderAmount;
+      .senderFilledAmount += _senderAmount;
     emit DelegateSwap(_nonce, _signerWallet);
   }
 
