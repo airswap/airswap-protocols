@@ -33,10 +33,12 @@ contract Delegate is IDelegate, Ownable {
 
   /**
    * @notice Set a Rule
+   * @param _senderWallet The address of the sender's wallet
    * @param _senderToken address ERC-20 token the sender would transfer
    * @param _senderAmount uint256 Maximum sender amount for the rule
    * @param _signerToken address ERC-20 token the signer would transfer
    * @param _signerAmount uint256 Maximum signer amount for the rule
+   * @param _expiry uint256 Expiry in seconds since 1 January 1970
    */
   function setRule(
     address _senderWallet,
@@ -77,6 +79,7 @@ contract Delegate is IDelegate, Ownable {
 
   /**
    * @notice Unset rule
+   * @param _senderWallet The address of the sender's wallet
    * @param _senderToken address sender token of the rule
    * @param _signerToken address signer token of the rule
    */
@@ -128,7 +131,6 @@ contract Delegate is IDelegate, Ownable {
     bytes32 _s
   ) external {
     Rule storage rule = rules[_senderWallet][_senderToken][_signerToken];
-
     if (
       _signerAmount <
       (rule.signerAmount * (rule.senderAmount - rule.senderFilledAmount)) /
