@@ -12,6 +12,7 @@ const {
 const { getReceiptUrl } = require('@airswap/utils')
 const swapERC20Deploys = require('../deploys.js')
 const swapERC20Blocks = require('../deploys-blocks.js')
+const swapERC20Commits = require('../deploys-commits.js')
 const config = require('./config.js')
 const { displayDeployerInfo } = require('../../../scripts/deployer-info')
 
@@ -47,7 +48,13 @@ async function main() {
   console.log(`protocolFeeLight: ${protocolFeeLight}`)
   console.log(`protocolFeeReceiver: ${protocolFeeReceiver}\n`)
 
-  const prompt = new Confirm('Proceed to deploy?')
+  const targetAddress = await displayDeployerInfo(deployer)
+  const mainnetAddress = swapERC20Deploys['1']
+  const prompt = new Confirm(
+    targetAddress === mainnetAddress
+      ? 'Proceed to deploy?'
+      : 'Contract address would not match current mainnet address. Proceed anyway?'
+  )
   if (await prompt.run()) {
     const swapFactory = await ethers.getContractFactory('SwapERC20')
     const swapContract = await swapFactory.deploy(
@@ -78,6 +85,17 @@ async function main() {
       './deploys-blocks.js',
       prettier.format(
         `module.exports = ${JSON.stringify(swapERC20Blocks, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
+      )
+    )
+    swapERC20Commits[chainId] = require('child_process')
+      .execSync('git rev-parse HEAD')
+      .toString()
+      .trim()
+    fs.writeFileSync(
+      './deploys-commits.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(swapERC20Commits, null, '\t')}`,
         { ...prettierConfig, parser: 'babel' }
       )
     )

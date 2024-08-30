@@ -7,6 +7,7 @@ const { ChainIds, chainLabels } = require('@airswap/utils')
 const { getReceiptUrl } = require('@airswap/utils')
 const batchCallDeploys = require('../deploys.js')
 const batchCallBlocks = require('../deploys-blocks.js')
+const batchCallCommits = require('../deploys-commits.js')
 const { displayDeployerInfo } = require('../../../scripts/deployer-info')
 
 async function main() {
@@ -18,9 +19,13 @@ async function main() {
     console.log('Value for --network flag is required')
     return
   }
-  await displayDeployerInfo(deployer)
-
-  const prompt = new Confirm('Proceed to deploy?')
+  const targetAddress = await displayDeployerInfo(deployer)
+  const mainnetAddress = batchCallDeploys['1']
+  const prompt = new Confirm(
+    targetAddress === mainnetAddress
+      ? 'Proceed to deploy?'
+      : 'Contract address would not match current mainnet address. Proceed anyway?'
+  )
   if (await prompt.run()) {
     const batchFactory = await ethers.getContractFactory('BatchCall')
     const batchCallContract = await batchFactory.deploy()
@@ -48,6 +53,30 @@ async function main() {
         { ...prettierConfig, parser: 'babel' }
       )
     )
+
+    batchCallBlocks[chainId] = (
+      await batchCallContract.deployTransaction.wait()
+    ).blockNumber
+    fs.writeFileSync(
+      './deploys-blocks.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(batchCallBlocks, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
+      )
+    )
+
+    batchCallCommits[chainId] = require('child_process')
+      .execSync('git rev-parse HEAD')
+      .toString()
+      .trim()
+    fs.writeFileSync(
+      './deploys-commits.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(batchCallCommits, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
+      )
+    )
+
     console.log(
       `Deployed: ${batchCallDeploys[chainId]} @ ${batchCallBlocks[chainId]}`
     )
