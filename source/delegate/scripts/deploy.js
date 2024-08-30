@@ -29,7 +29,7 @@ async function main() {
   const prompt = new Confirm(
     targetAddress === mainnetAddress
       ? 'Proceed to deploy?'
-      : 'Mainnet address not matching target address. Proceed to deployment anyways?'
+      : 'Contract address would not match current mainnet address. Proceed anyway?'
   )
   if (await prompt.run()) {
     const delegateFactory = await ethers.getContractFactory('Delegate')
