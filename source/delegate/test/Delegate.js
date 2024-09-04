@@ -143,6 +143,12 @@ describe('Delegate Unit', () => {
       expect(await delegate.swapERC20()).to.equal(UPDATE_SWAP_ERC20_ADDRESS)
     })
 
+    it('the swapERC20Contract address cannot be address(0)', async () => {
+      await expect(
+        delegate.setSwapERC20Contract(ADDRESS_ZERO)
+      ).to.be.revertedWith('InvalidAddress')
+    })
+
     it('only the owner can set the swapERC20Contract address', async () => {
       await expect(
         delegate.connect(anyone).setSwapERC20Contract(UPDATE_SWAP_ERC20_ADDRESS)
@@ -210,6 +216,37 @@ describe('Delegate Unit', () => {
         )
     })
 
+    it('an unauthorized manager cannot set a rule', async () => {
+      await delegate.connect(sender).authorize(manager.address)
+      await expect(
+        delegate
+          .connect(signer)
+          .setRule(
+            sender.address,
+            senderToken.address,
+            DEFAULT_SENDER_AMOUNT,
+            signerToken.address,
+            DEFAULT_SIGNER_AMOUNT,
+            RULE_EXPIRY
+          )
+      ).to.be.revertedWith('SenderInvalid')
+    })
+
+    it('a manager cannot set a rule without prior authorization', async () => {
+      await expect(
+        delegate
+          .connect(manager)
+          .setRule(
+            sender.address,
+            senderToken.address,
+            DEFAULT_SENDER_AMOUNT,
+            signerToken.address,
+            DEFAULT_SIGNER_AMOUNT,
+            RULE_EXPIRY
+          )
+      ).to.be.revertedWith('SenderInvalid')
+    })
+
     it('a manager can unset a Rule', async () => {
       await delegate.connect(sender).authorize(manager.address)
       await delegate
@@ -230,6 +267,48 @@ describe('Delegate Unit', () => {
       )
         .to.emit(delegate, 'UnsetRule')
         .withArgs(sender.address, senderToken.address, signerToken.address)
+    })
+
+    it('an unauthorized manager cannot unset a rule', async () => {
+      await delegate.connect(sender).authorize(manager.address)
+      await delegate
+        .connect(manager)
+        .setRule(
+          sender.address,
+          senderToken.address,
+          DEFAULT_SENDER_AMOUNT,
+          signerToken.address,
+          DEFAULT_SIGNER_AMOUNT,
+          RULE_EXPIRY
+        )
+
+      await expect(
+        delegate
+          .connect(signer)
+          .unsetRule(sender.address, senderToken.address, signerToken.address)
+      ).to.be.revertedWith('SenderInvalid')
+    })
+
+    it('a revoked manager cannot unset a rule', async () => {
+      await delegate.connect(sender).authorize(manager.address)
+      await delegate
+        .connect(manager)
+        .setRule(
+          sender.address,
+          senderToken.address,
+          DEFAULT_SENDER_AMOUNT,
+          signerToken.address,
+          DEFAULT_SIGNER_AMOUNT,
+          RULE_EXPIRY
+        )
+
+      await delegate.connect(sender).revoke()
+
+      await expect(
+        delegate
+          .connect(manager)
+          .unsetRule(sender.address, senderToken.address, signerToken.address)
+      ).to.be.revertedWith('SenderInvalid')
     })
 
     it('setting a Rule updates the rule balance', async () => {
