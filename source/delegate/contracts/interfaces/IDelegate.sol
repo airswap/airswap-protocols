@@ -21,7 +21,6 @@ interface IDelegate {
   error InvalidSignerAmount();
   error ManagerInvalid();
   error SenderInvalid();
-  error TransferFromFailed();
 
   event Authorize(address signatory, address signer);
   event DelegateSwap(uint256 nonce, address signerWallet);
@@ -64,7 +63,7 @@ interface IDelegate {
 
   function unsetRule(
     address sender,
-    address signerToken,
-    address senderToken
+    address senderToken,
+    address signerToken
   ) external;
 }

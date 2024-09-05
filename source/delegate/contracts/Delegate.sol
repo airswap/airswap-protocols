@@ -129,7 +129,11 @@ contract Delegate is IDelegate, Ownable {
       _senderAmount
     );
 
-    ERC20(_senderToken).approve(address(swapERC20), _senderAmount);
+    SafeTransferLib.safeApprove(
+      _senderToken,
+      address(swapERC20),
+      _senderAmount
+    );
 
     swapERC20.swapLight(
       _nonce,
