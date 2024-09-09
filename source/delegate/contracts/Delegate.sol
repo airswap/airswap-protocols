@@ -4,7 +4,6 @@ pragma solidity 0.8.23;
 
 import "./interfaces/IDelegate.sol";
 import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
-import { ERC20 } from "solady/src/tokens/ERC20.sol";
 import { Ownable } from "solady/src/auth/Ownable.sol";
 import { SafeTransferLib } from "solady/src/utils/SafeTransferLib.sol";
 
@@ -129,7 +128,11 @@ contract Delegate is IDelegate, Ownable {
       _senderAmount
     );
 
-    ERC20(_senderToken).approve(address(swapERC20), _senderAmount);
+    SafeTransferLib.safeApprove(
+      _senderToken,
+      address(swapERC20),
+      _senderAmount
+    );
 
     swapERC20.swapLight(
       _nonce,
