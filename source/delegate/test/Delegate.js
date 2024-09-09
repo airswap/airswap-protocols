@@ -146,7 +146,7 @@ describe('Delegate Unit', () => {
     it('the swapERC20Contract address cannot be address(0)', async () => {
       await expect(
         delegate.setSwapERC20Contract(ADDRESS_ZERO)
-      ).to.be.revertedWith('InvalidAddress')
+      ).to.be.revertedWith('AddressInvalid')
     })
 
     it('only the owner can set the swapERC20Contract address', async () => {
@@ -175,7 +175,6 @@ describe('Delegate Unit', () => {
           sender.address,
           senderToken.address,
           DEFAULT_SENDER_AMOUNT,
-          0,
           signerToken.address,
           DEFAULT_SIGNER_AMOUNT,
           RULE_EXPIRY
@@ -211,7 +210,6 @@ describe('Delegate Unit', () => {
           sender.address,
           senderToken.address,
           DEFAULT_SENDER_AMOUNT,
-          0,
           signerToken.address,
           DEFAULT_SIGNER_AMOUNT,
           RULE_EXPIRY
@@ -331,7 +329,7 @@ describe('Delegate Unit', () => {
         signerToken.address
       )
 
-      expect(rule.senderRuleAmount.toString()).to.equal(DEFAULT_SENDER_AMOUNT)
+      expect(rule.senderAmount.toString()).to.equal(DEFAULT_SENDER_AMOUNT)
     })
 
     it('unsetting a Rule updates the rule balance', async () => {
@@ -362,7 +360,7 @@ describe('Delegate Unit', () => {
         signerToken.address
       )
 
-      expect(rule.senderRuleAmount.toString()).to.equal('0')
+      expect(rule.senderAmount.toString()).to.equal('0')
     })
   })
 
@@ -492,7 +490,7 @@ describe('Delegate Unit', () => {
 
       await expect(
         delegate.connect(signer).swap(sender.address, ...order)
-      ).to.be.revertedWith('InvalidSenderAmount')
+      ).to.be.revertedWith('SenderAmountInvalid')
     })
 
     it('fails to swap with insufficient signer amount on Rule', async () => {
@@ -532,7 +530,7 @@ describe('Delegate Unit', () => {
 
       await expect(
         delegate.connect(signer).swap(sender.address, ...order)
-      ).to.be.revertedWith('InvalidSignerAmount')
+      ).to.be.revertedWith('SignerAmountInvalid')
     })
 
     it('fails to swap with a rule expired', async () => {
