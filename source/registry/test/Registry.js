@@ -352,7 +352,7 @@ describe('Registry Unit', () => {
       expect(token3Supported).to.equal(true)
     })
 
-    it('add a list of tokens when there is insufficent stake token', async () => {
+    it('add a list of tokens when there is insufficient stake token', async () => {
       await stakingToken.mock.transferFrom.returns(false)
       await expect(
         registry

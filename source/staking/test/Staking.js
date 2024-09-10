@@ -509,7 +509,7 @@ describe('Staking Unit', () => {
       await ethers.provider.send('evm_mine', [block['timestamp'] + 10])
 
       const available = await staking.available(account1.address)
-      // every 1 block 1% is unstakeable, user can only claim starting afater 10 blocks, or 10% unstakeable
+      // every 1 block 1% is unstakeable, user can only claim starting after 10 blocks, or 10% unstakeable
       expect(available).to.equal('10')
     })
 

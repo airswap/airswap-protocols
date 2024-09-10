@@ -358,7 +358,7 @@ describe('BatchCall Integration', () => {
     })
   })
 
-  describe('returns tokensSupported for mutiple stakers', () => {
+  describe('returns tokensSupported for multiple stakers', () => {
     it('returns all tokens supported by multiple stakers', async () => {
       const tokensSupported = []
       for (let i = 0; i < 10; i++) {
