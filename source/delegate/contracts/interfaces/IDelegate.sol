@@ -63,7 +63,7 @@ interface IDelegate {
 
   function unsetRule(
     address sender,
-    address signerToken,
-    address senderToken
+    address senderToken,
+    address signerToken
   ) external;
 }

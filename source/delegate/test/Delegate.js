@@ -146,7 +146,7 @@ describe('Delegate Unit', () => {
     it('the swapERC20Contract address cannot be address(0)', async () => {
       await expect(
         delegate.setSwapERC20Contract(ADDRESS_ZERO)
-      ).to.be.revertedWith('InvalidAddress')
+      ).to.be.revertedWith('AddressInvalid')
     })
 
     it('only the owner can set the swapERC20Contract address', async () => {
