@@ -33,8 +33,8 @@ async function main() {
 
   console.log(`\nDeploy WRAPPER`)
 
-  console.log(`· swapERC20Address    ${swapERC20Address}`)
-  console.log(`· wrappedTokenAddress ${wrappedTokenAddress}\n`)
+  console.log(`· swapERC20Address     ${swapERC20Address}`)
+  console.log(`· wrappedTokenAddress  ${wrappedTokenAddress}\n`)
 
   if (await confirmDeployment(deployer, wrapperDeploys[ChainIds.MAINNET])) {
     const wrapperFactory = await ethers.getContractFactory('Wrapper')

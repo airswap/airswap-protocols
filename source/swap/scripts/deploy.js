@@ -42,10 +42,10 @@ async function main() {
 
   console.log(`\nDeploy SWAP`)
 
-  console.log(`· adapters            ${adapterDeploys[chainId].join(', ')}`)
-  console.log(`· protocolFee         ${protocolFee}`)
-  console.log(`· requiredSenderKind  ${requiredSenderKind}`)
-  console.log(`· protocolFeeReceiver ${protocolFeeReceiver}\n`)
+  console.log(`· adapters             ${adapterDeploys[chainId].join(', ')}`)
+  console.log(`· protocolFee          ${protocolFee}`)
+  console.log(`· requiredSenderKind   ${requiredSenderKind}`)
+  console.log(`· protocolFeeReceiver  ${protocolFeeReceiver}\n`)
 
   if (await confirmDeployment(deployer, swapDeploys)) {
     const swapFactory = await ethers.getContractFactory('Swap')

@@ -32,9 +32,9 @@ async function main() {
 
   console.log(`\nDeploy REGISTRY`)
 
-  console.log(`· stakingCost  ${stakingCost}`)
-  console.log(`· supportCost  ${supportCost}`)
-  console.log(`· stakingToken ${stakingToken}\n`)
+  console.log(`· stakingCost   ${stakingCost}`)
+  console.log(`· supportCost   ${supportCost}`)
+  console.log(`· stakingToken  ${stakingToken}\n`)
 
   if (await confirmDeployment(deployer, registryDeploys)) {
     const registryFactory = await ethers.getContractFactory('Registry')

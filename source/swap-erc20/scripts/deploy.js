@@ -44,9 +44,9 @@ async function main() {
 
   console.log(`\nDeploy SWAPERC20`)
 
-  console.log(`· protocolFee:         ${protocolFee}`)
-  console.log(`· protocolFeeLight:    ${protocolFeeLight}`)
-  console.log(`· protocolFeeReceiver: ${protocolFeeReceiver}\n`)
+  console.log(`· protocolFee          ${protocolFee}`)
+  console.log(`· protocolFeeLight     ${protocolFeeLight}`)
+  console.log(`· protocolFeeReceiver  ${protocolFeeReceiver}\n`)
 
   if (await confirmDeployment(deployer, swapERC20Deploys[ChainIds.MAINNET])) {
     const swapFactory = await ethers.getContractFactory('SwapERC20')

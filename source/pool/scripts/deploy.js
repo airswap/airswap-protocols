@@ -24,8 +24,8 @@ async function main() {
 
   console.log(`\nDeploy POOL`)
 
-  console.log(`· max   ${max}`)
-  console.log(`· scale ${scale}\n`)
+  console.log(`· max    ${max}`)
+  console.log(`· scale  ${scale}\n`)
 
   if (await confirmDeployment(deployer, poolDeploys[ChainIds.MAINNET])) {
     const poolFactory = await ethers.getContractFactory('Pool')

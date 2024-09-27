@@ -30,11 +30,11 @@ async function main() {
 
   console.log(`\nDeploy STAKING`)
 
-  console.log(`· name                   ${name}`)
-  console.log(`· symbol                 ${symbol}`)
-  console.log(`· stakingToken           ${stakingToken}`)
-  console.log(`· stakingDuration        ${stakingDuration}`)
-  console.log(`· minDurationChangeDelay ${minDurationChangeDelay}\n`)
+  console.log(`· name                    ${name}`)
+  console.log(`· symbol                  ${symbol}`)
+  console.log(`· stakingToken            ${stakingToken}`)
+  console.log(`· stakingDuration         ${stakingDuration}`)
+  console.log(`· minDurationChangeDelay  ${minDurationChangeDelay}\n`)
 
   if (await confirmDeployment(deployer, stakingDeploys[ChainIds.MAINNET])) {
     const stakingFactory = await ethers.getContractFactory('Staking')

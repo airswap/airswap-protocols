@@ -23,7 +23,7 @@ async function main() {
 
   console.log(`\nDeploy ADAPTERS`)
 
-  console.log(`· adapters ${adapters.join(', ')}\n`)
+  console.log(`· adapters  ${adapters.join(', ')}\n`)
 
   if (await confirmDeployment(deployer, adapterDeploys[ChainIds.MAINNET][0])) {
     const blocks = []

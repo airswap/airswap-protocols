@@ -23,7 +23,7 @@ async function main() {
 
   console.log(`\nDeploy DELEGATE`)
 
-  console.log(`· swapERC20Contract ${swapERC20Deploys[chainId]}\n`)
+  console.log(`· swapERC20Contract  ${swapERC20Deploys[chainId]}\n`)
 
   if (await confirmDeployment(deployer, delegateDeploys[ChainIds.MAINNET])) {
     const delegateFactory = await ethers.getContractFactory('Delegate')
