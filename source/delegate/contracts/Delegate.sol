@@ -14,7 +14,7 @@ import { SafeTransferLib } from "solady/src/utils/SafeTransferLib.sol";
  */
 contract Delegate is IDelegate, Ownable {
   // The SwapERC20 contract to be used to execute orders
-  ISwapERC20 public swapERC20;
+  ISwapERC20 public swapERC20Contract;
 
   // Mapping of sender to senderToken to to signerToken to Rule
   mapping(address => mapping(address => mapping(address => Rule))) public rules;
@@ -25,9 +25,9 @@ contract Delegate is IDelegate, Ownable {
   /**
    * @notice Contract Constructor
    */
-  constructor(ISwapERC20 _swapERC20) {
+  constructor(ISwapERC20 _swapERC20Contract) {
     _initializeOwner(msg.sender);
-    swapERC20 = _swapERC20;
+    swapERC20Contract = _swapERC20Contract;
   }
 
   /**
@@ -153,12 +153,12 @@ contract Delegate is IDelegate, Ownable {
 
     SafeTransferLib.safeApprove(
       _senderToken,
-      address(swapERC20),
+      address(swapERC20Contract),
       _senderAmount
     );
 
     // Execute the swap
-    swapERC20.swapLight(
+    swapERC20Contract.swapLight(
       _nonce,
       _expiry,
       _signerWallet,
@@ -203,10 +203,12 @@ contract Delegate is IDelegate, Ownable {
 
   /**
    * @notice Sets the SwapERC20 contract
-   * @param _swapERC20 ISwapERC20 The SwapERC20 contract
+   * @param _swapERC20Contract ISwapERC20 The SwapERC20 contract
    */
-  function setSwapERC20Contract(ISwapERC20 _swapERC20) external onlyOwner {
-    if (address(_swapERC20) == address(0)) revert AddressInvalid();
-    swapERC20 = _swapERC20;
+  function setSwapERC20Contract(
+    ISwapERC20 _swapERC20Contract
+  ) external onlyOwner {
+    if (address(_swapERC20Contract) == address(0)) revert AddressInvalid();
+    swapERC20Contract = _swapERC20Contract;
   }
 }

@@ -135,12 +135,14 @@ describe('Delegate Unit', () => {
 
   describe('Constructor and admin functions', async () => {
     it('swap ERC20 address is set', async () => {
-      expect(await delegate.swapERC20()).to.equal(swapERC20.address)
+      expect(await delegate.swapERC20Contract()).to.equal(swapERC20.address)
     })
 
     it('sets the swapERC20Contract address', async () => {
       await delegate.setSwapERC20Contract(UPDATE_SWAP_ERC20_ADDRESS)
-      expect(await delegate.swapERC20()).to.equal(UPDATE_SWAP_ERC20_ADDRESS)
+      expect(await delegate.swapERC20Contract()).to.equal(
+        UPDATE_SWAP_ERC20_ADDRESS
+      )
     })
 
     it('the swapERC20Contract address cannot be address(0)', async () => {

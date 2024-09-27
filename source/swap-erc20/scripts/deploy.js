@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 const fs = require('fs')
 const prettier = require('prettier')
-const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const poolDeploys = require('@airswap/pool/deploys.js')
 const {
@@ -14,7 +13,7 @@ const swapERC20Deploys = require('../deploys.js')
 const swapERC20Blocks = require('../deploys-blocks.js')
 const swapERC20Commits = require('../deploys-commits.js')
 const config = require('./config.js')
-const { displayDeployerInfo } = require('../../../scripts/deployer-info')
+const { confirmDeployment } = require('../../../scripts/deployer-info')
 
 async function main() {
   await run('compile')
@@ -25,7 +24,6 @@ async function main() {
     console.log('Value for --network flag is required')
     return
   }
-  await displayDeployerInfo(deployer)
 
   let protocolFeeReceiver = poolDeploys[chainId]
   if (protocolFeeReceiverAddresses[chainId]) {
@@ -44,18 +42,13 @@ async function main() {
       config[ChainIds.MAINNET])
   }
 
-  console.log(`protocolFee: ${protocolFee}`)
-  console.log(`protocolFeeLight: ${protocolFeeLight}`)
-  console.log(`protocolFeeReceiver: ${protocolFeeReceiver}\n`)
+  console.log(`\nDeploy SWAPERC20`)
 
-  const targetAddress = await displayDeployerInfo(deployer)
-  const mainnetAddress = swapERC20Deploys['1']
-  const prompt = new Confirm(
-    targetAddress === mainnetAddress
-      ? 'Proceed to deploy?'
-      : 'Contract address would not match current mainnet address. Proceed anyway?'
-  )
-  if (await prompt.run()) {
+  console.log(`· protocolFee          ${protocolFee}`)
+  console.log(`· protocolFeeLight     ${protocolFeeLight}`)
+  console.log(`· protocolFeeReceiver  ${protocolFeeReceiver}\n`)
+
+  if (await confirmDeployment(deployer, swapERC20Deploys[ChainIds.MAINNET])) {
     const swapFactory = await ethers.getContractFactory('SwapERC20')
     const swapContract = await swapFactory.deploy(
       protocolFee,

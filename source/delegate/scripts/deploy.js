@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const fs = require('fs')
 const prettier = require('prettier')
-const Confirm = require('prompt-confirm')
+
 const { ethers, run } = require('hardhat')
 const swapERC20Deploys = require('@airswap/swap-erc20/deploys.js')
 const { ChainIds, chainLabels } = require('@airswap/utils')
@@ -9,7 +9,7 @@ const { getReceiptUrl } = require('@airswap/utils')
 const delegateDeploys = require('../deploys.js')
 const delegateBlocks = require('../deploys-blocks.js')
 const delegateCommits = require('../deploys-commits.js')
-const { displayDeployerInfo } = require('../../../scripts/deployer-info')
+const { confirmDeployment } = require('../../../scripts/deployer-info')
 
 async function main() {
   await run('compile')
@@ -20,18 +20,12 @@ async function main() {
     console.log('Value for --network flag is required')
     return
   }
-  await displayDeployerInfo(deployer)
 
-  console.log(`swapERC20Contract: ${swapERC20Deploys[chainId]}\n`)
+  console.log(`\nDeploy DELEGATE`)
 
-  const targetAddress = await displayDeployerInfo(deployer)
-  const mainnetAddress = delegateDeploys['1']
-  const prompt = new Confirm(
-    targetAddress === mainnetAddress
-      ? 'Proceed to deploy?'
-      : 'Contract address would not match current mainnet address. Proceed anyway?'
-  )
-  if (await prompt.run()) {
+  console.log(`· swapERC20Contract  ${swapERC20Deploys[chainId]}\n`)
+
+  if (await confirmDeployment(deployer, delegateDeploys[ChainIds.MAINNET])) {
     const delegateFactory = await ethers.getContractFactory('Delegate')
     const delegateContract = await delegateFactory.deploy(
       swapERC20Deploys[chainId]
