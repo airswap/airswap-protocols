@@ -9,6 +9,7 @@ const {
 } = require('@airswap/utils')
 
 const contracts = [
+  ['delegate', 'Delegate'],
   ['pool', 'Pool'],
   ['staking', 'Staking'],
   ['swap', 'Swap'],
