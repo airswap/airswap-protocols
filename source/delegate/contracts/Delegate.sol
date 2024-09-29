@@ -10,29 +10,30 @@ import { SafeTransferLib } from "solady/src/utils/SafeTransferLib.sol";
 /**
  * @title AirSwap: Delegated On-chain Trading Rules
  * @notice Supports ERC-20 tokens
- * @dev inherits IDelegate, Ownable and uses SafeTransferLib
+ * @dev inherits IDelegate, Ownable; uses SafeTransferLib
  */
 contract Delegate is IDelegate, Ownable {
   // The SwapERC20 contract to be used to execute orders
   ISwapERC20 public swapERC20Contract;
 
-  // Mapping of sender to senderToken to to signerToken to Rule
+  // Mapping of senderWallet to senderToken to to signerToken to Rule
   mapping(address => mapping(address => mapping(address => Rule))) public rules;
 
-  // Mapping of sender to authorized manager
+  // Mapping of senderWallet to an authorized manager
   mapping(address => address) public authorized;
 
   /**
-   * @notice Contract Constructor
+   * @notice Constructor
+   * @param _swapERC20Contract address
    */
-  constructor(ISwapERC20 _swapERC20Contract) {
+  constructor(address _swapERC20Contract) {
     _initializeOwner(msg.sender);
-    swapERC20Contract = _swapERC20Contract;
+    swapERC20Contract = ISwapERC20(_swapERC20Contract);
   }
 
   /**
    * @notice Set a Rule
-   * @param _senderWallet The address of the sender's wallet
+   * @param _senderWallet address Address of the sender wallet
    * @param _senderToken address ERC-20 token the sender would transfer
    * @param _senderAmount uint256 Maximum sender amount for the rule
    * @param _signerToken address ERC-20 token the signer would transfer
@@ -66,6 +67,7 @@ contract Delegate is IDelegate, Ownable {
       _expiry
     );
 
+    // Emit a SetRule event
     emit SetRule(
       _senderWallet,
       _senderToken,
@@ -77,10 +79,10 @@ contract Delegate is IDelegate, Ownable {
   }
 
   /**
-   * @notice Unset rule
+   * @notice Unset a Rule
    * @param _senderWallet The address of the sender's wallet
-   * @param _senderToken address sender token of the rule
-   * @param _signerToken address signer token of the rule
+   * @param _senderToken address ERC-20 token the sender would transfer
+   * @param _signerToken address ERC-20 token the signer would transfer
    */
   function unsetRule(
     address _senderWallet,
@@ -98,19 +100,20 @@ contract Delegate is IDelegate, Ownable {
     // Delete the rule
     delete rules[_senderWallet][_senderToken][_signerToken];
 
+    // Emit an UnsetRule event
     emit UnsetRule(_senderWallet, _senderToken, _signerToken);
   }
 
   /**
-   * @notice Atomic ERC20 Swap
-   * @notice forwards to the underlying SwapERC20 contract
+   * @notice Perform an atomic ERC-20 swap
+   * @dev Forwards to underlying SwapERC20 contract
    * @param _senderWallet address Wallet to receive sender proceeds
    * @param _nonce uint256 Unique and should be sequential
    * @param _expiry uint256 Expiry in seconds since 1 January 1970
    * @param _signerWallet address Wallet of the signer
-   * @param _signerToken address ERC20 token transferred from the signer
+   * @param _signerToken address ERC-20 token transferred from the signer
    * @param _signerAmount uint256 Amount transferred from the signer
-   * @param _senderToken address ERC20 token transferred from the sender
+   * @param _senderToken address ERC-20 token transferred from the sender
    * @param _senderAmount uint256 Amount transferred from the sender
    * @param _v uint8 "v" value of the ECDSA signature
    * @param _r bytes32 "r" value of the ECDSA signature
@@ -130,6 +133,7 @@ contract Delegate is IDelegate, Ownable {
     bytes32 _s
   ) external {
     Rule storage rule = rules[_senderWallet][_senderToken][_signerToken];
+    // Ensure the signer amount is valid
     if (
       _signerAmount <
       (rule.signerAmount * (rule.senderAmount - rule.senderFilledAmount)) /
@@ -137,8 +141,10 @@ contract Delegate is IDelegate, Ownable {
     ) {
       revert SignerAmountInvalid();
     }
+    // Ensure the rule has not expired
     if (rule.expiry < block.timestamp) revert RuleExpired();
 
+    // Ensure the sender amount is valid
     if (_senderAmount > (rule.senderAmount - rule.senderFilledAmount)) {
       revert SenderAmountInvalid();
     }
@@ -151,6 +157,7 @@ contract Delegate is IDelegate, Ownable {
       _senderAmount
     );
 
+    // Approve the SwapERC20 contract to transfer the sender token
     SafeTransferLib.safeApprove(
       _senderToken,
       address(swapERC20Contract),
@@ -177,6 +184,8 @@ contract Delegate is IDelegate, Ownable {
     // Update the filled amount
     rules[_senderWallet][_senderToken][_signerToken]
       .senderFilledAmount += _senderAmount;
+
+    // Emit a DelegateSwap event
     emit DelegateSwap(_nonce, _signerWallet);
   }
 
@@ -203,12 +212,10 @@ contract Delegate is IDelegate, Ownable {
 
   /**
    * @notice Sets the SwapERC20 contract
-   * @param _swapERC20Contract ISwapERC20 The SwapERC20 contract
+   * @param _swapERC20Contract address
    */
-  function setSwapERC20Contract(
-    ISwapERC20 _swapERC20Contract
-  ) external onlyOwner {
-    if (address(_swapERC20Contract) == address(0)) revert AddressInvalid();
-    swapERC20Contract = _swapERC20Contract;
+  function setSwapERC20Contract(address _swapERC20Contract) external onlyOwner {
+    if (_swapERC20Contract == address(0)) revert AddressInvalid();
+    swapERC20Contract = ISwapERC20(_swapERC20Contract);
   }
 }
