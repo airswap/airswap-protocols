@@ -28,7 +28,11 @@ interface IDelegate {
     uint256 expiry
   );
 
-  event UnsetRule(address signer, address signerToken, address senderToken);
+  event UnsetRule(
+    address senderWallet,
+    address senderToken,
+    address signerToken
+  );
 
   error AddressInvalid();
   error RuleExpired();
@@ -39,7 +43,7 @@ interface IDelegate {
   error TransferFromFailed();
 
   function setRule(
-    address sender,
+    address senderWallet,
     address senderToken,
     uint256 senderAmount,
     address signerToken,
@@ -62,8 +66,14 @@ interface IDelegate {
   ) external;
 
   function unsetRule(
-    address sender,
+    address senderWallet,
     address senderToken,
     address signerToken
   ) external;
+
+  function authorize(address manager) external;
+
+  function revoke() external;
+
+  function setSwapERC20Contract(address _swapERC20Contract) external;
 }
