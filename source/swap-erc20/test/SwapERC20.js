@@ -1,9 +1,10 @@
 const { expect } = require('chai')
-const { ADDRESS_ZERO, SECONDS_IN_DAY } = require('@airswap/utils')
 const {
   createOrderERC20,
   orderERC20ToParams,
   createOrderERC20Signature,
+  ADDRESS_ZERO,
+  SECONDS_IN_DAY,
 } = require('@airswap/utils')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle

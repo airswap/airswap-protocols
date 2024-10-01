@@ -1,30 +1,48 @@
+require('dotenv').config({ path: './.env' })
 const Confirm = require('prompt-confirm')
 const { ethers } = require('hardhat')
-const { chainNames, ChainIds } = require('@airswap/utils')
-const { getReceiptUrl } = require('@airswap/utils')
+const {
+  ChainIds,
+  chainNames,
+  apiUrls,
+  getReceiptUrl,
+} = require('@airswap/utils')
 
-const { Pool__factory } = require('../typechain/factories/contracts')
-const { abi } = require('./migrate-abis/4-1-1.js')
-const deploys = require('../deploys.js')
+const { Pool__factory } = require('@airswap/pool/typechain/factories/contracts')
+const { abi } = require('@airswap/pool/legacy-abis/4-1-1.js')
+const deploys = require('@airswap/pool/deploys.js')
 
 const CONFIRMATIONS = 2
 const PREVIOUS_POOL = '0xEEcD248D977Fd4D392915b4AdeF8154BA3aE9c02'
 const NEW_POOL = '0xbbcec987E4C189FCbAB0a2534c77b3ba89229F11'
 
 async function main() {
-  const [account] = await ethers.getSigners()
-  const chainId = await account.getChainId()
-  if (chainId === ChainIds.HARDHAT) {
+  let chainId
+  if (process.argv[2] === '--network') {
+    chainId = ChainIds[process.argv[3].toUpperCase()]
+  }
+
+  if (!chainId) {
     console.log('Value for --network flag is required')
     return
   }
+
+  const provider = new ethers.providers.JsonRpcProvider(apiUrls[chainId])
+  const account = new ethers.Wallet(process.env.PRIVATE_KEY, provider)
+
   console.log(`Account: ${account.address}`)
   console.log(`Network: ${chainNames[chainId].toUpperCase()}\n`)
   console.log(`From-pool: ${PREVIOUS_POOL}`)
   console.log(`To-pool: ${NEW_POOL}`)
 
   const previousPool = new ethers.Contract(PREVIOUS_POOL, abi, account.provider)
-  const logs = await previousPool.queryFilter(previousPool.filters.UseClaim())
+  let logs
+  try {
+    logs = await previousPool.queryFilter(previousPool.filters.UseClaim())
+  } catch (error) {
+    console.log('\n✘ Error querying claim events on from-pool.\n\n', error.body)
+    return
+  }
 
   if (!logs.length) {
     console.log('\n✘ No claim events found on from-pool.\n')

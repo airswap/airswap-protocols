@@ -1,7 +1,11 @@
 const { expect } = require('chai')
 const { ethers } = require('hardhat')
-const { createOrder, createOrderSignature } = require('@airswap/utils')
-const { TokenKinds, ADDRESS_ZERO } = require('@airswap/utils')
+const {
+  createOrder,
+  createOrderSignature,
+  TokenKinds,
+  ADDRESS_ZERO,
+} = require('@airswap/utils')
 const ERC20PresetMinterPauser = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
 const ERC1155PresetMinterPauser = require('@openzeppelin/contracts/build/contracts/ERC1155PresetMinterPauser.json')
 
