@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: MIT
 
-import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
-
 pragma solidity 0.8.23;
 
 interface IDelegate {
