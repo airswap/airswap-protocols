@@ -1,9 +1,10 @@
 const { expect } = require('chai')
-const { ADDRESS_ZERO, SECONDS_IN_DAY } = require('@airswap/utils')
 const {
   createOrderERC20,
   orderERC20ToParams,
   createOrderERC20Signature,
+  ADDRESS_ZERO,
+  SECONDS_IN_DAY,
 } = require('@airswap/utils')
 const { ethers, waffle } = require('hardhat')
 const { deployMockContract } = waffle
@@ -180,7 +181,7 @@ describe('SwapERC20 Unit', () => {
           BONUS_SCALE,
           BONUS_MAX
         )
-      ).to.be.revertedWith('InvalidFeeWallet')
+      ).to.be.revertedWith('ProtocolFeeWalletInvalid')
     })
 
     it('test invalid fee', async () => {
@@ -194,7 +195,7 @@ describe('SwapERC20 Unit', () => {
           BONUS_SCALE,
           BONUS_MAX
         )
-      ).to.be.revertedWith('InvalidFee')
+      ).to.be.revertedWith('ProtocolFeeInvalid')
     })
 
     it('test invalid fee light', async () => {
@@ -208,7 +209,7 @@ describe('SwapERC20 Unit', () => {
           BONUS_SCALE,
           BONUS_MAX
         )
-      ).to.be.revertedWith('InvalidFeeLight')
+      ).to.be.revertedWith('ProtocolFeeLightInvalid')
     })
 
     it('test invalid bonus scale', async () => {
@@ -250,7 +251,7 @@ describe('SwapERC20 Unit', () => {
     it('test setProtocolFee with invalid input', async () => {
       await expect(
         swap.connect(deployer).setProtocolFee(FEE_DIVISOR)
-      ).to.be.revertedWith('InvalidFee')
+      ).to.be.revertedWith('ProtocolFeeInvalid')
     })
     it('test setProtocolFee as non-owner', async () => {
       await expect(
@@ -265,7 +266,7 @@ describe('SwapERC20 Unit', () => {
     it('test setProtocolFeeLight with invalid input', async () => {
       await expect(
         swap.connect(deployer).setProtocolFeeLight(FEE_DIVISOR)
-      ).to.be.revertedWith('InvalidFeeLight')
+      ).to.be.revertedWith('ProtocolFeeLightInvalid')
     })
     it('test setProtocolFeeLight as non-owner', async () => {
       await expect(
@@ -318,7 +319,7 @@ describe('SwapERC20 Unit', () => {
     it('test setStaking with zero address', async () => {
       await expect(
         swap.connect(deployer).setStaking(ADDRESS_ZERO)
-      ).to.be.revertedWith('InvalidStaking')
+      ).to.be.revertedWith('StakingInvalid')
     })
   })
 
@@ -688,7 +689,7 @@ describe('SwapERC20 Unit', () => {
     it('test invalid fee wallet', async () => {
       await expect(
         swap.connect(deployer).setProtocolFeeWallet(ADDRESS_ZERO)
-      ).to.be.revertedWith('InvalidFeeWallet')
+      ).to.be.revertedWith('ProtocolFeeWalletInvalid')
     })
 
     it('test changing fee', async () => {
@@ -721,7 +722,7 @@ describe('SwapERC20 Unit', () => {
     it('test invalid fee', async () => {
       await expect(
         swap.connect(deployer).setProtocolFee(FEE_DIVISOR + 1)
-      ).to.be.revertedWith('InvalidFee')
+      ).to.be.revertedWith('ProtocolFeeInvalid')
     })
 
     it('test when signed with incorrect fee', async () => {

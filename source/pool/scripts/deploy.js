@@ -1,13 +1,12 @@
 /* eslint-disable no-console */
 const fs = require('fs')
 const prettier = require('prettier')
-const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
-const { chainLabels, ChainIds } = require('@airswap/utils')
-const { getReceiptUrl } = require('@airswap/utils')
+const { chainLabels, ChainIds, getReceiptUrl } = require('@airswap/utils')
 const poolDeploys = require('../deploys.js')
 const poolBlocks = require('../deploys-blocks.js')
-const { displayDeployerInfo } = require('../../../scripts/deployer-info')
+const poolCommits = require('../deploys-commits.js')
+const { confirmDeployment } = require('../../../scripts/deployer-info')
 
 async function main() {
   await run('compile')
@@ -18,16 +17,16 @@ async function main() {
     console.log('Value for --network flag is required')
     return
   }
-  await displayDeployerInfo(deployer)
 
   const scale = 10
   const max = 100
 
-  console.log(`scale: ${scale}`)
-  console.log(`max: ${max}`)
+  console.log(`\nDeploy POOL`)
 
-  const prompt = new Confirm('Proceed to deploy?')
-  if (await prompt.run()) {
+  console.log(`· max    ${max}`)
+  console.log(`· scale  ${scale}\n`)
+
+  if (await confirmDeployment(deployer, poolDeploys[ChainIds.MAINNET])) {
     const poolFactory = await ethers.getContractFactory('Pool')
     const poolContract = await poolFactory.deploy(scale, max)
     console.log(
@@ -51,6 +50,17 @@ async function main() {
       './deploys-blocks.js',
       prettier.format(
         `module.exports = ${JSON.stringify(poolBlocks, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
+      )
+    )
+    poolCommits[chainId] = require('child_process')
+      .execSync('git rev-parse HEAD')
+      .toString()
+      .trim()
+    fs.writeFileSync(
+      './deploys-commits.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(poolCommits, null, '\t')}`,
         { ...prettierConfig, parser: 'babel' }
       )
     )

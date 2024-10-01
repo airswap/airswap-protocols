@@ -28,17 +28,16 @@ interface ISwapERC20 {
   event SetBonusMax(uint256 bonusMax);
   event SetStaking(address indexed staking);
 
-  error ChainIdChanged();
-  error InvalidFee();
-  error InvalidFeeLight();
-  error InvalidFeeWallet();
-  error InvalidStaking();
-  error OrderExpired();
   error MaxTooHigh();
   error NonceAlreadyUsed(uint256);
+  error OrderExpired();
+  error ProtocolFeeInvalid();
+  error ProtocolFeeLightInvalid();
+  error ProtocolFeeWalletInvalid();
   error ScaleTooHigh();
   error SignatoryInvalid();
   error SignatureInvalid();
+  error StakingInvalid();
   error TransferFromFailed();
 
   function swap(

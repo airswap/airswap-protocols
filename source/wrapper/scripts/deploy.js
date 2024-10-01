@@ -1,14 +1,14 @@
 /* eslint-disable no-console */
 const fs = require('fs')
 const prettier = require('prettier')
-const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
+const { chainLabels, ChainIds, getReceiptUrl } = require('@airswap/utils')
 const swapDeploys = require('@airswap/swap-erc20/deploys.js')
 const wrapperDeploys = require('../deploys.js')
 const wrapperBlocks = require('../deploys-blocks.js')
+const wrapperCommits = require('../deploys-commits.js')
 const wethDeploys = require('../deploys-weth.js')
-const { ChainIds, chainNames, chainLabels } = require('@airswap/utils')
-const { getReceiptUrl } = require('@airswap/utils')
+const { confirmDeployment } = require('../../../scripts/deployer-info')
 
 async function main() {
   await run('compile')
@@ -21,9 +21,6 @@ async function main() {
     console.log('Value for --network flag is required')
     return
   }
-  console.log(`Deployer: ${deployer.address}`)
-  console.log(`Network: ${chainNames[chainId].toUpperCase()}`)
-  console.log(`Gas price: ${gasPrice / 10 ** 9} gwei\n`)
 
   const swapERC20Address = swapDeploys[chainId]
   const wrappedTokenAddress = wethDeploys[chainId]
@@ -33,11 +30,12 @@ async function main() {
     return
   }
 
-  console.log(`SwapERC20: ${swapERC20Address}`)
-  console.log(`Wrapped: ${wrappedTokenAddress}`)
+  console.log(`\nDeploy WRAPPER`)
 
-  const prompt = new Confirm('Proceed to deploy?')
-  if (await prompt.run()) {
+  console.log(`· swapERC20Address     ${swapERC20Address}`)
+  console.log(`· wrappedTokenAddress  ${wrappedTokenAddress}\n`)
+
+  if (await confirmDeployment(deployer, wrapperDeploys[ChainIds.MAINNET])) {
     const wrapperFactory = await ethers.getContractFactory('Wrapper')
     const wrapperContract = await wrapperFactory.deploy(
       swapERC20Address,
@@ -67,6 +65,17 @@ async function main() {
       './deploys-blocks.js',
       prettier.format(
         `module.exports = ${JSON.stringify(wrapperBlocks, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
+      )
+    )
+    wrapperCommits[chainId] = require('child_process')
+      .execSync('git rev-parse HEAD')
+      .toString()
+      .trim()
+    fs.writeFileSync(
+      './deploys-commits.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(wrapperCommits, null, '\t')}`,
         { ...prettierConfig, parser: 'babel' }
       )
     )

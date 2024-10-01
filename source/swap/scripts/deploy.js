@@ -1,21 +1,21 @@
 /* eslint-disable no-console */
 const fs = require('fs')
 const prettier = require('prettier')
-const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const {
   chainLabels,
   ChainIds,
   protocolFeeReceiverAddresses,
   ADDRESS_ZERO,
+  getReceiptUrl,
 } = require('@airswap/utils')
-const { getReceiptUrl } = require('@airswap/utils')
 const poolDeploys = require('@airswap/pool/deploys.js')
 const swapDeploys = require('../deploys.js')
 const swapBlocks = require('../deploys-blocks.js')
+const swapCommits = require('../deploys-commits.js')
 const adapterDeploys = require('../deploys-adapters.js')
 const config = require('./config.js')
-const { displayDeployerInfo } = require('../../../scripts/deployer-info')
+const { confirmDeployment } = require('../../../scripts/deployer-info')
 
 async function main() {
   await run('compile')
@@ -26,7 +26,6 @@ async function main() {
     console.log('Value for --network flag is required')
     return
   }
-  await displayDeployerInfo(deployer)
 
   let requiredSenderKind
   let protocolFee
@@ -41,13 +40,14 @@ async function main() {
     protocolFeeReceiver = protocolFeeReceiverAddresses[chainId]
   }
 
-  console.log(`adapters: ${JSON.stringify(adapterDeploys[chainId])}`)
-  console.log(`requiredSenderKind: ${requiredSenderKind}`)
-  console.log(`protocolFee: ${protocolFee}`)
-  console.log(`protocolFeeReceiver: ${protocolFeeReceiver}`)
+  console.log(`\nDeploy SWAP`)
 
-  const prompt = new Confirm('Proceed to deploy?')
-  if (await prompt.run()) {
+  console.log(`· adapters             ${adapterDeploys[chainId].join(', ')}`)
+  console.log(`· protocolFee          ${protocolFee}`)
+  console.log(`· requiredSenderKind   ${requiredSenderKind}`)
+  console.log(`· protocolFeeReceiver  ${protocolFeeReceiver}\n`)
+
+  if (await confirmDeployment(deployer, swapDeploys)) {
     const swapFactory = await ethers.getContractFactory('Swap')
     const swapContract = await swapFactory.deploy(
       adapterDeploys[chainId],
@@ -76,6 +76,17 @@ async function main() {
       './deploys-blocks.js',
       prettier.format(
         `module.exports = ${JSON.stringify(swapBlocks, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
+      )
+    )
+    swapCommits[chainId] = require('child_process')
+      .execSync('git rev-parse HEAD')
+      .toString()
+      .trim()
+    fs.writeFileSync(
+      './deploys-commits.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(swapCommits, null, '\t')}`,
         { ...prettierConfig, parser: 'babel' }
       )
     )

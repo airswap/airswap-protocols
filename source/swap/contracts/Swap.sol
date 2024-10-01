@@ -28,11 +28,10 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   // Domain name and version for use in EIP712 signatures
   string public constant DOMAIN_NAME = "SWAP";
   string public constant DOMAIN_VERSION = "4.2";
-  uint256 public immutable DOMAIN_CHAIN_ID;
   bytes32 public immutable DOMAIN_SEPARATOR;
 
   uint256 public constant FEE_DIVISOR = 10000;
-  uint256 private constant MAX_ERROR_COUNT = 16;
+  uint256 private constant MAX_ERROR_COUNT = 15;
 
   /**
    * @notice Double mapping of signers to nonce groups to nonce states
@@ -71,7 +70,6 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     if (_protocolFeeWallet == address(0)) revert FeeWalletInvalid();
     if (_adapters.length == 0) revert AdaptersInvalid();
 
-    DOMAIN_CHAIN_ID = block.chainid;
     DOMAIN_SEPARATOR = _domainSeparatorV4();
 
     uint256 adaptersLength = _adapters.length;
@@ -268,10 +266,6 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
     uint256 count;
 
-    if (DOMAIN_CHAIN_ID != block.chainid) {
-      errors[count++] = "ChainIdChanged";
-    }
-
     // Validate as the authorized signatory if set
     address signatory = order.signer.wallet;
     if (authorized[signatory] != address(0)) {
@@ -423,9 +417,6 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @param order Order to validate
    */
   function _check(Order calldata order) private {
-    // Ensure execution on the intended chain
-    if (DOMAIN_CHAIN_ID != block.chainid) revert ChainIdChanged();
-
     // Ensure the sender token is the required kind
     if (order.sender.kind != requiredSenderKind) revert SenderTokenInvalid();
 
@@ -466,21 +457,17 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    */
   function _getOrderHash(Order calldata order) private view returns (bytes32) {
     return
-      keccak256(
-        abi.encodePacked(
-          "\x19\x01", // EIP191: Indicates EIP712
-          DOMAIN_SEPARATOR,
-          keccak256(
-            abi.encode(
-              ORDER_TYPEHASH,
-              order.nonce,
-              order.expiry,
-              protocolFee,
-              keccak256(abi.encode(PARTY_TYPEHASH, order.signer)),
-              keccak256(abi.encode(PARTY_TYPEHASH, order.sender)),
-              order.affiliateWallet,
-              order.affiliateAmount
-            )
+      _hashTypedDataV4(
+        keccak256(
+          abi.encode(
+            ORDER_TYPEHASH,
+            order.nonce,
+            order.expiry,
+            protocolFee,
+            keccak256(abi.encode(PARTY_TYPEHASH, order.signer)),
+            keccak256(abi.encode(PARTY_TYPEHASH, order.sender)),
+            order.affiliateWallet,
+            order.affiliateAmount
           )
         )
       );

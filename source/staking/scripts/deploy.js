@@ -1,14 +1,13 @@
 /* eslint-disable no-console */
 const fs = require('fs')
 const prettier = require('prettier')
-const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
-const { chainLabels, ChainIds } = require('@airswap/utils')
-const { getReceiptUrl } = require('@airswap/utils')
+const { chainLabels, ChainIds, getReceiptUrl } = require('@airswap/utils')
 const stakingDeploys = require('../deploys.js')
 const stakingBlocks = require('../deploys-blocks.js')
+const stakingCommits = require('../deploys-commits.js')
 const config = require('./config.js')
-const { displayDeployerInfo } = require('../../../scripts/deployer-info')
+const { confirmDeployment } = require('../../../scripts/deployer-info')
 
 async function main() {
   await run('compile')
@@ -19,7 +18,6 @@ async function main() {
     console.log('Value for --network flag is required')
     return
   }
-  await displayDeployerInfo(deployer)
 
   const {
     name,
@@ -29,14 +27,15 @@ async function main() {
     minDurationChangeDelay,
   } = config[chainId]
 
-  console.log(`name: ${name}`)
-  console.log(`symbol: ${symbol}`)
-  console.log(`stakingToken: ${stakingToken}`)
-  console.log(`stakingDuration: ${stakingDuration}`)
-  console.log(`minDurationChangeDelay: ${minDurationChangeDelay}\n`)
+  console.log(`\nDeploy STAKING`)
 
-  const prompt = new Confirm('Proceed to deploy?')
-  if (await prompt.run()) {
+  console.log(`· name                    ${name}`)
+  console.log(`· symbol                  ${symbol}`)
+  console.log(`· stakingToken            ${stakingToken}`)
+  console.log(`· stakingDuration         ${stakingDuration}`)
+  console.log(`· minDurationChangeDelay  ${minDurationChangeDelay}\n`)
+
+  if (await confirmDeployment(deployer, stakingDeploys[ChainIds.MAINNET])) {
     const stakingFactory = await ethers.getContractFactory('Staking')
     const stakingContract = await stakingFactory.deploy(
       name,
@@ -66,6 +65,17 @@ async function main() {
       './deploys-blocks.js',
       prettier.format(
         `module.exports = ${JSON.stringify(stakingBlocks, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
+      )
+    )
+    stakingCommits[chainId] = require('child_process')
+      .execSync('git rev-parse HEAD')
+      .toString()
+      .trim()
+    fs.writeFileSync(
+      './deploys-commits.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(stakingCommits, null, '\t')}`,
         { ...prettierConfig, parser: 'babel' }
       )
     )

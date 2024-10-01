@@ -1,6 +1,6 @@
 {
   "name": "airswap-protocols",
-  "version": "0.0.1",
+  "version": "5.0.0",
   "private": true,
   "license": "MIT",
   "workspaces": {
@@ -13,12 +13,14 @@
     "check:owners": "node ./scripts/owners-report.js",
     "check:receivers": "node ./scripts/receivers-report.js",
     "check:wrappers": "node ./scripts/wrappers-report.js",
+    "check:delegates": "node ./scripts/delegates-report.js",
     "clean": "lerna run clean",
     "compile": "lerna run compile",
     "linter": "yarn eslint . --ext .js,.ts --fix",
     "test": "lerna run test",
     "test:ci": "lerna run test:ci",
     "drain": "node ./scripts/drain-deployer.js",
+    "migrate-pool": "node ./scripts/migrate-pool.js",
     "prepare": "husky install",
     "prettier": "prettier --write \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\" \"./**/*.json\""
   },
@@ -52,6 +54,7 @@
     "nx": "^16.5.5",
     "prettier": "^2.8.4",
     "prettier-plugin-solidity": "^1.1.2",
+    "prompt-confirm": "^2.0.4",
     "solidity-coverage": "^0.8.5",
     "ts-node": "^10.9.1",
     "typechain": "^8.1.1",

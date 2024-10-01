@@ -36,7 +36,6 @@ interface ISwap {
   event Authorize(address indexed signer, address indexed signerWallet);
   event Revoke(address indexed signer, address indexed signerWallet);
 
-  error ChainIdChanged();
   error AdaptersInvalid();
   error FeeInvalid();
   error FeeWalletInvalid();

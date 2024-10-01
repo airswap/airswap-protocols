@@ -1,14 +1,13 @@
 /* eslint-disable no-console */
 const fs = require('fs')
 const prettier = require('prettier')
-const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
-const { ChainIds, chainLabels } = require('@airswap/utils')
-const { getReceiptUrl } = require('@airswap/utils')
+const { ChainIds, chainLabels, getReceiptUrl } = require('@airswap/utils')
 const registryDeploys = require('../deploys.js')
 const registryBlocks = require('../deploys-blocks.js')
+const registryCommits = require('../deploys-commits.js')
 const config = require('./config.js')
-const { displayDeployerInfo } = require('../../../scripts/deployer-info')
+const { confirmDeployment } = require('../../../scripts/deployer-info')
 
 async function main() {
   await run('compile')
@@ -19,7 +18,6 @@ async function main() {
     console.log('Value for --network flag is required')
     return
   }
-  await displayDeployerInfo(deployer)
 
   let stakingToken
   let stakingCost
@@ -31,12 +29,13 @@ async function main() {
     ;({ stakingToken, stakingCost, supportCost } = config[ChainIds.MAINNET])
   }
 
-  console.log(`stakingToken: ${stakingToken}`)
-  console.log(`stakingCost: ${stakingCost}`)
-  console.log(`supportCost: ${supportCost}\n`)
+  console.log(`\nDeploy REGISTRY`)
 
-  const prompt = new Confirm('Proceed to deploy?')
-  if (await prompt.run()) {
+  console.log(`· stakingCost   ${stakingCost}`)
+  console.log(`· supportCost   ${supportCost}`)
+  console.log(`· stakingToken  ${stakingToken}\n`)
+
+  if (await confirmDeployment(deployer, registryDeploys)) {
     const registryFactory = await ethers.getContractFactory('Registry')
     const registryContract = await registryFactory.deploy(
       stakingToken,
@@ -64,6 +63,17 @@ async function main() {
       './deploys-blocks.js',
       prettier.format(
         `module.exports = ${JSON.stringify(registryBlocks, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
+      )
+    )
+    registryCommits[chainId] = require('child_process')
+      .execSync('git rev-parse HEAD')
+      .toString()
+      .trim()
+    fs.writeFileSync(
+      './deploys-commits.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(registryCommits, null, '\t')}`,
         { ...prettierConfig, parser: 'babel' }
       )
     )

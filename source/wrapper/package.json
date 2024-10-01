@@ -1,6 +1,6 @@
 {
   "name": "@airswap/wrapper",
-  "version": "4.2.3",
+  "version": "5.0.0",
   "description": "AirSwap: Wrap and Unwrap Native Tokens",
   "license": "MIT",
   "repository": {
@@ -10,11 +10,7 @@
   "files": [
     "./build",
     "./typechain",
-    "./deploys.js",
-    "./deploys-blocks.js",
-    "./deploys-weth.js",
-    "./deploys-blocks-weth.js",
-    "./deploys.js.d.ts"
+    "./deploys*"
   ],
   "scripts": {
     "clean": "rm -rf ./cache && rm -rf ./build && rm -rf ./typechain",
@@ -22,17 +18,16 @@
     "typechain": "tsc -b",
     "coverage": "hardhat coverage",
     "test": "hardhat test",
-    "test:ci": "hardhat",
+    "test:ci": "hardhat test",
     "deploy": "hardhat run ./scripts/deploy.js",
     "verify": "hardhat run ./scripts/verify.js",
     "owners": "hardhat run ./scripts/owner.js"
   },
   "devDependencies": {
-    "@airswap/utils": "4.3.4",
-    "@airswap/swap-erc20": "4.3.1",
+    "@airswap/utils": "5.0.0",
+    "@airswap/swap-erc20": "5.0.0",
     "@openzeppelin/contracts": "^4.8.3",
-    "@uniswap/v2-periphery": "^1.1.0-beta.0",
-    "prompt-confirm": "^2.0.4"
+    "@uniswap/v2-periphery": "^1.1.0-beta.0"
   },
   "publishConfig": {
     "access": "public"

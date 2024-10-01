@@ -1,14 +1,11 @@
 require('dotenv').config({ path: './.env' })
 const { ethers } = require('ethers')
-const { mainnets, testnets, chainNames, apiUrls } = require('@airswap/utils')
+const { mainnets, chainNames, apiUrls } = require('@airswap/utils')
 const swapERC20Deploys = require('@airswap/swap-erc20/deploys.js')
-
-const chains = mainnets.concat(testnets)
 
 async function main() {
   console.log()
-  for (let c = 0; c < chains.length; c++) {
-    const chainId = chains[c]
+  for (const chainId of mainnets) {
     const apiUrl = apiUrls[chainId]
     const provider = new ethers.providers.JsonRpcProvider(apiUrl)
     const deployer = new ethers.Wallet(process.env.PRIVATE_KEY, provider)
@@ -40,11 +37,17 @@ async function main() {
         console.log(
           chainNames[chainId].toUpperCase(),
           `(${chainId})`,
-          '✘ Not deployed'
+          '✘ SwapERC20 not deployed'
         )
       }
-      console.log()
+    } else {
+      console.log(
+        chainNames[chainId].toUpperCase(),
+        `(${chainId})`,
+        '✘ Wrapper not deployed'
+      )
     }
+    console.log()
   }
 }
 

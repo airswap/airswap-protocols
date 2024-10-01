@@ -1,13 +1,12 @@
 /* eslint-disable no-console */
 const fs = require('fs')
 const prettier = require('prettier')
-const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
-const { ChainIds, chainLabels } = require('@airswap/utils')
-const { getReceiptUrl } = require('@airswap/utils')
+const { ChainIds, chainLabels, getReceiptUrl } = require('@airswap/utils')
 const batchCallDeploys = require('../deploys.js')
 const batchCallBlocks = require('../deploys-blocks.js')
-const { displayDeployerInfo } = require('../../../scripts/deployer-info')
+const batchCallCommits = require('../deploys-commits.js')
+const { confirmDeployment } = require('../../../scripts/deployer-info')
 
 async function main() {
   await run('compile')
@@ -18,10 +17,9 @@ async function main() {
     console.log('Value for --network flag is required')
     return
   }
-  await displayDeployerInfo(deployer)
+  console.log(`\nDeploy BATCHCALL\n`)
 
-  const prompt = new Confirm('Proceed to deploy?')
-  if (await prompt.run()) {
+  if (await confirmDeployment(deployer, batchCallDeploys)) {
     const batchFactory = await ethers.getContractFactory('BatchCall')
     const batchCallContract = await batchFactory.deploy()
     console.log(
@@ -48,6 +46,30 @@ async function main() {
         { ...prettierConfig, parser: 'babel' }
       )
     )
+
+    batchCallBlocks[chainId] = (
+      await batchCallContract.deployTransaction.wait()
+    ).blockNumber
+    fs.writeFileSync(
+      './deploys-blocks.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(batchCallBlocks, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
+      )
+    )
+
+    batchCallCommits[chainId] = require('child_process')
+      .execSync('git rev-parse HEAD')
+      .toString()
+      .trim()
+    fs.writeFileSync(
+      './deploys-commits.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(batchCallCommits, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
+      )
+    )
+
     console.log(
       `Deployed: ${batchCallDeploys[chainId]} @ ${batchCallBlocks[chainId]}`
     )

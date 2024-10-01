@@ -1,19 +1,19 @@
 /* eslint-disable no-console */
 const fs = require('fs')
 const prettier = require('prettier')
-const Confirm = require('prompt-confirm')
 const { ethers, run } = require('hardhat')
 const poolDeploys = require('@airswap/pool/deploys.js')
 const {
   ChainIds,
   chainLabels,
   protocolFeeReceiverAddresses,
+  getReceiptUrl,
 } = require('@airswap/utils')
-const { getReceiptUrl } = require('@airswap/utils')
 const swapERC20Deploys = require('../deploys.js')
 const swapERC20Blocks = require('../deploys-blocks.js')
+const swapERC20Commits = require('../deploys-commits.js')
 const config = require('./config.js')
-const { displayDeployerInfo } = require('../../../scripts/deployer-info')
+const { confirmDeployment } = require('../../../scripts/deployer-info')
 
 async function main() {
   await run('compile')
@@ -24,7 +24,6 @@ async function main() {
     console.log('Value for --network flag is required')
     return
   }
-  await displayDeployerInfo(deployer)
 
   let protocolFeeReceiver = poolDeploys[chainId]
   if (protocolFeeReceiverAddresses[chainId]) {
@@ -43,12 +42,13 @@ async function main() {
       config[ChainIds.MAINNET])
   }
 
-  console.log(`protocolFee: ${protocolFee}`)
-  console.log(`protocolFeeLight: ${protocolFeeLight}`)
-  console.log(`protocolFeeReceiver: ${protocolFeeReceiver}\n`)
+  console.log(`\nDeploy SWAPERC20`)
 
-  const prompt = new Confirm('Proceed to deploy?')
-  if (await prompt.run()) {
+  console.log(`· protocolFee          ${protocolFee}`)
+  console.log(`· protocolFeeLight     ${protocolFeeLight}`)
+  console.log(`· protocolFeeReceiver  ${protocolFeeReceiver}\n`)
+
+  if (await confirmDeployment(deployer, swapERC20Deploys[ChainIds.MAINNET])) {
     const swapFactory = await ethers.getContractFactory('SwapERC20')
     const swapContract = await swapFactory.deploy(
       protocolFee,
@@ -78,6 +78,17 @@ async function main() {
       './deploys-blocks.js',
       prettier.format(
         `module.exports = ${JSON.stringify(swapERC20Blocks, null, '\t')}`,
+        { ...prettierConfig, parser: 'babel' }
+      )
+    )
+    swapERC20Commits[chainId] = require('child_process')
+      .execSync('git rev-parse HEAD')
+      .toString()
+      .trim()
+    fs.writeFileSync(
+      './deploys-commits.js',
+      prettier.format(
+        `module.exports = ${JSON.stringify(swapERC20Commits, null, '\t')}`,
         { ...prettierConfig, parser: 'babel' }
       )
     )

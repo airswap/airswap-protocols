@@ -260,6 +260,7 @@ export const ownerAddresses: Record<number, string> = {
   [ChainIds.AVALANCHE]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
   [ChainIds.LINEA]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
   [ChainIds.SEPOLIA]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
+  [ChainIds.NEON]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
 }
 
 export const protocolFeeReceiverAddresses: Record<number, string> = {
