@@ -1,6 +1,6 @@
 {
   "name": "airswap-protocols",
-  "version": "0.0.1",
+  "version": "5.0.0",
   "private": true,
   "license": "MIT",
   "workspaces": {
