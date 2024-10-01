@@ -24,7 +24,7 @@
     "owners": "hardhat run ./scripts/owner.js"
   },
   "devDependencies": {
-    "@airswap/utils": "5.0.0",
+    "@airswap/utils": "5.0.1",
     "@airswap/swap": "5.0.0",
     "@airswap/swap-erc20": "5.0.0",
     "@openzeppelin/contracts": "^4.8.3"

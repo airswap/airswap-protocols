@@ -24,7 +24,7 @@
     "owners": "hardhat run ./scripts/owner.js"
   },
   "devDependencies": {
-    "@airswap/utils": "5.0.0",
+    "@airswap/utils": "5.0.1",
     "@openzeppelin/contracts": "^4.8.3"
   },
   "publishConfig": {

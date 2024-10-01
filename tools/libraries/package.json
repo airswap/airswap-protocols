@@ -30,7 +30,7 @@
     "@airswap/staking": "5.0.0",
     "@airswap/swap": "5.0.0",
     "@airswap/swap-erc20": "5.0.0",
-    "@airswap/utils": "5.0.0",
+    "@airswap/utils": "5.0.1",
     "@airswap/wrapper": "5.0.0",
     "browser-or-node": "^2.1.1",
     "ethers": "^5.7.2",
