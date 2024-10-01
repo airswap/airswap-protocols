@@ -10,9 +10,7 @@
   "files": [
     "./build",
     "./typechain",
-    "./deploys.js",
-    "./deploys-blocks.js",
-    "./deploys.js.d.ts"
+    "./deploys*"
   ],
   "scripts": {
     "clean": "rm -rf ./cache && rm -rf ./build && rm -rf ./typechain",
@@ -28,7 +26,6 @@
   "devDependencies": {
     "@airswap/staking": "5.0.0",
     "@airswap/utils": "5.0.0",
-    "prompt-confirm": "^2.0.4",
     "solady": "0.0.173"
   },
   "publishConfig": {

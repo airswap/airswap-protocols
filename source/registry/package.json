@@ -10,9 +10,7 @@
   "files": [
     "./build",
     "./typechain",
-    "./deploys.js",
-    "./deploys-blocks.js",
-    "./deploys.js.d.ts"
+    "./deploys*"
   ],
   "scripts": {
     "clean": "rm -rf ./cache && rm -rf ./build && rm -rf ./typechain",
@@ -25,12 +23,11 @@
     "verify": "hardhat run ./scripts/verify.js",
     "owners": "hardhat run ./scripts/owner.js"
   },
-  "publishConfig": {
-    "access": "public"
-  },
   "devDependencies": {
     "@airswap/utils": "5.0.0",
-    "@openzeppelin/contracts": "^4.8.3",
-    "prompt-confirm": "^2.0.4"
+    "@openzeppelin/contracts": "^4.8.3"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
