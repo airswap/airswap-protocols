@@ -7,8 +7,8 @@ const {
   ChainIds,
   chainLabels,
   protocolFeeReceiverAddresses,
+  getReceiptUrl,
 } = require('@airswap/utils')
-const { getReceiptUrl } = require('@airswap/utils')
 const swapERC20Deploys = require('../deploys.js')
 const swapERC20Blocks = require('../deploys-blocks.js')
 const swapERC20Commits = require('../deploys-commits.js')

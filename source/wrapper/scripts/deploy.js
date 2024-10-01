@@ -2,13 +2,12 @@
 const fs = require('fs')
 const prettier = require('prettier')
 const { ethers, run } = require('hardhat')
-const { chainLabels, ChainIds } = require('@airswap/utils')
+const { chainLabels, ChainIds, getReceiptUrl } = require('@airswap/utils')
 const swapDeploys = require('@airswap/swap-erc20/deploys.js')
 const wrapperDeploys = require('../deploys.js')
 const wrapperBlocks = require('../deploys-blocks.js')
 const wrapperCommits = require('../deploys-commits.js')
 const wethDeploys = require('../deploys-weth.js')
-const { getReceiptUrl } = require('@airswap/utils')
 const { confirmDeployment } = require('../../../scripts/deployer-info')
 
 async function main() {
