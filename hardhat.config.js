@@ -94,6 +94,14 @@ module.exports = {
       url: apiUrls[ChainIds.HOLESKY],
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
     },
+    neon: {
+      url: apiUrls[ChainIds.NEON],
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
+    },
+    neondevnet: {
+      url: apiUrls[ChainIds.NEONDEVNET],
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : undefined,
+    },
   },
   solidity: {
     compilers: [
@@ -145,6 +153,8 @@ module.exports = {
       rsk: process.env.BLOCKSCOUT_API_KEY,
       rskTestnet: process.env.BLOCKSCOUT_API_KEY,
       sepolia: process.env.ETHERSCAN_API_KEY,
+      neon: process.env.NEONSCAN_API_KEY,
+      neondevnet: process.env.NEONSCAN_API_KEY,
     },
     customChains: [
       {
@@ -209,6 +219,22 @@ module.exports = {
         urls: {
           apiURL: explorerApiUrls[ChainIds.ARBITRUMSEPOLIA],
           browserURL: explorerUrls[ChainIds.ARBITRUMSEPOLIA],
+        },
+      },
+      {
+        network: 'neon',
+        chainId: ChainIds.NEON,
+        urls: {
+          apiURL: explorerApiUrls[ChainIds.NEON],
+          browserURL: explorerUrls[ChainIds.NEON],
+        },
+      },
+      {
+        network: 'neondevnet',
+        chainId: ChainIds.NEONDEVNET,
+        urls: {
+          apiURL: explorerApiUrls[ChainIds.NEONDEVNET],
+          browserURL: explorerUrls[ChainIds.NEONDEVNET],
         },
       },
     ],

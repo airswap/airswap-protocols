@@ -1,27 +1,17 @@
 // SPDX-License-Identifier: MIT
 
-import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
-
 pragma solidity 0.8.23;
 
 interface IDelegate {
   struct Rule {
-    address sender;
+    address senderWallet;
     address senderToken;
-    uint256 senderRuleAmount;
+    uint256 senderAmount;
     uint256 senderFilledAmount;
     address signerToken;
     uint256 signerAmount;
-    uint256 ruleExpiry;
+    uint256 expiry;
   }
-
-  error RuleExpired();
-  error InvalidAddress();
-  error InvalidSenderAmount();
-  error InvalidSignerAmount();
-  error ManagerInvalid();
-  error SenderInvalid();
-  error TransferFromFailed();
 
   event Authorize(address signatory, address signer);
   event DelegateSwap(uint256 nonce, address signerWallet);
@@ -30,22 +20,33 @@ interface IDelegate {
   event SetRule(
     address senderWallet,
     address senderToken,
-    uint256 senderRuleAmount,
-    uint256 senderFilledAmount,
+    uint256 senderAmount,
     address signerToken,
     uint256 signerAmount,
-    uint256 ruleExpiry
+    uint256 expiry
   );
 
-  event UnsetRule(address signer, address signerToken, address senderToken);
+  event UnsetRule(
+    address senderWallet,
+    address senderToken,
+    address signerToken
+  );
+
+  error AddressInvalid();
+  error RuleExpired();
+  error SenderAmountInvalid();
+  error SignerAmountInvalid();
+  error SenderInvalid();
+  error ManagerInvalid();
+  error TransferFromFailed();
 
   function setRule(
-    address sender,
+    address senderWallet,
     address senderToken,
-    uint256 senderRuleAmount,
+    uint256 senderAmount,
     address signerToken,
     uint256 signerAmount,
-    uint256 ruleExpiry
+    uint256 expiry
   ) external;
 
   function swap(
@@ -63,8 +64,14 @@ interface IDelegate {
   ) external;
 
   function unsetRule(
-    address sender,
-    address signerToken,
-    address senderToken
+    address senderWallet,
+    address senderToken,
+    address signerToken
   ) external;
+
+  function authorize(address manager) external;
+
+  function revoke() external;
+
+  function setSwapERC20Contract(address _swapERC20Contract) external;
 }

@@ -62,9 +62,9 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     uint256 _bonusScale,
     uint256 _bonusMax
   ) {
-    if (_protocolFee >= FEE_DIVISOR) revert InvalidFee();
-    if (_protocolFeeLight >= FEE_DIVISOR) revert InvalidFeeLight();
-    if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
+    if (_protocolFee >= FEE_DIVISOR) revert ProtocolFeeInvalid();
+    if (_protocolFeeLight >= FEE_DIVISOR) revert ProtocolFeeLightInvalid();
+    if (_protocolFeeWallet == address(0)) revert ProtocolFeeWalletInvalid();
     if (_bonusMax > MAX_MAX) revert MaxTooHigh();
     if (_bonusScale > MAX_SCALE) revert ScaleTooHigh();
 
@@ -324,7 +324,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
    */
   function setProtocolFee(uint256 _protocolFee) external onlyOwner {
     // Ensure the fee is less than divisor
-    if (_protocolFee >= FEE_DIVISOR) revert InvalidFee();
+    if (_protocolFee >= FEE_DIVISOR) revert ProtocolFeeInvalid();
     protocolFee = _protocolFee;
     emit SetProtocolFee(_protocolFee);
   }
@@ -335,7 +335,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
    */
   function setProtocolFeeLight(uint256 _protocolFeeLight) external onlyOwner {
     // Ensure the fee is less than divisor
-    if (_protocolFeeLight >= FEE_DIVISOR) revert InvalidFeeLight();
+    if (_protocolFeeLight >= FEE_DIVISOR) revert ProtocolFeeLightInvalid();
     protocolFeeLight = _protocolFeeLight;
     emit SetProtocolFeeLight(_protocolFeeLight);
   }
@@ -346,7 +346,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
    */
   function setProtocolFeeWallet(address _protocolFeeWallet) external onlyOwner {
     // Ensure the new fee wallet is not null
-    if (_protocolFeeWallet == address(0)) revert InvalidFeeWallet();
+    if (_protocolFeeWallet == address(0)) revert ProtocolFeeWalletInvalid();
     protocolFeeWallet = _protocolFeeWallet;
     emit SetProtocolFeeWallet(_protocolFeeWallet);
   }
@@ -379,7 +379,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
    */
   function setStaking(address _stakingToken) external onlyOwner {
     // Ensure the new staking token is not null
-    if (_stakingToken == address(0)) revert InvalidStaking();
+    if (_stakingToken == address(0)) revert StakingInvalid();
     stakingToken = _stakingToken;
     emit SetStaking(_stakingToken);
   }

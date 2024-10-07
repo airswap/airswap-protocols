@@ -10,12 +10,12 @@ async function main() {
     const provider = new ethers.providers.JsonRpcProvider(apiUrl)
     const deployer = new ethers.Wallet(process.env.PRIVATE_KEY, provider)
 
-    const deploys = require('../source/wrapper/deploys.js')
+    const deploys = require('../source/delegate/deploys.js')
     const {
-      Wrapper__factory,
-    } = require('@airswap/wrapper/typechain/factories/contracts')
+      Delegate__factory,
+    } = require('@airswap/delegate/typechain/factories/contracts')
     if (deploys[chainId]) {
-      const contract = Wrapper__factory.connect(deploys[chainId], deployer)
+      const contract = Delegate__factory.connect(deploys[chainId], deployer)
       const currentSwapERC20 = await contract.swapERC20Contract()
 
       const intendedSwapERC20 = swapERC20Deploys[chainId]
@@ -28,9 +28,9 @@ async function main() {
           intendedSwapERC20
         )
 
-        let label = 'Wrapper has correct SwapERC20'
+        let label = 'Delegate has correct SwapERC20'
         if (currentSwapERC20 !== intendedSwapERC20) {
-          label = `Wrapper has incorrect SwapERC20: ${currentSwapERC20}`
+          label = `Delegate has incorrect SwapERC20: ${currentSwapERC20}`
         }
         console.log(currentSwapERC20 === intendedSwapERC20 ? '✔' : '✘', label)
       } else {
@@ -44,7 +44,7 @@ async function main() {
       console.log(
         chainNames[chainId].toUpperCase(),
         `(${chainId})`,
-        '✘ Wrapper not deployed'
+        '✘ Delegate not deployed'
       )
     }
     console.log()

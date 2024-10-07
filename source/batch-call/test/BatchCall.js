@@ -13,8 +13,8 @@ const {
   createOrderSignature,
   createOrderERC20,
   createOrderERC20Signature,
+  TokenKinds,
 } = require('@airswap/utils')
-const { TokenKinds } = require('@airswap/utils')
 
 const CHAIN_ID = 31337
 const PROTOCOL_FEE = '30'

@@ -1,7 +1,7 @@
 {
   "name": "@airswap/batch-call",
-  "version": "4.2.3",
-  "description": "Batch balance, allowance, order validity checks",
+  "version": "5.0.0",
+  "description": "AirSwap: Balance, Allowance, Validity Checks",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -10,9 +10,7 @@
   "files": [
     "./build",
     "./typechain",
-    "./deploys.js",
-    "./deploys-blocks.js",
-    "./deploys.js.d.ts"
+    "./deploys*"
   ],
   "scripts": {
     "clean": "rm -rf ./cache && rm -rf ./build && rm -rf ./typechain",
@@ -26,11 +24,10 @@
     "owners": "hardhat run ./scripts/owner.js"
   },
   "devDependencies": {
-    "@airswap/utils": "4.3.3",
-    "@airswap/swap": "4.2.2",
-    "@airswap/swap-erc20": "4.3.1",
-    "@openzeppelin/contracts": "^4.8.3",
-    "prompt-confirm": "^2.0.4"
+    "@airswap/utils": "5.0.0",
+    "@airswap/swap": "5.0.0",
+    "@airswap/swap-erc20": "5.0.0",
+    "@openzeppelin/contracts": "^4.8.3"
   },
   "publishConfig": {
     "access": "public"

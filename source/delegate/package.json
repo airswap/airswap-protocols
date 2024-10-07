@@ -1,7 +1,7 @@
 {
   "name": "@airswap/delegate",
-  "version": "4.3.0-beta.0",
-  "description": "AirSwap: Delegate On-chain Trading Rules",
+  "version": "5.0.0",
+  "description": "AirSwap: Delegated On-chain Trading Rules",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -10,9 +10,7 @@
   "files": [
     "./build",
     "./typechain",
-    "./deploys.js",
-    "./deploys-blocks.js",
-    "./deploys.js.d.ts"
+    "./deploys*"
   ],
   "scripts": {
     "clean": "rm -rf ./cache && rm -rf ./build && rm -rf ./typechain",
@@ -23,14 +21,11 @@
     "test:ci": "hardhat test",
     "deploy": "hardhat run ./scripts/deploy.js",
     "verify": "hardhat run ./scripts/verify.js",
-    "owners": "hardhat run ./scripts/owner.js",
-    "migrate": "hardhat run ./scripts/migrate.js",
-    "balances": "hardhat run ./scripts/balances.js"
+    "owners": "hardhat run ./scripts/owner.js"
   },
   "devDependencies": {
-    "@airswap/utils": "4.3.3",
-    "@airswap/swap-erc20": "4.3.1",
-    "prompt-confirm": "^2.0.4"
+    "@airswap/utils": "5.0.0",
+    "@airswap/swap-erc20": "5.0.0"
   },
   "publishConfig": {
     "access": "public"

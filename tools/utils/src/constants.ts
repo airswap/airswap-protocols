@@ -28,6 +28,8 @@ export enum ChainIds {
   BASESEPOLIA = 84532,
   ARBITRUMSEPOLIA = 421614,
   SEPOLIA = 11155111,
+  NEON = 245022934,
+  NEONDEVNET = 245022926,
 }
 
 export const mainnets: number[] = [
@@ -40,6 +42,7 @@ export const mainnets: number[] = [
   ChainIds.ARBITRUM,
   ChainIds.AVALANCHE,
   ChainIds.LINEA,
+  ChainIds.NEON,
 ]
 
 export const testnets: number[] = [
@@ -53,6 +56,7 @@ export const testnets: number[] = [
   ChainIds.BASESEPOLIA,
   ChainIds.ARBITRUMSEPOLIA,
   ChainIds.SEPOLIA,
+  ChainIds.NEONDEVNET,
 ]
 
 export const chainLabels: Record<number, string> = {
@@ -76,6 +80,8 @@ export const chainLabels: Record<number, string> = {
   [ChainIds.BASESEPOLIA]: 'BASESEPOLIA',
   [ChainIds.ARBITRUMSEPOLIA]: 'ARBITRUMSEPOLIA',
   [ChainIds.SEPOLIA]: 'SEPOLIA',
+  [ChainIds.NEON]: 'NEON',
+  [ChainIds.NEONDEVNET]: 'NEONDEVNET',
 }
 
 export const chainNames: Record<number, string> = {
@@ -99,6 +105,8 @@ export const chainNames: Record<number, string> = {
   [ChainIds.BASESEPOLIA]: 'Base Sepolia',
   [ChainIds.ARBITRUMSEPOLIA]: 'Arbitrum Sepolia',
   [ChainIds.SEPOLIA]: 'Sepolia',
+  [ChainIds.NEON]: 'Neon',
+  [ChainIds.NEONDEVNET]: 'Neon Devnet',
 }
 
 export const chainCurrencies: Record<number, string> = {
@@ -122,6 +130,8 @@ export const chainCurrencies: Record<number, string> = {
   [ChainIds.BASESEPOLIA]: 'ETH',
   [ChainIds.ARBITRUMSEPOLIA]: 'AETH',
   [ChainIds.SEPOLIA]: 'SepoliaETH',
+  [ChainIds.NEON]: 'NEON',
+  [ChainIds.NEONDEVNET]: 'NEONDEVNET',
 }
 
 export const currencyIcons: Record<number, number> = {
@@ -144,6 +154,8 @@ export const currencyIcons: Record<number, number> = {
   [ChainIds.BASESEPOLIA]: ChainIds.MAINNET,
   [ChainIds.ARBITRUMSEPOLIA]: ChainIds.MAINNET,
   [ChainIds.SEPOLIA]: ChainIds.MAINNET,
+  [ChainIds.NEON]: ChainIds.NEON,
+  [ChainIds.NEONDEVNET]: ChainIds.NEONDEVNET,
 }
 
 export const apiUrls: Record<number, string> = {
@@ -166,6 +178,8 @@ export const apiUrls: Record<number, string> = {
   [ChainIds.BASESEPOLIA]: 'https://sepolia.base.org',
   [ChainIds.ARBITRUMSEPOLIA]: 'https://sepolia-rollup.arbitrum.io/rpc',
   [ChainIds.SEPOLIA]: 'https://ethereum-sepolia.publicnode.com',
+  [ChainIds.NEON]: 'https://neon-proxy-mainnet.solana.p2p.org',
+  [ChainIds.NEONDEVNET]: 'https://devnet.neonevm.org',
 }
 
 export const explorerUrls: Record<number, string> = {
@@ -188,6 +202,8 @@ export const explorerUrls: Record<number, string> = {
   [ChainIds.BASESEPOLIA]: 'https://sepolia.basescan.org',
   [ChainIds.ARBITRUMSEPOLIA]: 'https://sepolia.arbiscan.io',
   [ChainIds.SEPOLIA]: 'https://sepolia.etherscan.io',
+  [ChainIds.NEON]: 'https://neonscan.org',
+  [ChainIds.NEONDEVNET]: 'https://devnet.neonscan.org/',
 }
 
 export const explorerApiUrls: Record<number, string> = {
@@ -199,6 +215,8 @@ export const explorerApiUrls: Record<number, string> = {
   [ChainIds.BASESEPOLIA]: 'https://api-sepolia.basescan.org/api',
   [ChainIds.BASE]: 'https://api.basescan.org/api',
   [ChainIds.ARBITRUMSEPOLIA]: 'https://api-sepolia.arbiscan.io/api',
+  [ChainIds.NEON]: 'https://api.neonscan.org/hardhat/verify',
+  [ChainIds.NEONDEVNET]: 'https://devnet-api.neonscan.org/hardhat/verify',
 }
 
 export const stakingTokenAddresses: Record<number, string> = {
@@ -227,6 +245,8 @@ export const wrappedNativeTokenAddresses: Record<number, string> = {
   [ChainIds.BASESEPOLIA]: '0x4200000000000000000000000000000000000006',
   [ChainIds.ARBITRUMSEPOLIA]: '0x0091f4e75a03c11cb9be8e3717219005eb780d89',
   [ChainIds.SEPOLIA]: '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
+  [ChainIds.NEON]: '0x202C35e517Fa803B537565c40F0a6965D7204609',
+  [ChainIds.NEONDEVNET]: '0x11adC2d986E334137b9ad0a0F290771F31e9517F',
 }
 
 export const ownerAddresses: Record<number, string> = {
@@ -240,6 +260,7 @@ export const ownerAddresses: Record<number, string> = {
   [ChainIds.AVALANCHE]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
   [ChainIds.LINEA]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
   [ChainIds.SEPOLIA]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
+  [ChainIds.NEON]: '0xed669F5fe2A37Ef204DB178c7a982717B9f03Ec2',
 }
 
 export const protocolFeeReceiverAddresses: Record<number, string> = {

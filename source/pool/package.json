@@ -1,6 +1,6 @@
 {
   "name": "@airswap/pool",
-  "version": "4.2.2",
+  "version": "5.0.0",
   "description": "AirSwap: Withdrawable Token Pool",
   "license": "MIT",
   "repository": {
@@ -10,9 +10,7 @@
   "files": [
     "./build",
     "./typechain",
-    "./deploys.js",
-    "./deploys-blocks.js",
-    "./deploys.js.d.ts"
+    "./deploys*"
   ],
   "scripts": {
     "clean": "rm -rf ./cache && rm -rf ./build && rm -rf ./typechain",
@@ -24,14 +22,12 @@
     "deploy": "hardhat run ./scripts/deploy.js",
     "verify": "hardhat run ./scripts/verify.js",
     "owners": "hardhat run ./scripts/owner.js",
-    "migrate": "hardhat run ./scripts/migrate.js",
     "balances": "hardhat run ./scripts/balances.js"
   },
   "devDependencies": {
-    "@airswap/utils": "4.3.3",
+    "@airswap/utils": "5.0.0",
     "@airswap/merkle": "0.0.2",
-    "@openzeppelin/contracts": "^4.8.3",
-    "prompt-confirm": "^2.0.4"
+    "@openzeppelin/contracts": "^4.8.3"
   },
   "publishConfig": {
     "access": "public"
