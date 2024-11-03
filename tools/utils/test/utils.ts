@@ -1,20 +1,20 @@
 import { assert, expect } from 'chai'
 import { ethers } from 'ethers'
-import { Levels, FullOrderERC20, UnsignedOrderERC20 } from '../index'
+import type { FullOrderERC20, Levels, UnsignedOrderERC20 } from '../index'
 
 import {
   ADDRESS_ZERO,
   SECONDS_IN_DAY,
-  isValidPricingERC20,
+  calculateCostFromLevels,
+  compressFullOrderERC20,
+  createOrderERC20Signature,
+  decompressFullOrderERC20,
+  getFullSwapERC20,
+  getInterfaceId,
+  getSignerFromOrderERC20Signature,
   isValidFullOrderERC20,
   isValidOrderERC20,
-  createOrderERC20Signature,
-  getSignerFromOrderERC20Signature,
-  compressFullOrderERC20,
-  decompressFullOrderERC20,
-  calculateCostFromLevels,
-  getInterfaceId,
-  getFullSwapERC20,
+  isValidPricingERC20,
   protocolInterfaces,
 } from '../index'
 

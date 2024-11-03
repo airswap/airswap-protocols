@@ -23,7 +23,7 @@ async function main() {
     const chainId = mainnets[m]
     let apiUrl = apiUrls[chainId]
     if (apiUrl.indexOf('infura.io') !== -1)
-      apiUrl += '/' + process.env.INFURA_API_KEY
+      apiUrl += `/${process.env.INFURA_API_KEY}`
     const provider = new ethers.providers.JsonRpcProvider(apiUrl)
     const deployer = new ethers.Wallet(process.env.PRIVATE_KEY, provider)
 

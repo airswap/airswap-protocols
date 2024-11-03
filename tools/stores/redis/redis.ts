@@ -1,11 +1,11 @@
-import { createClient, SchemaFieldTypes } from 'redis'
 import {
-  FullOrder,
-  OrderFilter,
-  Indexes,
   Direction,
+  type FullOrder,
+  Indexes,
+  type OrderFilter,
   THIRTY_DAYS,
 } from '@airswap/utils'
+import { SchemaFieldTypes, createClient } from 'redis'
 
 function tagsKey(token: string) {
   return `tags:${token.toLowerCase()}`

@@ -43,7 +43,7 @@ async function main() {
   }
 
   if (RECIPIENT === ADDRESS_ZERO) {
-    console.log(`\n✘ RECIPIENT must be set.\n`)
+    console.log('\n✘ RECIPIENT must be set.\n')
     process.exit(0)
   }
 
@@ -72,7 +72,7 @@ async function main() {
   )
 
   if (value.isNegative()) {
-    console.log(`✘ Not enough balance to perform transfer.\n`)
+    console.log('✘ Not enough balance to perform transfer.\n')
     process.exit(0)
   }
 
@@ -85,7 +85,7 @@ async function main() {
     })
     console.log('Transferring...', getReceiptUrl(chainId, tx.hash), '\n')
     await tx.wait(CONFIRMATIONS)
-    console.log(`✔ Balance transfer complete.\n`)
+    console.log('✔ Balance transfer complete.\n')
   }
 }
 

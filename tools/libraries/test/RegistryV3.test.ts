@@ -7,13 +7,13 @@ const RegistryABI = require('registry-v3/build/contracts/Registry.sol/Registry.j
 
 const { RegistryV3 } = require('../index')
 
-let deployer
-let staker
-let stakingToken
-let baseToken
-let quoteToken
-let registryFactory
-let registry
+let deployer: any
+let staker: any
+let stakingToken: any
+let baseToken: any
+let quoteToken: any
+let registryFactory: any
+let registry: any
 
 const SERVER_URL = 'https://maker.com/xyz'
 const STAKING_COST = 1000

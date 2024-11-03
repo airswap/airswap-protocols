@@ -76,7 +76,7 @@ async function main() {
     const gasPrice = await account.getGasPrice()
     console.log(`\nGas price: ${gasPrice / 10 ** 9} gwei\n`)
 
-    const prompt = new Confirm(`Enable and set above as claimed on to-pool?`)
+    const prompt = new Confirm('Enable and set above as claimed on to-pool?')
     if (await prompt.run()) {
       const tx = await newPool.enableAndSetClaimed(tree, root, trees[tree])
       console.log('Updating...', getReceiptUrl(chainId, tx.hash), '\n')

@@ -1,10 +1,15 @@
-import { fancy } from 'fancy-test'
 import chai, { expect } from 'chai'
-import sinonChai from 'sinon-chai'
-import { useFakeTimers } from 'sinon'
 import { ethers } from 'ethers'
+import { fancy } from 'fancy-test'
+import { useFakeTimers } from 'sinon'
+import sinonChai from 'sinon-chai'
 
 import {
+  ADDRESS_ZERO,
+  ChainIds,
+  type Levels,
+  type OrderERC20,
+  ProtocolIds,
   createOrder,
   createOrderERC20,
   createOrderERC20Signature,
@@ -12,22 +17,17 @@ import {
   isValidFullOrder,
   isValidFullOrderERC20,
   isValidPricingERC20,
-  ADDRESS_ZERO,
-  ChainIds,
-  ProtocolIds,
-  OrderERC20,
-  Levels,
 } from '@airswap/utils'
 
+import { JsonRpcErrorCodes } from '@airswap/jsonrpc-client-websocket'
 import { Server } from '../index'
 import {
+  MockSocketServer,
   addJSONRPCAssertions,
   createRequest,
   createResponse,
-  MockSocketServer,
   nextEvent,
 } from './test-utils'
-import { JsonRpcErrorCodes } from '@airswap/jsonrpc-client-websocket'
 
 addJSONRPCAssertions()
 declare global {
@@ -55,17 +55,17 @@ chai.use(sinonChai)
 
 function mockHttpServer(api) {
   api.post('/').reply(200, async (uri, body) => {
-    const params = body['params']
-    let order
-    let res
-    switch (body['method']) {
+    const params = body.params
+    let order: any
+    let res: any
+    switch (body.method) {
       case 'getProtocols':
         res = [ProtocolIds.Discovery, ProtocolIds.RequestForQuoteERC20]
         break
       case 'getTokens':
         res = [USDC, USDT]
         break
-      case 'getPricingERC20':
+      case 'getPricingERC20': {
         const levels: Levels = [
           ['250', '0.5'],
           ['500', '0.6'],
@@ -80,6 +80,7 @@ function mockHttpServer(api) {
           },
         ]
         break
+      }
       case 'getSignerSideOrderERC20':
         order = createOrderERC20({
           signerToken: params.signerToken,
@@ -142,7 +143,7 @@ function mockHttpServer(api) {
     }
     return {
       jsonrpc: '2.0',
-      id: body['id'],
+      id: body.id,
       result: res,
     }
   })
@@ -150,7 +151,7 @@ function mockHttpServer(api) {
 
 describe('HTTPServer', () => {
   fancy
-    .nock('https://' + URL, mockHttpServer)
+    .nock(`https://${URL}`, mockHttpServer)
     .it('Server getProtocols()', async () => {
       const server = await Server.at(URL)
       const result = await server.getProtocols()
@@ -158,7 +159,7 @@ describe('HTTPServer', () => {
       expect(result[1]).to.be.equal(ProtocolIds.RequestForQuoteERC20)
     })
   fancy
-    .nock('https://' + URL, mockHttpServer)
+    .nock(`https://${URL}`, mockHttpServer)
     .it('Server getTokens()', async () => {
       const server = await Server.at(URL)
       const result = await server.getTokens()
@@ -166,7 +167,7 @@ describe('HTTPServer', () => {
       expect(result[1]).to.be.equal(USDT)
     })
   fancy
-    .nock('https://' + URL, mockHttpServer)
+    .nock(`https://${URL}`, mockHttpServer)
     .it('Server getPricingERC20()', async () => {
       const server = await Server.at(URL)
       const result = await server.getPricingERC20([
@@ -175,7 +176,7 @@ describe('HTTPServer', () => {
       expect(isValidPricingERC20(result)).to.be.true
     })
   fancy
-    .nock('https://' + URL, mockHttpServer)
+    .nock(`https://${URL}`, mockHttpServer)
     .it('Server getSignerSideOrderERC20()', async () => {
       const server = await Server.at(URL, {
         swapContract: ADDRESS_ZERO,
@@ -190,7 +191,7 @@ describe('HTTPServer', () => {
       expect(order.signerToken).to.equal(ADDRESS_ZERO)
     })
   fancy
-    .nock('https://' + URL, mockHttpServer)
+    .nock(`https://${URL}`, mockHttpServer)
     .it('Server getOrdersERC20()', async () => {
       const server = await Server.at(URL)
       const result = await server.getOrdersERC20(
@@ -203,7 +204,7 @@ describe('HTTPServer', () => {
       expect(isValidFullOrderERC20(result.orders[0])).to.be.true
     })
   fancy
-    .nock('https://' + URL, mockHttpServer)
+    .nock(`https://${URL}`, mockHttpServer)
     .it('Server getOrders()', async () => {
       const server = await Server.at(URL)
       const result = await server.getOrders(
@@ -216,7 +217,7 @@ describe('HTTPServer', () => {
       expect(isValidFullOrder(result.orders[0])).to.be.true
     })
   fancy
-    .nock('https://' + URL, mockHttpServer)
+    .nock(`https://${URL}`, mockHttpServer)
     .it('Server getTags()', async () => {
       const server = await Server.at(URL)
       const result = await server.getTags(ADDRESS_ZERO)
@@ -278,7 +279,7 @@ const fakeOrder: OrderERC20 = {
 }
 
 describe('WebSocketServer', () => {
-  const url = `ws://server.com:1234/`
+  const url = 'ws://server.com:1234/'
   let mockServer: MockSocketServer
   before(() => {
     MockSocketServer.startMockingWebSocket()
@@ -376,7 +377,7 @@ describe('WebSocketServer', () => {
   })
 
   fancy
-    .nock('https://' + URL, mockHttpServer)
+    .nock(`https://${URL}`, mockHttpServer)
     .it(
       'should use HTTP for consider when senderServer is provided',
       async () => {

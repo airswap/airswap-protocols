@@ -1,34 +1,34 @@
-import * as url from 'url'
-import { ethers } from 'ethers'
+import * as url from 'node:url'
 import { isBrowser } from 'browser-or-node'
-import { Client as HttpClient } from 'jayson'
+import type { ethers } from 'ethers'
+import type { Client as HttpClient } from 'jayson'
 import { TypedEmitter } from 'tiny-typed-emitter'
 
 import {
-  JsonRpcWebsocket,
-  JsonRpcError,
+  type JsonRpcError,
   JsonRpcErrorCodes,
+  JsonRpcWebsocket,
   WebsocketReadyStates,
 } from '@airswap/jsonrpc-client-websocket'
 
 import {
   ChainIds,
-  ProtocolIds,
-  ServerOptions,
-  OrderERC20,
-  FullOrderERC20,
-  FullOrder,
-  Pricing,
-  OrderFilter,
-  OrderResponse,
-  Indexes,
   Direction,
-  SupportedProtocolInfo,
-  protocolNames,
-  orderERC20PropsToStrings,
+  type FullOrder,
+  type FullOrderERC20,
+  Indexes,
+  type OrderERC20,
+  type OrderFilter,
+  type OrderResponse,
+  type Pricing,
+  ProtocolIds,
+  type ServerOptions,
+  type SupportedProtocolInfo,
   isValidOrderERC20,
   isValidPricingERC20,
+  orderERC20PropsToStrings,
   parseUrl,
+  protocolNames,
 } from '@airswap/utils'
 
 import { SwapERC20 } from './Contracts'
@@ -140,7 +140,8 @@ export class Server extends TypedEmitter<ServerEvents> {
     const errors = this.compare(params, order)
     if (errors.length) {
       throw new Error(`Server response differs from request params: ${errors}`)
-    } else if (!isValidOrderERC20(order)) {
+    }
+    if (!isValidOrderERC20(order)) {
       throw new Error(`Invalid order response: ${JSON.stringify(order)}`)
     }
     return orderERC20PropsToStrings(order)
@@ -176,7 +177,8 @@ export class Server extends TypedEmitter<ServerEvents> {
     const errors = this.compare(params, order)
     if (errors.length) {
       throw new Error(`Server response differs from request params: ${errors}`)
-    } else if (!isValidOrderERC20(order)) {
+    }
+    if (!isValidOrderERC20(order)) {
       throw new Error(`Invalid order response: ${JSON.stringify(order)}`)
     }
     return orderERC20PropsToStrings(order)
@@ -361,9 +363,8 @@ export class Server extends TypedEmitter<ServerEvents> {
   private _init(initializeTimeout: number = DEFAULT_TIMEOUT) {
     if (this.transportProtocol === 'http') {
       return this._initHTTPClient(this.locator)
-    } else {
-      return this._initWebSocketClient(this.locator, initializeTimeout)
     }
+    return this._initWebSocketClient(this.locator, initializeTimeout)
   }
 
   private _initHTTPClient(locator: string, clientOnly?: boolean) {
@@ -372,7 +373,7 @@ export class Server extends TypedEmitter<ServerEvents> {
     const options = {
       protocol: parsedUrl.protocol,
       hostname: parsedUrl.hostname,
-      path: parsedUrl.path,
+      pathname: parsedUrl.pathname,
       port: parsedUrl.port,
       timeout: DEFAULT_TIMEOUT,
     }
@@ -602,8 +603,7 @@ export class Server extends TypedEmitter<ServerEvents> {
       (method === 'considerOrderERC20' && this.senderServer)
     ) {
       return this.httpCall<T>(method, params)
-    } else {
-      return this.webSocketCall<T>(method, params)
     }
+    return this.webSocketCall<T>(method, params)
   }
 }
