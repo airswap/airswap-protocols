@@ -1,5 +1,5 @@
 import { ChainIds } from './constants'
-import { TokenInfo } from './types'
+import type { TokenInfo } from './types'
 const TEST_TOKEN_DECIMALS = 6
 
 export default [

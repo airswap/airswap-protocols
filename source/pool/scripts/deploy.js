@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const fs = require('fs')
+const fs = require('node:fs')
 const prettier = require('prettier')
 const { ethers, run } = require('hardhat')
 const { chainLabels, ChainIds, getReceiptUrl } = require('@airswap/utils')
@@ -21,7 +21,7 @@ async function main() {
   const scale = 10
   const max = 100
 
-  console.log(`\nDeploy POOL`)
+  console.log('\nDeploy POOL')
 
   console.log(`· max    ${max}`)
   console.log(`· scale  ${scale}\n`)
@@ -53,7 +53,7 @@ async function main() {
         { ...prettierConfig, parser: 'babel' }
       )
     )
-    poolCommits[chainId] = require('child_process')
+    poolCommits[chainId] = require('node:child_process')
       .execSync('git rev-parse HEAD')
       .toString()
       .trim()

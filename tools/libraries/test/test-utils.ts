@@ -1,12 +1,12 @@
-import chai from 'chai'
-import { EventEmitter } from 'events'
-import {
+import type { EventEmitter } from 'node:events'
+import type {
   JsonRpcRequest,
   JsonRpcResponse,
 } from '@airswap/jsonrpc-client-websocket'
-import mock from 'mock-require'
-import { WebSocket, Server as BaseMockSocketServer } from 'mock-socket'
 import { ProtocolIds } from '@airswap/utils'
+import chai from 'chai'
+import mock from 'mock-require'
+import { Server as BaseMockSocketServer, WebSocket } from 'mock-socket'
 
 export function addJSONRPCAssertions(): void {
   chai.Assertion.addMethod(

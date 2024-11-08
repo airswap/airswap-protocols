@@ -1,12 +1,12 @@
+import { ChainIds } from '@airswap/utils'
 import { expect } from 'chai'
 import { Redis, createIndex } from '../redis/redis'
-import { ChainIds } from '@airswap/utils'
 
 import {
+  ADDRESS_ZERO,
+  type FullOrder,
   createOrder,
   createOrderSignature,
-  FullOrder,
-  ADDRESS_ZERO,
 } from '@airswap/utils'
 
 const store = new Redis(process.env.REDISCLOUD_URL)
@@ -15,8 +15,8 @@ const TOKEN_ADDRESS = '0x000000000000000000000000000000000000000A'
 const signerOne = '0x0000000000000000000000000000000000000001'
 const signerTwo = '0x0000000000000000000000000000000000000002'
 
-let orderOne
-let orderTwo
+let orderOne: FullOrder
+let orderTwo: FullOrder
 
 async function createSignedOrder(
   id: string,

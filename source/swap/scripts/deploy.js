@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const fs = require('fs')
+const fs = require('node:fs')
 const prettier = require('prettier')
 const { ethers, run } = require('hardhat')
 const {
@@ -40,7 +40,7 @@ async function main() {
     protocolFeeReceiver = protocolFeeReceiverAddresses[chainId]
   }
 
-  console.log(`\nDeploy SWAP`)
+  console.log('\nDeploy SWAP')
 
   console.log(`· adapters             ${adapterDeploys[chainId].join(', ')}`)
   console.log(`· protocolFee          ${protocolFee}`)
@@ -79,7 +79,7 @@ async function main() {
         { ...prettierConfig, parser: 'babel' }
       )
     )
-    swapCommits[chainId] = require('child_process')
+    swapCommits[chainId] = require('node:child_process')
       .execSync('git rev-parse HEAD')
       .toString()
       .trim()

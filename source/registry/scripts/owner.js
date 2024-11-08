@@ -1,1 +1,1 @@
-console.log(`\n✘ Registry is not ownable.\n`)
+console.log('\n✘ Registry is not ownable.\n')

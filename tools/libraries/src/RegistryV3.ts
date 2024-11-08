@@ -1,8 +1,8 @@
-import { ethers } from 'ethers'
+import type { ethers } from 'ethers'
 import { Registry__factory } from 'registry-v3/typechain/factories/contracts'
 
-import { Server } from './Server'
 import { Contract, SwapERC20 } from './Contracts'
+import { Server } from './Server'
 
 const registryDeploys = {
   1: '0x8F9DA6d38939411340b19401E8c54Ea1f51B8f95',

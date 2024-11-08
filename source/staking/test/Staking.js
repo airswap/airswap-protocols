@@ -316,7 +316,7 @@ describe('Staking Unit', () => {
       await staking.connect(account1).stake('100')
 
       const block = await ethers.provider.getBlock()
-      await ethers.provider.send('evm_mine', [block['timestamp'] + 10])
+      await ethers.provider.send('evm_mine', [block.timestamp + 10])
 
       await expect(staking.connect(account1).unstake('12'))
         .to.be.revertedWith('AmountInvalid')
@@ -506,7 +506,7 @@ describe('Staking Unit', () => {
       await staking.connect(account1).stake('100')
 
       const block = await ethers.provider.getBlock()
-      await ethers.provider.send('evm_mine', [block['timestamp'] + 10])
+      await ethers.provider.send('evm_mine', [block.timestamp + 10])
 
       const available = await staking.available(account1.address)
       // every 1 block 1% is unstakeable, user can only claim starting afater 10 blocks, or 10% unstakeable
@@ -519,7 +519,7 @@ describe('Staking Unit', () => {
       await staking.connect(account1).stake('100')
 
       const block = await ethers.provider.getBlock()
-      await ethers.provider.send('evm_mine', [block['timestamp'] + 10])
+      await ethers.provider.send('evm_mine', [block.timestamp + 10])
 
       await staking.connect(account1).stake('100')
 
@@ -535,7 +535,7 @@ describe('Staking Unit', () => {
       await staking.connect(account1).stake('100')
 
       const block = await ethers.provider.getBlock()
-      await ethers.provider.send('evm_mine', [block['timestamp'] + 10])
+      await ethers.provider.send('evm_mine', [block.timestamp + 10])
 
       await staking.connect(account1).unstake('10')
       const available = await staking.available(account1.address)
@@ -549,7 +549,7 @@ describe('Staking Unit', () => {
 
       const block = await ethers.provider.getBlock()
       // With a duration of 100, increasing the timestamp by 10 will unlock 10% of the staked balance
-      await ethers.provider.send('evm_mine', [block['timestamp'] + 10])
+      await ethers.provider.send('evm_mine', [block.timestamp + 10])
 
       // We withdraw 2
       await staking.connect(account1).unstake('2')
@@ -586,7 +586,7 @@ describe('Staking Unit', () => {
       await staking.connect(account1).proposeDelegate(account2.address)
       await staking.connect(account2).acceptDelegateProposal(account1.address)
       await expect(staking.connect(deployer).proposeDelegate(account2.address))
-        .to.be.revertedWith(`DelegateTaken`)
+        .to.be.revertedWith('DelegateTaken')
         .withArgs(account2.address)
     })
 
@@ -594,7 +594,7 @@ describe('Staking Unit', () => {
       await staking.connect(account1).proposeDelegate(account2.address)
       await staking.connect(account2).acceptDelegateProposal(account1.address)
       await expect(staking.connect(account1).proposeDelegate(deployer.address))
-        .to.be.revertedWith(`SenderHasDelegate`)
+        .to.be.revertedWith('SenderHasDelegate')
         .withArgs(account1.address, deployer.address)
     })
 
@@ -605,7 +605,7 @@ describe('Staking Unit', () => {
       await expect(
         staking.connect(account2).acceptDelegateProposal(deployer.address)
       )
-        .to.be.revertedWith(`DelegateTaken`)
+        .to.be.revertedWith('DelegateTaken')
         .withArgs(deployer.address)
     })
 
@@ -613,7 +613,7 @@ describe('Staking Unit', () => {
       await token.mock.transferFrom.returns(true)
       await staking.connect(account2).stake('100')
       await expect(staking.connect(account1).proposeDelegate(account2.address))
-        .to.be.revertedWith(`DelegateStaked`)
+        .to.be.revertedWith('DelegateStaked')
         .withArgs(account2.address)
     })
 
@@ -624,7 +624,7 @@ describe('Staking Unit', () => {
       await expect(
         staking.connect(account2).acceptDelegateProposal(account1.address)
       )
-        .to.be.revertedWith(`DelegateStaked`)
+        .to.be.revertedWith('DelegateStaked')
         .withArgs(account1.address)
     })
 
@@ -632,7 +632,7 @@ describe('Staking Unit', () => {
       await expect(
         staking.connect(account2).acceptDelegateProposal(account1.address)
       )
-        .to.be.revertedWith(`DelegateNotProposed`)
+        .to.be.revertedWith('DelegateNotProposed')
         .withArgs(account1.address)
     })
 
@@ -651,7 +651,7 @@ describe('Staking Unit', () => {
 
     it('unsuccessful delegate removed if not set as delegate', async () => {
       await expect(staking.connect(account1).unsetDelegate(account2.address))
-        .to.be.revertedWith(`DelegateNotSet`)
+        .to.be.revertedWith('DelegateNotSet')
         .withArgs(account2.address)
     })
 

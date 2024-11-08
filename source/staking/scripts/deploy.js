@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const fs = require('fs')
+const fs = require('node:fs')
 const prettier = require('prettier')
 const { ethers, run } = require('hardhat')
 const { chainLabels, ChainIds, getReceiptUrl } = require('@airswap/utils')
@@ -27,7 +27,7 @@ async function main() {
     minDurationChangeDelay,
   } = config[chainId]
 
-  console.log(`\nDeploy STAKING`)
+  console.log('\nDeploy STAKING')
 
   console.log(`· name                    ${name}`)
   console.log(`· symbol                  ${symbol}`)
@@ -68,7 +68,7 @@ async function main() {
         { ...prettierConfig, parser: 'babel' }
       )
     )
-    stakingCommits[chainId] = require('child_process')
+    stakingCommits[chainId] = require('node:child_process')
       .execSync('git rev-parse HEAD')
       .toString()
       .trim()

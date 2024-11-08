@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const fs = require('fs')
+const fs = require('node:fs')
 const prettier = require('prettier')
 const { ethers, run } = require('hardhat')
 const { ChainIds, chainLabels, getReceiptUrl } = require('@airswap/utils')
@@ -17,7 +17,7 @@ async function main() {
     console.log('Value for --network flag is required')
     return
   }
-  console.log(`\nDeploy BATCHCALL\n`)
+  console.log('\nDeploy BATCHCALL\n')
 
   if (await confirmDeployment(deployer, batchCallDeploys)) {
     const batchFactory = await ethers.getContractFactory('BatchCall')
@@ -58,7 +58,7 @@ async function main() {
       )
     )
 
-    batchCallCommits[chainId] = require('child_process')
+    batchCallCommits[chainId] = require('node:child_process')
       .execSync('git rev-parse HEAD')
       .toString()
       .trim()

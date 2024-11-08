@@ -36,7 +36,8 @@ describe('SwapERC20 Unit', () => {
   const DEFAULT_BALANCE = '100000'
   const STAKING_BALANCE = '10000000000'
   const SWAP_FEE =
-    (parseInt(DEFAULT_AMOUNT) * parseInt(PROTOCOL_FEE)) / parseInt(FEE_DIVISOR)
+    (Number.parseInt(DEFAULT_AMOUNT) * Number.parseInt(PROTOCOL_FEE)) /
+    Number.parseInt(FEE_DIVISOR)
   const IS_VALID_SIGNATURE_ABI = [
     {
       inputs: [

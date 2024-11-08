@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const fs = require('fs')
+const fs = require('node:fs')
 const prettier = require('prettier')
 const { ethers, run } = require('hardhat')
 const { ChainIds, chainLabels, getReceiptUrl } = require('@airswap/utils')
@@ -29,7 +29,7 @@ async function main() {
     ;({ stakingToken, stakingCost, supportCost } = config[ChainIds.MAINNET])
   }
 
-  console.log(`\nDeploy REGISTRY`)
+  console.log('\nDeploy REGISTRY')
 
   console.log(`· stakingCost   ${stakingCost}`)
   console.log(`· supportCost   ${supportCost}`)
@@ -66,7 +66,7 @@ async function main() {
         { ...prettierConfig, parser: 'babel' }
       )
     )
-    registryCommits[chainId] = require('child_process')
+    registryCommits[chainId] = require('node:child_process')
       .execSync('git rev-parse HEAD')
       .toString()
       .trim()
