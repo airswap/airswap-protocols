@@ -76,7 +76,7 @@ function isValidString(value: string): boolean {
   return typeof value === 'string' && value.length > 0
 }
 function isBytesLike(value: string): boolean {
-  return typeof value === 'string' && ethers.utils.isBytesLike(value)
+  return typeof value === 'string' && ethers.isBytesLike(value)
 }
 function isValidOrderParty(orderParty: OrderParty): boolean {
   return (
@@ -108,7 +108,7 @@ export function isValidOrder(order: Order): boolean {
 export function isValidFullOrder(fullOrder: FullOrder) {
   return (
     isValidOrder(fullOrder as Order) &&
-    ethers.utils.isAddress(fullOrder.swapContract) &&
+    ethers.isAddress(fullOrder.swapContract) &&
     typeof fullOrder.chainId === 'number'
   )
 }
@@ -159,7 +159,7 @@ export async function createOrderSignature(
       },
     })
   } else {
-    sig = await signer._signTypedData(
+    sig = await signer.signTypedData(
       {
         verifyingContract: swapContract,
         chainId,
@@ -170,7 +170,7 @@ export async function createOrderSignature(
       unsignedOrder
     )
   }
-  const { r, s, v } = ethers.utils.splitSignature(sig)
+  const { r, s, v } = ethers.Signature.from(sig)
   return { r, s, v: String(v) }
 }
 
@@ -182,9 +182,7 @@ export function getSignerFromOrderSignature(
   r: string,
   s: string
 ): string {
-  const sig = `${r}${s.slice(2)}${ethers.BigNumber.from(v)
-    .toHexString()
-    .slice(2)}`
+  const sig = `${r}${s.slice(2)}${ethers.hexlify(v).slice(2)}`
   return recoverTypedSignature({
     version: SignTypedDataVersion.V4,
     signature: sig,

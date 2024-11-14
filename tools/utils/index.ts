@@ -21,7 +21,7 @@ export function getAccountUrl(chainId: number, address: string): string {
 export function parseCheckResult(errors: Array<string>) {
   const res: Array<string> = []
   for (let idx = 0; idx < errors.length; idx++) {
-    const error = ethers.utils.parseBytes32String(errors[idx])
+    const error = ethers.decodeBytes32String(errors[idx])
     if (error) {
       res.push(error)
     }
@@ -30,19 +30,13 @@ export function parseCheckResult(errors: Array<string>) {
 }
 
 export function getInterfaceId(functions: string[]): string {
-  const _interface = new ethers.utils.Interface(functions)
-  const interfaceId = ethers.utils.arrayify(
-    _interface.getSighash(_interface.fragments[0])
-  )
-  for (let i = 1; i < _interface.fragments.length; i++) {
-    const hash = ethers.utils.arrayify(
-      _interface.getSighash(_interface.fragments[i])
-    )
-    for (let j = 0; j < hash.length; j++) {
-      interfaceId[j] = interfaceId[j] ^ hash[j]
-    }
+  const _interface = new ethers.Interface(functions)
+  let interfaceId = 0n
+  for (const fragment of _interface.fragments) {
+    const selector = BigInt((fragment as ethers.FunctionFragment).selector)
+    interfaceId ^= selector
   }
-  return ethers.utils.hexlify(interfaceId)
+  return ethers.hexlify(ethers.toBeArray(interfaceId & 0xffffffffn))
 }
 
 export function stringifyEIP712Type(

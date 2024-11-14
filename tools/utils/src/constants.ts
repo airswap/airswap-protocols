@@ -286,22 +286,22 @@ export const protocolNames: Record<string, string> = {
 export const protocolInterfaces: Record<string, string[]> = {
   [ProtocolIds.Discovery]: [
     'function getProtocols()',
-    'function setProtocols(array((string interfaceId,(string chainId,string swapContractAddress,string walletAddress))))',
+    'function setProtocols((string interfaceId,(string chainId,string swapContractAddress,string walletAddress))[])',
     'function getTokens()',
-    'function setTokens(array(string tokenContractAddress))',
+    'function setTokens(string[] tokenContractAddress)',
   ],
   [ProtocolIds.RequestForQuoteERC20]: [
     'function getSignerSideOrderERC20(string chainId,string swapContractAddress,string senderAmount,string signerToken,string senderToken,string senderWallet,string minExpiry,string proxyingFor)',
     'function getSenderSideOrderERC20(string chainId,string swapContractAddress,string signerAmount,string signerToken,string senderToken,string senderWallet,string minExpiry,string proxyingFor)',
-    'function getPricingERC20(array((string baseToken,string quoteToken)),string minExpiry)',
+    'function getPricingERC20((string baseToken,string quoteToken)[],string minExpiry)',
     'function getAllPricingERC20(string minExpiry)',
   ],
   [ProtocolIds.LastLookERC20]: [
-    'function subscribePricingERC20(array((string baseToken,string quoteToken)))',
+    'function subscribePricingERC20((string baseToken,string quoteToken)[])',
     'function subscribeAllPricingERC20()',
-    'function unsubscribePricingERC20(array((string baseToken,string quoteToken)))',
+    'function unsubscribePricingERC20((string baseToken,string quoteToken)[])',
     'function unsubscribeAllPricingERC20()',
-    'function setPricingERC20(array(string baseToken,string quoteToken,string minimum,array(array((string level,string price))),array(array((string level,string price)))))',
+    'function setPricingERC20((string baseToken,string quoteToken,string minimum,(string level,string price)[][],(string level,string price)[][]))',
     'function considerOrderERC20(string chainId,string swapContractAddress,string nonce,string expiry,string signerWallet,string signerToken,string signerAmount,string senderToken,string senderAmount,string v,string r,string s)',
   ],
   [ProtocolIds.IndexingERC20]: [

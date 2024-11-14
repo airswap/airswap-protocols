@@ -8,7 +8,7 @@ import { ethers } from 'ethers'
 import lzString from 'lz-string'
 
 import { abi as ERC20_ABI } from './abis/ERC20.json'
-const erc20Interface = new ethers.utils.Interface(ERC20_ABI)
+const erc20Interface = new ethers.Interface(ERC20_ABI)
 
 import {
   ADDRESS_ZERO,
@@ -128,7 +128,7 @@ export async function createOrderERC20Signature(
       },
     })
   } else {
-    sig = await signer._signTypedData(
+    sig = await signer.signTypedData(
       {
         verifyingContract: swapContract,
         chainId,
@@ -139,7 +139,7 @@ export async function createOrderERC20Signature(
       unsignedOrder
     )
   }
-  const { r, s, v } = ethers.utils.splitSignature(sig)
+  const { r, s, v } = ethers.Signature.from(sig)
   return { r, s, v: String(v) }
 }
 
@@ -151,9 +151,7 @@ export function getSignerFromOrderERC20Signature(
   r: string,
   s: string
 ): string {
-  const sig = `${r}${s.slice(2)}${ethers.BigNumber.from(v)
-    .toHexString()
-    .slice(2)}`
+  const sig = `${r}${s.slice(2)}${ethers.hexlify(v).slice(2)}`
   return recoverTypedSignature({
     version: SignTypedDataVersion.V4,
     signature: sig,
@@ -176,34 +174,34 @@ export function isValidOrderERC20(order: OrderERC20): boolean {
     !!order &&
     typeof order.nonce === 'string' &&
     typeof order.expiry === 'string' &&
-    ethers.utils.isAddress(order.signerWallet) &&
-    ethers.utils.isAddress(order.signerToken) &&
+    ethers.isAddress(order.signerWallet) &&
+    ethers.isAddress(order.signerToken) &&
     typeof order.signerAmount === 'string' &&
-    ethers.utils.isAddress(order.senderToken) &&
+    ethers.isAddress(order.senderToken) &&
     typeof order.senderAmount === 'string' &&
     typeof order.v === 'string' &&
-    ethers.utils.isBytesLike(order.r) &&
-    ethers.utils.isBytesLike(order.s)
+    ethers.isBytesLike(order.r) &&
+    ethers.isBytesLike(order.s)
   )
 }
 
 export function isValidFullOrderERC20(fullOrder: FullOrderERC20): boolean {
   return (
     !!fullOrder &&
-    ethers.utils.isAddress(fullOrder.swapContract) &&
+    ethers.isAddress(fullOrder.swapContract) &&
     typeof fullOrder.chainId === 'number' &&
     typeof fullOrder.nonce === 'string' &&
     typeof fullOrder.expiry === 'string' &&
-    ethers.utils.isAddress(fullOrder.signerWallet) &&
-    ethers.utils.isAddress(fullOrder.signerToken) &&
+    ethers.isAddress(fullOrder.signerWallet) &&
+    ethers.isAddress(fullOrder.signerToken) &&
     typeof fullOrder.signerAmount === 'string' &&
     typeof fullOrder.protocolFee === 'string' &&
-    ethers.utils.isAddress(fullOrder.senderWallet) &&
-    ethers.utils.isAddress(fullOrder.senderToken) &&
+    ethers.isAddress(fullOrder.senderWallet) &&
+    ethers.isAddress(fullOrder.senderToken) &&
     typeof fullOrder.senderAmount === 'string' &&
     typeof fullOrder.v === 'string' &&
-    ethers.utils.isBytesLike(fullOrder.r) &&
-    ethers.utils.isBytesLike(fullOrder.s)
+    ethers.isBytesLike(fullOrder.r) &&
+    ethers.isBytesLike(fullOrder.s)
   )
 }
 
@@ -342,7 +340,7 @@ const parseTransfer = (log: any): any => {
         token: log.address?.toLowerCase(),
         from: parsed.args[0]?.toLowerCase(),
         to: parsed.args[1]?.toLowerCase(),
-        amount: ethers.BigNumber.from(parsed.args[2]),
+        amount: BigInt(parsed.args[2]),
       }
     }
   } catch (e) {
@@ -355,7 +353,7 @@ export const getFullSwapERC20 = async (
   nonce: string,
   signerWallet: string,
   feeReceiver: string,
-  logs: ethers.providers.Log[]
+  logs: ethers.Log[]
 ): Promise<FullSwapERC20> => {
   const transfers = []
   let transfer: any

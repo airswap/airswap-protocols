@@ -33,8 +33,8 @@ export function isValidPricingERC20(pricing: Pricing[]): boolean {
 export function isValidPricingERC20Pair(pricing: Pricing): boolean {
   return (
     !!pricing &&
-    ethers.utils.isAddress(pricing.baseToken) &&
-    ethers.utils.isAddress(pricing.quoteToken) &&
+    ethers.isAddress(pricing.baseToken) &&
+    ethers.isAddress(pricing.quoteToken) &&
     !!pricing.bid &&
     !!pricing.ask &&
     !!pricing.bid.length &&
@@ -114,15 +114,15 @@ export function calculateCostFromLevels(amount: string, levels: Levels) {
 }
 
 export function toDecimalString(
-  value: string | ethers.BigNumber,
+  value: string | ethers.BigNumberish,
   decimals: string | number
 ): string {
-  return ethers.utils.formatUnits(value.toString(), decimals).toString()
+  return ethers.formatUnits(value.toString(), decimals).toString()
 }
 
 export function toAtomicString(
-  value: string | ethers.BigNumber,
+  value: string | ethers.BigNumberish,
   decimals: string | number
 ): string {
-  return ethers.utils.parseUnits(value.toString(), decimals).toString()
+  return ethers.parseUnits(value.toString(), decimals).toString()
 }

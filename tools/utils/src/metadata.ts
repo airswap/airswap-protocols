@@ -166,7 +166,7 @@ export function getStakingTokens(): TokenInfo[] {
 }
 
 export async function getTokenKind(
-  provider: ethers.providers.Provider,
+  provider: ethers.Provider,
   address: string
 ): Promise<string> {
   const contract = new ethers.Contract(address, ERC165_ABI, provider)
@@ -190,10 +190,10 @@ export async function getTokenKind(
 }
 
 export async function getTokenInfo(
-  provider: ethers.providers.Provider,
+  provider: ethers.Provider,
   address: string
 ): Promise<TokenInfo> {
-  if (!ethers.utils.isAddress(address)) {
+  if (!ethers.isAddress(address)) {
     throw new Error(`Invalid address: ${address}`)
   }
   const contract = new ethers.Contract(address, ERC20_ABI, provider)
@@ -210,7 +210,7 @@ export async function getTokenInfo(
     throw new Error(`Unable to get ERC20 from contract at ${address}`)
   }
   return {
-    chainId: (await provider.getNetwork()).chainId,
+    chainId: Number((await provider.getNetwork()).chainId),
     address: address.toLowerCase(),
     name,
     symbol,
@@ -219,7 +219,7 @@ export async function getTokenInfo(
 }
 
 export async function getCollectionTokenInfo(
-  provider: ethers.providers.Provider,
+  provider: ethers.Provider,
   address: string,
   id: string
 ): Promise<CollectionTokenInfo> {
@@ -228,7 +228,7 @@ export async function getCollectionTokenInfo(
   let uri = null
   let metadata = null
 
-  if (!ethers.utils.isAddress(address)) {
+  if (!ethers.isAddress(address)) {
     throw new Error(`Invalid address: ${address}`)
   }
   try {
@@ -250,7 +250,7 @@ export async function getCollectionTokenInfo(
     throw `Unable to fetch token metadata: ${e.message}`
   }
   return {
-    chainId: (await provider.getNetwork()).chainId,
+    chainId: Number((await provider.getNetwork()).chainId),
     address: address.toLowerCase(),
     kind,
     id,
