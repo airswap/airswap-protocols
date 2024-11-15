@@ -268,9 +268,9 @@ export const protocolFeeReceiverAddresses: Record<number, string> = {
 }
 
 export enum ProtocolIds {
-  Discovery = '0xf3713ede',
-  RequestForQuoteERC20 = '0x02ad05d3',
-  LastLookERC20 = '0x395ca9f1',
+  Discovery = '0x461cbdde',
+  RequestForQuoteERC20 = '0xc4f4ebe3',
+  LastLookERC20 = '0x08828238',
   IndexingERC20 = '0x85ccc7d5',
   Indexing = '0x9498325a',
 }

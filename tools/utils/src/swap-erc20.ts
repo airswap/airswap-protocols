@@ -151,7 +151,7 @@ export function getSignerFromOrderERC20Signature(
   r: string,
   s: string
 ): string {
-  const sig = `${r}${s.slice(2)}${ethers.hexlify(v).slice(2)}`
+  const sig = `${r}${s.slice(2)}${ethers.toBeHex(v).slice(2)}`
   return recoverTypedSignature({
     version: SignTypedDataVersion.V4,
     signature: sig,

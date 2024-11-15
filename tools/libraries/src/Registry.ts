@@ -11,14 +11,14 @@ class ServerRegistry extends Contract {
     super('Registry', registryDeploys, registryBlocks, Registry__factory)
   }
   public async getServerURLs(
-    providerOrSigner: ethers.providers.Provider | ethers.Signer,
+    signerOrProvider: ethers.Signer | ethers.Provider,
     chainId: number,
     protocol: string,
     baseToken?: string,
     quoteToken?: string,
     address = registryDeploys[chainId]
   ): Promise<string[]> {
-    const contract = Registry__factory.connect(address, providerOrSigner)
+    const contract = Registry__factory.connect(address, signerOrProvider)
     const protocolStakers: string[] = await contract.getStakersForProtocol(
       protocol
     )

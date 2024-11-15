@@ -25,7 +25,7 @@ import wrapperBlocks from '@airswap/wrapper/deploys-blocks.js'
 
 import BatchCallContract from '@airswap/batch-call/build/contracts/BatchCall.sol/BatchCall.json'
 import batchCallDeploys from '@airswap/batch-call/deploys.js'
-const batchInterface = new ethers.utils.Interface(
+const batchInterface = new ethers.Interface(
   JSON.stringify(BatchCallContract.abi)
 )
 
@@ -52,7 +52,7 @@ export class Contract {
     return this.deployedBlocks[chainId] || 0
   }
   public getContract(
-    providerOrSigner: ethers.providers.Provider | ethers.Signer,
+    providerOrSigner: ethers.Provider | ethers.Signer,
     chainId: number
   ): ethers.Contract {
     return this.factory.connect(this.addresses[chainId], providerOrSigner)
@@ -93,7 +93,7 @@ export const WETH = new Contract(
 )
 export const BatchCall = new Contract('BatchCall', batchCallDeploys)
 BatchCall.getContract = (
-  providerOrSigner: ethers.providers.Provider | ethers.Signer,
+  providerOrSigner: ethers.Provider | ethers.Signer,
   chainId: number
 ): ethers.Contract => {
   return new ethers.Contract(

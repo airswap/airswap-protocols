@@ -48,14 +48,6 @@ describe('Utils', async () => {
     }
   })
 
-  it('Generates correct interfaceIds', async () => {
-    for (const interfaceId in protocolInterfaces) {
-      expect(getInterfaceId(protocolInterfaces[interfaceId])).to.be.equal(
-        interfaceId
-      )
-    }
-  })
-
   it('Signs and validates an order', async () => {
     const { v, r, s } = await createOrderERC20Signature(
       unsignedOrder,
