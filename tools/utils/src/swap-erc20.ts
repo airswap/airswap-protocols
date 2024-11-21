@@ -382,7 +382,7 @@ export const getFullSwapERC20FromTransfers = (
   }
 
   if (!signerTransfer || !senderTransfer) {
-    throw new Error('getFullSwapERC20: Either signer or sender not found')
+    throw new Error('getFullSwapERC20: mutual transfers not found')
   }
 
   return {
@@ -393,7 +393,7 @@ export const getFullSwapERC20FromTransfers = (
     senderWallet: senderTransfer.from,
     senderToken: senderTransfer.token,
     senderAmount: senderTransfer.amount.toString(),
-    feeAmount: feeTransfer.amount.toString(),
+    feeAmount: (feeTransfer?.amount || 0).toString(),
   }
 }
 

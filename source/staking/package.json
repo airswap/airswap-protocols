@@ -29,7 +29,7 @@
     "ethers": "^5.7.2"
   },
   "devDependencies": {
-    "@airswap/utils": "5.0.1",
+    "@airswap/utils": "5.0.2",
     "@openzeppelin/contracts": "^4.8.3"
   },
   "publishConfig": {
