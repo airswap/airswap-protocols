@@ -134,11 +134,7 @@ contract Delegate is IDelegate, Ownable {
   ) external {
     Rule storage rule = rules[_senderWallet][_senderToken][_signerToken];
     // Ensure the signer amount is valid
-    if (
-      _signerAmount <
-      (rule.signerAmount * (rule.senderAmount - rule.senderFilledAmount)) /
-        rule.senderAmount
-    ) {
+    if (rule.signerAmount * _senderAmount != rule.senderAmount * _signerAmount) {
       revert SignerAmountInvalid();
     }
     // Ensure the rule has not expired

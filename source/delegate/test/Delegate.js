@@ -462,7 +462,7 @@ describe('Delegate Unit', () => {
 
     it('fails to swap with insufficient remaining sender amount on Rule', async () => {
       await senderToken.mock.approve
-        .withArgs(delegate.address, DEFAULT_SENDER_AMOUNT - 1)
+        .withArgs(delegate.address, DEFAULT_SENDER_AMOUNT / 2)
         .returns(true)
 
       await delegate
@@ -470,9 +470,9 @@ describe('Delegate Unit', () => {
         .setRule(
           sender.address,
           senderToken.address,
-          DEFAULT_SENDER_AMOUNT - 1,
+          DEFAULT_SENDER_AMOUNT / 2,
           signerToken.address,
-          DEFAULT_SIGNER_AMOUNT,
+          DEFAULT_SIGNER_AMOUNT / 2,
           RULE_EXPIRY
         )
 
@@ -488,7 +488,7 @@ describe('Delegate Unit', () => {
 
       await signerToken.mock.balanceOf
         .withArgs(signer.address)
-        .returns(DEFAULT_SIGNER_AMOUNT - 1)
+        .returns(DEFAULT_SIGNER_AMOUNT)
 
       await expect(
         delegate.connect(signer).swap(sender.address, ...order)
