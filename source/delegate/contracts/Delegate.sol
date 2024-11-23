@@ -133,20 +133,19 @@ contract Delegate is IDelegate, Ownable {
     bytes32 _s
   ) external {
     Rule storage rule = rules[_senderWallet][_senderToken][_signerToken];
-    // Ensure the signer amount is valid
-    if (
-      _signerAmount <
-      (rule.signerAmount * (rule.senderAmount - rule.senderFilledAmount)) /
-        rule.senderAmount
-    ) {
-      revert SignerAmountInvalid();
-    }
-    // Ensure the rule has not expired
-    if (rule.expiry < block.timestamp) revert RuleExpired();
+    // Ensure the expiry is not passed
+    if (rule.expiry <= block.timestamp) revert RuleExpiredOrDoesNotExist();
 
     // Ensure the sender amount is valid
     if (_senderAmount > (rule.senderAmount - rule.senderFilledAmount)) {
       revert SenderAmountInvalid();
+    }
+
+    // Ensure the signer amount is valid
+    if (
+      rule.signerAmount * _senderAmount != rule.senderAmount * _signerAmount
+    ) {
+      revert SignerAmountInvalid();
     }
 
     // Transfer the sender token to this contract
