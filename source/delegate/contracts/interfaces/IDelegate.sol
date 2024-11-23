@@ -33,7 +33,7 @@ interface IDelegate {
   );
 
   error AddressInvalid();
-  error RuleExpired();
+  error RuleExpiredOrDoesNotExist();
   error SenderAmountInvalid();
   error SignerAmountInvalid();
   error SenderInvalid();
