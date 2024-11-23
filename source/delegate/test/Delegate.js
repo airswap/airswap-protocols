@@ -461,7 +461,6 @@ describe('Delegate Unit', () => {
       ).to.be.revertedWith('RuleExpiredOrDoesNotExist')
     })
 
-
     it('fails to swap with a rule expired', async () => {
       await delegate
         .connect(sender)
@@ -605,6 +604,5 @@ describe('Delegate Unit', () => {
         delegate.connect(signer).swap(sender.address, ...order)
       ).to.be.revertedWith('SignerAmountInvalid')
     })
-
   })
 })

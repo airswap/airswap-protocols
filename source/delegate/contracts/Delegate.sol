@@ -142,7 +142,9 @@ contract Delegate is IDelegate, Ownable {
     }
 
     // Ensure the signer amount is valid
-    if (rule.signerAmount * _senderAmount != rule.senderAmount * _signerAmount) {
+    if (
+      rule.signerAmount * _senderAmount != rule.senderAmount * _signerAmount
+    ) {
       revert SignerAmountInvalid();
     }
 
