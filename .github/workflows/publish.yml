@@ -7,12 +7,16 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v4
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
-          registry-url: 'https://registry.npmjs.org'
-      - run: yarn install
+          node-version: "18.x"
+          cache: 'yarn'
+      - name: Install dependencies
+        run: yarn install --immutable
       - run: lerna run compile --concurrency=1
       - run: lerna publish from-package --yes
         env:

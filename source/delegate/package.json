@@ -29,8 +29,8 @@
     "ethers": "^5.7.2"
   },
   "devDependencies": {
-    "@airswap/utils": "5.0.2",
-    "@airswap/swap-erc20": "5.0.1"
+    "@airswap/swap-erc20": "5.0.1",
+    "@airswap/utils": "5.0.2"
   },
   "publishConfig": {
     "access": "public"
