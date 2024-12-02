@@ -1,6 +1,6 @@
 {
   "name": "@airswap/pool",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "AirSwap: Withdrawable Token Pool",
   "license": "MIT",
   "repository": {
@@ -12,6 +12,8 @@
     "./typechain",
     "./deploys*"
   ],
+  "main": "typechain/index.js",
+  "types": "typechain/index.ts",
   "scripts": {
     "clean": "rm -rf ./cache && rm -rf ./build && rm -rf ./typechain",
     "compile": "hardhat compile; yarn typechain",
@@ -24,8 +26,11 @@
     "owners": "hardhat run ./scripts/owner.js",
     "balances": "hardhat run ./scripts/balances.js"
   },
+  "dependencies": {
+    "ethers": "^5.7.2"
+  },
   "devDependencies": {
-    "@airswap/utils": "5.0.0",
+    "@airswap/utils": "5.0.2",
     "@airswap/merkle": "0.0.2",
     "@openzeppelin/contracts": "^4.8.3"
   },

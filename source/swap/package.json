@@ -1,6 +1,6 @@
 {
   "name": "@airswap/swap",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "AirSwap: Atomic Token Swap",
   "license": "MIT",
   "repository": {
@@ -12,6 +12,8 @@
     "./typechain",
     "./deploys*"
   ],
+  "main": "typechain/index.js",
+  "types": "typechain/index.ts",
   "scripts": {
     "clean": "rm -rf ./cache && rm -rf ./build && rm -rf ./typechain",
     "compile": "hardhat compile; yarn typechain",
@@ -25,8 +27,11 @@
     "verify-adapters": "hardhat run ./scripts/verify-adapters.js",
     "owners": "hardhat run ./scripts/owner.js"
   },
+  "dependencies": {
+    "ethers": "^5.7.2"
+  },
   "devDependencies": {
-    "@airswap/utils": "5.0.0",
+    "@airswap/utils": "5.0.2",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.7",
     "@openzeppelin/contracts": "^4.8.3"
   },

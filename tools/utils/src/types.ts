@@ -15,6 +15,13 @@ export type Token = {
   decimals: number
 }
 
+export type Transfer = {
+  from: string
+  to: string
+  token: string
+  amount: string
+}
+
 export type { TokenInfo } from '@uniswap/token-lists'
 
 export interface CollectionTokenAttribute {

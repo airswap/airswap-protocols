@@ -18,7 +18,7 @@ import {
   SECONDS_IN_DAY,
 } from './constants'
 
-import type { Settlement, Signature } from './types'
+import type { Signature, Settlement, Transfer } from './types'
 
 export const EIP712SwapERC20 = {
   EIP712Domain: [
@@ -332,7 +332,7 @@ export function decompressFullOrderERC20(str: string): FullOrderERC20 {
   return paramsToFullOrderERC20(lzString.decompressFromEncodedURIComponent(str))
 }
 
-const parseTransfer = (log: any): any => {
+const parseTransfer = (log: any): Transfer | null => {
   let parsed: any
   let transfer: any
   try {
@@ -351,31 +351,20 @@ const parseTransfer = (log: any): any => {
   return transfer
 }
 
-export const getFullSwapERC20 = async (
+export const getFullSwapERC20FromTransfers = (
   nonce: string,
   signerWallet: string,
   feeReceiver: string,
-  logs: ethers.providers.Log[]
-): Promise<FullSwapERC20> => {
-  const transfers = []
-  let transfer: any
-  let length = logs.length
-
-  while (length--) {
-    transfer = parseTransfer(logs[length])
-    if (transfer) {
-      transfers.push(transfer)
-    }
-  }
-
-  let fee: any
-  let signer: any
-  let sender: any
+  transfers: Transfer[]
+): FullSwapERC20 => {
+  let feeTransfer: Transfer | null
+  let signerTransfer: Transfer | null
+  let senderTransfer: Transfer | null
 
   let i = transfers.length
   while (i--) {
-    if (transfers[i].to === feeReceiver.toLowerCase()) {
-      fee = transfers[i]
+    if (transfers[i].to === feeReceiver) {
+      feeTransfer = transfers[i]
     } else {
       let j = transfers.length
       while (j--) {
@@ -384,26 +373,53 @@ export const getFullSwapERC20 = async (
           transfers[i].from === transfers[j].to &&
           transfers[i].to === transfers[j].from
         ) {
-          signer = transfers[i]
-          sender = transfers[j]
+          signerTransfer = transfers[i]
+          senderTransfer = transfers[j]
           break
         }
       }
     }
   }
 
-  if (!signer || !sender) {
-    throw new Error('getFullSwapERC20: Swap not found')
+  if (!signerTransfer || !senderTransfer) {
+    throw new Error('getFullSwapERC20: mutual transfers not found')
   }
 
   return {
     nonce: nonce.toString(),
-    signerWallet: signer.from,
-    signerToken: signer.token,
-    signerAmount: signer.amount.toString(),
-    senderWallet: sender.from,
-    senderToken: sender.token,
-    senderAmount: sender.amount.toString(),
-    feeAmount: fee.amount.toString(),
+    signerWallet: signerTransfer.from,
+    signerToken: signerTransfer.token,
+    signerAmount: signerTransfer.amount.toString(),
+    senderWallet: senderTransfer.from,
+    senderToken: senderTransfer.token,
+    senderAmount: senderTransfer.amount.toString(),
+    feeAmount: (feeTransfer?.amount || 0).toString(),
   }
+}
+
+export const getFullSwapERC20 = (
+  nonce: string,
+  signerWallet: string,
+  feeReceiver: string,
+  logs: ethers.providers.Log[]
+): FullSwapERC20 => {
+  const allTransfers: Transfer[] = []
+  let transfer: Transfer | null
+  let length = logs.length
+
+  feeReceiver = feeReceiver.toLowerCase()
+  signerWallet = signerWallet.toLowerCase()
+
+  while (length--) {
+    if ((transfer = parseTransfer(logs[length]))) {
+      allTransfers.push(transfer)
+    }
+  }
+
+  return getFullSwapERC20FromTransfers(
+    nonce,
+    signerWallet,
+    feeReceiver,
+    allTransfers
+  )
 }
