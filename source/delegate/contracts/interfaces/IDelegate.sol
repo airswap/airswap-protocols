@@ -14,7 +14,11 @@ interface IDelegate {
   }
 
   event Authorize(address signatory, address signer);
-  event DelegateSwap(uint256 nonce, address signerWallet);
+  event DelegatedSwapFor(
+    address indexed senderWallet,
+    address indexed signerWallet,
+    uint256 indexed nonce
+  );
   event Revoke(address tmp, address signer);
 
   event SetRule(

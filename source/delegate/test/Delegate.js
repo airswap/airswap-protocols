@@ -409,7 +409,7 @@ describe('Delegate Unit', () => {
 
       await expect(
         delegate.connect(signer).swap(sender.address, ...order)
-      ).to.emit(delegate, 'DelegateSwap')
+      ).to.emit(delegate, 'DelegatedSwapFor')
     })
 
     it('successfully swaps with a manager', async () => {
@@ -438,7 +438,7 @@ describe('Delegate Unit', () => {
 
       await expect(
         delegate.connect(signer).swap(sender.address, ...order)
-      ).to.emit(delegate, 'DelegateSwap')
+      ).to.emit(delegate, 'DelegatedSwapFor')
     })
 
     it('fails to swap with no rule', async () => {
@@ -555,7 +555,7 @@ describe('Delegate Unit', () => {
 
       await expect(
         delegate.connect(signer).swap(sender.address, ...order)
-      ).to.emit(delegate, 'DelegateSwap')
+      ).to.emit(delegate, 'DelegatedSwapFor')
 
       const order2 = await createSignedOrderERC20({}, signer)
 

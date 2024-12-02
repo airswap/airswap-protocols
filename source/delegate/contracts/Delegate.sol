@@ -33,7 +33,7 @@ contract Delegate is IDelegate, Ownable {
 
   /**
    * @notice Set a Rule
-   * @param _senderWallet address Address of the sender wallet
+   * @param _senderWallet address Address of the delegating sender wallet
    * @param _senderToken address ERC-20 token the sender would transfer
    * @param _senderAmount uint256 Maximum sender amount for the rule
    * @param _signerToken address ERC-20 token the signer would transfer
@@ -80,7 +80,7 @@ contract Delegate is IDelegate, Ownable {
 
   /**
    * @notice Unset a Rule
-   * @param _senderWallet The address of the sender's wallet
+   * @param _senderWallet address Address of the delegating sender wallet
    * @param _senderToken address ERC-20 token the sender would transfer
    * @param _signerToken address ERC-20 token the signer would transfer
    */
@@ -184,8 +184,8 @@ contract Delegate is IDelegate, Ownable {
     rules[_senderWallet][_senderToken][_signerToken]
       .senderFilledAmount += _senderAmount;
 
-    // Emit a DelegateSwap event
-    emit DelegateSwap(_nonce, _signerWallet);
+    // Emit a DelegatedSwapFor event
+    emit DelegatedSwapFor(_senderWallet, _signerWallet, _nonce);
   }
 
   /**
