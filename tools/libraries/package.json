@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@airswap/batch-call": "5.0.1",
-    "@airswap/delegate": "5.0.1",
+    "@airswap/delegate": "5.0.2",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
     "@airswap/pool": "5.0.1",
     "@airswap/registry": "5.0.1",
