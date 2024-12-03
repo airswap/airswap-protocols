@@ -21,6 +21,8 @@ __metadata:
     "@airswap/utils": "npm:5.0.2"
     "@openzeppelin/contracts": "npm:^4.8.3"
     ethers: "npm:^5.7.2"
+    hardhat: "npm:^2.12.7"
+    typescript: "npm:^5.0.4"
   languageName: unknown
   linkType: soft
 
@@ -31,6 +33,8 @@ __metadata:
     "@airswap/swap-erc20": "npm:5.0.1"
     "@airswap/utils": "npm:5.0.2"
     ethers: "npm:^5.7.2"
+    hardhat: "npm:^2.12.7"
+    typescript: "npm:^5.0.4"
   languageName: unknown
   linkType: soft
 
@@ -58,10 +62,12 @@ __metadata:
     "@airswap/utils": "npm:5.0.2"
     "@airswap/wrapper": "npm:5.0.1"
     "@relaycorp/ws-mock": "npm:^5.2.6"
+    "@types/chai": "npm:^4"
     "@types/mocha": "npm:^10"
     "@types/mock-require": "npm:^2.0.0"
     body-parser: "npm:^1.20.1"
     browser-or-node: "npm:^2.1.1"
+    chai: "npm:^4.0.0"
     ethers: "npm:^5.7.2"
     express: "npm:^4.18.2"
     fancy-test: "npm:^1.4.7"
@@ -74,6 +80,7 @@ __metadata:
     sinon: "npm:^14.0.0"
     sinon-chai: "npm:^3.7.0"
     tiny-typed-emitter: "npm:^2.1.0"
+    typescript: "npm:^5.0.4"
     websocket: "npm:^1.0.34"
     ws: "npm:^7.4.1"
   languageName: unknown
@@ -98,6 +105,8 @@ __metadata:
     "@airswap/utils": "npm:5.0.2"
     "@openzeppelin/contracts": "npm:^4.8.3"
     ethers: "npm:^5.7.2"
+    hardhat: "npm:^2.12.7"
+    typescript: "npm:^5.0.4"
   languageName: unknown
   linkType: soft
 
@@ -108,6 +117,8 @@ __metadata:
     "@airswap/utils": "npm:5.0.2"
     "@openzeppelin/contracts": "npm:^4.8.3"
     ethers: "npm:^5.7.2"
+    hardhat: "npm:^2.12.7"
+    typescript: "npm:^5.0.4"
   languageName: unknown
   linkType: soft
 
@@ -118,6 +129,8 @@ __metadata:
     "@airswap/utils": "npm:5.0.2"
     "@openzeppelin/contracts": "npm:^4.8.3"
     ethers: "npm:^5.7.2"
+    hardhat: "npm:^2.12.7"
+    typescript: "npm:^5.0.4"
   languageName: unknown
   linkType: soft
 
@@ -128,6 +141,7 @@ __metadata:
     "@airswap/utils": "npm:5.0.2"
     dotenv: "npm:^16.0.1"
     redis: "npm:^4.6.13"
+    typescript: "npm:^5.0.4"
   languageName: unknown
   linkType: soft
 
@@ -138,7 +152,9 @@ __metadata:
     "@airswap/staking": "npm:5.0.1"
     "@airswap/utils": "npm:5.0.2"
     ethers: "npm:^5.7.2"
+    hardhat: "npm:^2.12.7"
     solady: "npm:0.0.173"
+    typescript: "npm:^5.0.4"
   languageName: unknown
   linkType: soft
 
@@ -150,6 +166,8 @@ __metadata:
     "@nomicfoundation/hardhat-network-helpers": "npm:^1.0.7"
     "@openzeppelin/contracts": "npm:^4.8.3"
     ethers: "npm:^5.7.2"
+    hardhat: "npm:^2.12.7"
+    typescript: "npm:^5.0.4"
   languageName: unknown
   linkType: soft
 
@@ -165,6 +183,7 @@ __metadata:
     ethers: "npm:^5.7.2"
     lz-string: "npm:^1.5.0"
     mocha: "npm:^10.8.2"
+    typescript: "npm:^5.0.4"
     valid-url: "npm:^1.0.9"
   languageName: unknown
   linkType: soft
@@ -177,6 +196,8 @@ __metadata:
     "@airswap/utils": "npm:5.0.2"
     "@openzeppelin/contracts": "npm:^4.8.3"
     "@uniswap/v2-periphery": "npm:^1.1.0-beta.0"
+    hardhat: "npm:^2.12.7"
+    typescript: "npm:^5.0.4"
   languageName: unknown
   linkType: soft
 
@@ -2454,6 +2475,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/chai@npm:^4":
+  version: 4.3.20
+  resolution: "@types/chai@npm:4.3.20"
+  checksum: 10c0/4601189d611752e65018f1ecadac82e94eed29f348e1d5430e5681a60b01e1ecf855d9bcc74ae43b07394751f184f6970fac2b5561fc57a1f36e93a0f5ffb6e8
+  languageName: node
+  linkType: hard
+
 "@types/concat-stream@npm:^1.6.0":
   version: 1.6.1
   resolution: "@types/concat-stream@npm:1.6.1"
@@ -4282,6 +4310,21 @@ __metadata:
   dependencies:
     nofilter: "npm:^3.1.0"
   checksum: 10c0/a836e2e7ea0efb1b9c4e5a4be906c57113d730cc42293a34072e0164ed110bb8ac035dc7dca2e3ebb641bd4b37e00fdbbf09c951aa864b3d4888a6ed8c6243f7
+  languageName: node
+  linkType: hard
+
+"chai@npm:^4.0.0":
+  version: 4.5.0
+  resolution: "chai@npm:4.5.0"
+  dependencies:
+    assertion-error: "npm:^1.1.0"
+    check-error: "npm:^1.0.3"
+    deep-eql: "npm:^4.1.3"
+    get-func-name: "npm:^2.0.2"
+    loupe: "npm:^2.3.6"
+    pathval: "npm:^1.1.1"
+    type-detect: "npm:^4.1.0"
+  checksum: 10c0/b8cb596bd1aece1aec659e41a6e479290c7d9bee5b3ad63d2898ad230064e5b47889a3bc367b20100a0853b62e026e2dc514acf25a3c9385f936aa3614d4ab4d
   languageName: node
   linkType: hard
 
@@ -13020,6 +13063,13 @@ __metadata:
   version: 4.0.8
   resolution: "type-detect@npm:4.0.8"
   checksum: 10c0/8fb9a51d3f365a7de84ab7f73b653534b61b622aa6800aecdb0f1095a4a646d3f5eb295322127b6573db7982afcd40ab492d038cf825a42093a58b1e1353e0bd
+  languageName: node
+  linkType: hard
+
+"type-detect@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "type-detect@npm:4.1.0"
+  checksum: 10c0/df8157ca3f5d311edc22885abc134e18ff8ffbc93d6a9848af5b682730ca6a5a44499259750197250479c5331a8a75b5537529df5ec410622041650a7f293e2a
   languageName: node
   linkType: hard
 

@@ -41,9 +41,11 @@
   },
   "devDependencies": {
     "@relaycorp/ws-mock": "^5.2.6",
+    "@types/chai": "^4",
     "@types/mocha": "^10",
     "@types/mock-require": "^2.0.0",
     "body-parser": "^1.20.1",
+    "chai": "^4.0.0",
     "express": "^4.18.2",
     "fancy-test": "^1.4.7",
     "mocha": "^10.8.2",
@@ -52,6 +54,7 @@
     "nock": "^12.0.1",
     "sinon": "^14.0.0",
     "sinon-chai": "^3.7.0",
+    "typescript": "^5.0.4",
     "ws": "^7.4.1"
   },
   "publishConfig": {
