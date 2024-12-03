@@ -31,5 +31,10 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10",
+    "mocha": "^10.8.2",
+    "typescript": "^5.0.4"
   }
 }

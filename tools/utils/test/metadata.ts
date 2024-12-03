@@ -2,8 +2,8 @@ import { expect } from 'chai'
 import {
   ADDRESS_ZERO,
   ChainIds,
-  getKnownTokens,
   findTokenByAddress,
+  getKnownTokens,
 } from '../index'
 
 const METADATA_FETCH_TIMEOUT = 5000

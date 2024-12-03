@@ -1,21 +1,21 @@
-import { ethers } from 'ethers'
-import { toBuffer } from 'ethereumjs-util'
 import {
-  signTypedData,
-  recoverTypedSignature,
   SignTypedDataVersion,
+  recoverTypedSignature,
+  signTypedData,
 } from '@metamask/eth-sig-util'
+import { toBuffer } from 'ethereumjs-util'
+import { ethers } from 'ethers'
 
 import { lowerCaseAddresses } from '../index'
 import {
-  ChainIds,
-  SECONDS_IN_DAY,
   ADDRESS_ZERO,
-  DOMAIN_VERSION_SWAP,
+  ChainIds,
   DOMAIN_NAME_SWAP,
+  DOMAIN_VERSION_SWAP,
+  SECONDS_IN_DAY,
 } from './constants'
 
-import { Signature, Settlement } from './types'
+import type { Settlement, Signature } from './types'
 
 export const EIP712Swap = {
   EIP712Domain: [
@@ -81,35 +81,35 @@ function isBytesLike(value: string): boolean {
 function isValidOrderParty(orderParty: OrderParty): boolean {
   return (
     !!orderParty &&
-    isValidString(orderParty['wallet']) &&
-    isValidString(orderParty['token']) &&
-    isValidString(orderParty['kind']) &&
-    isValidString(orderParty['id']) &&
-    isValidString(orderParty['amount'])
+    isValidString(orderParty.wallet) &&
+    isValidString(orderParty.token) &&
+    isValidString(orderParty.kind) &&
+    isValidString(orderParty.id) &&
+    isValidString(orderParty.amount)
   )
 }
 
 export function isValidOrder(order: Order): boolean {
   return (
     !!order &&
-    isValidString(order['nonce']) &&
-    isValidString(order['expiry']) &&
-    isValidString(order['protocolFee']) &&
-    isValidString(order['affiliateWallet']) &&
-    isValidString(order['affiliateAmount']) &&
-    isBytesLike(order['r']) &&
-    isBytesLike(order['s']) &&
-    isValidString(order['v']) &&
-    isValidOrderParty(order['signer']) &&
-    isValidOrderParty(order['sender'])
+    isValidString(order.nonce) &&
+    isValidString(order.expiry) &&
+    isValidString(order.protocolFee) &&
+    isValidString(order.affiliateWallet) &&
+    isValidString(order.affiliateAmount) &&
+    isBytesLike(order.r) &&
+    isBytesLike(order.s) &&
+    isValidString(order.v) &&
+    isValidOrderParty(order.signer) &&
+    isValidOrderParty(order.sender)
   )
 }
 
 export function isValidFullOrder(fullOrder: FullOrder) {
   return (
     isValidOrder(fullOrder as Order) &&
-    ethers.utils.isAddress(fullOrder['swapContract']) &&
-    typeof fullOrder['chainId'] == 'number'
+    ethers.utils.isAddress(fullOrder.swapContract) &&
+    typeof fullOrder.chainId === 'number'
   )
 }
 
@@ -141,7 +141,7 @@ export async function createOrderSignature(
   version = DOMAIN_VERSION_SWAP,
   name = DOMAIN_NAME_SWAP
 ): Promise<Signature> {
-  let sig
+  let sig: string
   if (typeof signer === 'string') {
     sig = signTypedData({
       version: SignTypedDataVersion.V4,

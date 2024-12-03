@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const fs = require('fs')
+const fs = require('node:fs')
 const prettier = require('prettier')
 
 const { ethers, run } = require('hardhat')
@@ -20,7 +20,7 @@ async function main() {
     return
   }
 
-  console.log(`\nDeploy DELEGATE`)
+  console.log('\nDeploy DELEGATE')
 
   console.log(`· swapERC20Contract  ${swapERC20Deploys[chainId]}\n`)
 
@@ -53,7 +53,7 @@ async function main() {
         { ...prettierConfig, parser: 'babel' }
       )
     )
-    delegateCommits[chainId] = require('child_process')
+    delegateCommits[chainId] = require('node:child_process')
       .execSync('git rev-parse HEAD')
       .toString()
       .trim()

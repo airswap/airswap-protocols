@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const fs = require('fs')
+const fs = require('node:fs')
 const prettier = require('prettier')
 const { ethers, run } = require('hardhat')
 const poolDeploys = require('@airswap/pool/deploys.js')
@@ -42,7 +42,7 @@ async function main() {
       config[ChainIds.MAINNET])
   }
 
-  console.log(`\nDeploy SWAPERC20`)
+  console.log('\nDeploy SWAPERC20')
 
   console.log(`· protocolFee          ${protocolFee}`)
   console.log(`· protocolFeeLight     ${protocolFeeLight}`)
@@ -81,7 +81,7 @@ async function main() {
         { ...prettierConfig, parser: 'babel' }
       )
     )
-    swapERC20Commits[chainId] = require('child_process')
+    swapERC20Commits[chainId] = require('node:child_process')
       .execSync('git rev-parse HEAD')
       .toString()
       .trim()

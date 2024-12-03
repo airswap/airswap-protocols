@@ -114,7 +114,7 @@ describe('Delegate Integration', () => {
 
       await expect(
         delegate.connect(signer).swap(sender.address, ...order)
-      ).to.emit(delegate, 'DelegateSwap')
+      ).to.emit(delegate, 'DelegatedSwapFor')
 
       expect(await signerToken.balanceOf(sender.address)).to.equal(
         DEFAULT_SIGNER_AMOUNT

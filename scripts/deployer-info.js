@@ -6,7 +6,7 @@ const {
 } = require('@airswap/utils')
 
 module.exports = {
-  confirmDeployment: async function (deployer, targetAddress) {
+  confirmDeployment: async (deployer, targetAddress) => {
     const gasPrice = await deployer.getGasPrice()
     const chainId = await deployer.getChainId()
     const balance = ethers.utils.formatUnits(

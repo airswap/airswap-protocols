@@ -26,10 +26,12 @@
     "owners": "hardhat run ./scripts/owner.js"
   },
   "devDependencies": {
-    "@airswap/utils": "5.0.2",
     "@airswap/swap-erc20": "5.0.1",
+    "@airswap/utils": "5.0.2",
     "@openzeppelin/contracts": "^4.8.3",
-    "@uniswap/v2-periphery": "^1.1.0-beta.0"
+    "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "hardhat": "^2.12.7",
+    "typescript": "^5.0.4"
   },
   "publishConfig": {
     "access": "public"

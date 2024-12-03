@@ -206,7 +206,7 @@ describe('Registry Unit', () => {
           .connect(account1)
           .addProtocols([protocol1, protocol2, protocol1])
       )
-        .to.be.revertedWith(`ProtocolExists`)
+        .to.be.revertedWith('ProtocolExists')
         .withArgs(protocol1)
     })
 
@@ -214,7 +214,7 @@ describe('Registry Unit', () => {
       await stakingToken.mock.transferFrom.returns(true)
       await registry.connect(account1).addProtocols([protocol1, protocol2])
       await expect(registry.connect(account1).addProtocols([protocol1]))
-        .to.be.revertedWith(`ProtocolExists`)
+        .to.be.revertedWith('ProtocolExists')
         .withArgs(protocol1)
     })
 
@@ -277,7 +277,7 @@ describe('Registry Unit', () => {
           .connect(account1)
           .removeProtocols([protocol1, protocol2, protocol1])
       )
-        .to.be.revertedWith(`ProtocolDoesNotExist`)
+        .to.be.revertedWith('ProtocolDoesNotExist')
         .withArgs(protocol1)
     })
 
@@ -293,7 +293,7 @@ describe('Registry Unit', () => {
         .removeProtocols([protocol1, protocol2, protocol3])
 
       await expect(registry.connect(account1).removeProtocols([protocol1]))
-        .to.be.revertedWith(`ProtocolDoesNotExist`)
+        .to.be.revertedWith('ProtocolDoesNotExist')
         .withArgs(protocol1)
     })
   })
@@ -368,7 +368,7 @@ describe('Registry Unit', () => {
           .connect(account1)
           .addTokens([token1.address, token2.address, token1.address])
       )
-        .to.be.revertedWith(`TokenExists`)
+        .to.be.revertedWith('TokenExists')
         .withArgs(token1.address)
     })
 
@@ -378,7 +378,7 @@ describe('Registry Unit', () => {
         .connect(account1)
         .addTokens([token1.address, token2.address])
       await expect(registry.connect(account1).addTokens([token1.address]))
-        .to.be.revertedWith(`TokenExists`)
+        .to.be.revertedWith('TokenExists')
         .withArgs(token1.address)
     })
 
@@ -496,7 +496,7 @@ describe('Registry Unit', () => {
           .connect(account1)
           .removeTokens([token1.address, token2.address, token1.address])
       )
-        .to.be.revertedWith(`TokenDoesNotExist`)
+        .to.be.revertedWith('TokenDoesNotExist')
         .withArgs(token1.address)
     })
 
@@ -512,7 +512,7 @@ describe('Registry Unit', () => {
         .removeTokens([token1.address, token2.address, token3.address])
 
       await expect(registry.connect(account1).removeTokens([token1.address]))
-        .to.be.revertedWith(`TokenDoesNotExist`)
+        .to.be.revertedWith('TokenDoesNotExist')
         .withArgs(token1.address)
     })
   })

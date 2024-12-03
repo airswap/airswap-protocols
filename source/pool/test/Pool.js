@@ -96,7 +96,7 @@ describe('Pool Unit', () => {
       await expect(
         (await ethers.getContractFactory('Pool')).deploy(CLAIM_SCALE, max)
       )
-        .to.be.revertedWith(`MaxTooHigh`)
+        .to.be.revertedWith('MaxTooHigh')
         .withArgs(max)
     })
 
@@ -105,7 +105,7 @@ describe('Pool Unit', () => {
       await expect(
         (await ethers.getContractFactory('Pool')).deploy(scale, CLAIM_MAX)
       )
-        .to.be.revertedWith(`ScaleTooHigh`)
+        .to.be.revertedWith('ScaleTooHigh')
         .withArgs(scale)
     })
 
@@ -139,7 +139,7 @@ describe('Pool Unit', () => {
       const newRoot = getRoot(newTree)
       await expect(pool.connect(alice).enable(TREE, newRoot)).to.be.emit(
         pool,
-        `Enable`
+        'Enable'
       )
     })
   })
@@ -185,7 +185,7 @@ describe('Pool Unit', () => {
         pool
           .connect(bob)
           .withdraw([], feeToken.address, WITHDRAW_MINIMUM, bob.address)
-      ).to.be.revertedWith(`ClaimsNotProvided`)
+      ).to.be.revertedWith('ClaimsNotProvided')
 
       const isClaimed = await pool.claimed(TREE, bob.address)
       expect(isClaimed).to.equal(false)
@@ -212,7 +212,7 @@ describe('Pool Unit', () => {
           bob.address
         )
       )
-        .to.be.revertedWith(`TreeNotEnabled`)
+        .to.be.revertedWith('TreeNotEnabled')
         .withArgs(TREE)
 
       const isClaimed = await pool.claimed(TREE, bob.address)
@@ -256,7 +256,7 @@ describe('Pool Unit', () => {
           WITHDRAW_MINIMUM,
           bob.address
         )
-      ).to.be.revertedWith(`ClaimAlreadyUsed`)
+      ).to.be.revertedWith('ClaimAlreadyUsed')
 
       const isClaimed = await pool.claimed(TREE, bob.address)
       expect(isClaimed).to.equal(true)
@@ -284,7 +284,7 @@ describe('Pool Unit', () => {
           bob.address
         )
       )
-        .to.be.revertedWith(`ProofInvalid`)
+        .to.be.revertedWith('ProofInvalid')
         .withArgs(TREE, root)
 
       const isClaimed = await pool.claimed(TREE, bob.address)
@@ -318,7 +318,7 @@ describe('Pool Unit', () => {
           bob.address
         )
       )
-        .to.be.revertedWith(`AmountInsufficient`)
+        .to.be.revertedWith('AmountInsufficient')
         .withArgs(amount)
 
       const isClaimed = await pool.claimed(TREE, alice.address)
@@ -413,7 +413,7 @@ describe('Pool Unit', () => {
     it('setScale reverts', async () => {
       const scale = 1000
       await expect(pool.setScale(scale))
-        .to.be.revertedWith(`ScaleTooHigh`)
+        .to.be.revertedWith('ScaleTooHigh')
         .withArgs(scale)
     })
   })
@@ -435,7 +435,7 @@ describe('Pool Unit', () => {
     it('setMax reverts', async () => {
       const max = 101
       await expect(pool.setMax(max))
-        .to.be.revertedWith(`MaxTooHigh`)
+        .to.be.revertedWith('MaxTooHigh')
         .withArgs(max)
     })
   })
@@ -454,7 +454,7 @@ describe('Pool Unit', () => {
 
     it('setAdmin reverts with zero address', async () => {
       await expect(pool.connect(deployer).setAdmin(ADDRESS_ZERO))
-        .to.be.revertedWith(`AddressInvalid`)
+        .to.be.revertedWith('AddressInvalid')
         .withArgs(ADDRESS_ZERO)
     })
 
@@ -473,7 +473,7 @@ describe('Pool Unit', () => {
 
     it('unsetAdmin executed by non-admin reverts', async () => {
       await expect(pool.connect(deployer).unsetAdmin(alice.address))
-        .to.be.revertedWith(`AdminNotSet`)
+        .to.be.revertedWith('AdminNotSet')
         .withArgs(alice.address)
     })
   })
@@ -500,7 +500,7 @@ describe('Pool Unit', () => {
           WITHDRAW_MINIMUM,
           bob.address
         )
-      ).to.be.revertedWith(`ClaimAlreadyUsed`)
+      ).to.be.revertedWith('ClaimAlreadyUsed')
     })
 
     it('set claimed with non-owner reverts', async () => {

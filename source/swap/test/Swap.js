@@ -262,7 +262,7 @@ describe('Swap Unit', () => {
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
       )
-        .to.be.revertedWith(`RoyaltyExceedsMax`)
+        .to.be.revertedWith('RoyaltyExceedsMax')
         .withArgs(Number(MAX_ROYALTY) + 1)
     })
 
@@ -358,7 +358,7 @@ describe('Swap Unit', () => {
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
       )
-        .to.be.revertedWith(`NonceAlreadyUsed`)
+        .to.be.revertedWith('NonceAlreadyUsed')
         .withArgs(Number(order.nonce))
     })
 
@@ -371,7 +371,7 @@ describe('Swap Unit', () => {
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
       )
-        .to.be.revertedWith(`NonceAlreadyUsed`)
+        .to.be.revertedWith('NonceAlreadyUsed')
         .withArgs(Number(order.nonce))
     })
 
@@ -386,7 +386,7 @@ describe('Swap Unit', () => {
       ).to.equal(order.nonce + 1)
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
-      ).to.be.revertedWith(`NonceTooLow`)
+      ).to.be.revertedWith('NonceTooLow')
     })
 
     it('an order with an invalid expiry (at current block timestamp) is rejected', async () => {
@@ -644,7 +644,7 @@ describe('Swap Unit', () => {
       await expect(
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
       )
-        .to.be.revertedWith(`TransferFailed`)
+        .to.be.revertedWith('TransferFailed')
         .withArgs(signer.address, sender.address)
     })
   })

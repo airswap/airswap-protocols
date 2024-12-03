@@ -1,10 +1,5 @@
 import { ethers } from 'ethers'
-import {
-  TokenInfo,
-  CollectionTokenInfo,
-  CollectionTokenMetadata,
-  CollectionTokenAttribute,
-} from './types'
+import validUrl from 'valid-url'
 import {
   TokenKinds,
   chainCurrencies,
@@ -12,9 +7,14 @@ import {
   stakingTokenAddresses,
   wrappedNativeTokenAddresses,
 } from './constants'
-import TOKEN_LISTS from './tokenlists'
 import TOKEN_DEFAULTS from './tokendefaults'
-import validUrl from 'valid-url'
+import TOKEN_LISTS from './tokenlists'
+import type {
+  CollectionTokenAttribute,
+  CollectionTokenInfo,
+  CollectionTokenMetadata,
+  TokenInfo,
+} from './types'
 
 const AIRSWAP_LOGO_URI =
   'https://storage.googleapis.com/subgraph-images/158680119781426823563.png'
@@ -22,8 +22,8 @@ const AIRSWAP_SYMBOL = 'AST'
 const DEFAULT_NAME = 'Unknown NFT'
 const DEFAULT_IPFS_URI = 'https://ipfs.io/ipfs/'
 
-import { abi as ERC165_ABI } from './abis/ERC165.json'
 import { abi as ERC20_ABI } from './abis/ERC20.json'
+import { abi as ERC165_ABI } from './abis/ERC165.json'
 import { abi as ERC721_ABI } from './abis/ERC721.json'
 import { abi as ERC1155_ABI } from './abis/ERC1155.json'
 
@@ -52,7 +52,7 @@ export async function getKnownTokens(
         }
       })
     )
-    promises.forEach((promise) => {
+    for (const promise of promises) {
       if (promise.status === 'fulfilled') {
         if (promise.value.message) {
           errors.push(promise.value)
@@ -62,7 +62,7 @@ export async function getKnownTokens(
       } else {
         errors.push(promise.reason.message)
       }
-    })
+    }
   }
   tokens = tokens.filter((token) => {
     return (
@@ -74,7 +74,7 @@ export async function getKnownTokens(
   if (stakingTokenAddresses[chainId]) {
     const stakingTokens = getStakingTokens()
     for (let i = 0; i < stakingTokens.length; i++) {
-      if (stakingTokens[i].chainId == chainId) {
+      if (stakingTokens[i].chainId === chainId) {
         tokens.push(stakingTokens[i])
       }
     }
@@ -82,7 +82,7 @@ export async function getKnownTokens(
   if (wrappedNativeTokenAddresses[chainId]) {
     const wrappedTokens = getWrappedTokens()
     for (let i = 0; i < wrappedTokens.length; i++) {
-      if (wrappedTokens[i].chainId == chainId) {
+      if (wrappedTokens[i].chainId === chainId) {
         tokens.push(wrappedTokens[i])
       }
     }
@@ -150,12 +150,12 @@ export function getStakingTokens(): TokenInfo[] {
   for (const chainId in stakingTokenAddresses) {
     const _chainId = Number(chainId)
     _stakingTokens.push({
-      name:
-        'AirSwap Token' +
-        (_chainId !== 1 ? ` (${chainNames[_chainId]} Placeholder)` : ''),
-      symbol:
-        'AST' +
-        (_chainId !== 1 ? ` (${chainNames[_chainId]} Placeholder)` : ''),
+      name: `AirSwap Token${
+        _chainId !== 1 ? ` (${chainNames[_chainId]} Placeholder)` : ''
+      }`,
+      symbol: `AST${
+        _chainId !== 1 ? ` (${chainNames[_chainId]} Placeholder)` : ''
+      }`,
       address: stakingTokenAddresses[_chainId],
       decimals: 4,
       logoURI: AIRSWAP_LOGO_URI,
@@ -197,9 +197,9 @@ export async function getTokenInfo(
     throw new Error(`Invalid address: ${address}`)
   }
   const contract = new ethers.Contract(address, ERC20_ABI, provider)
-  let name
-  let symbol
-  let decimals
+  let name: string
+  let symbol: string
+  let decimals: number
   try {
     ;[name, symbol, decimals] = await Promise.all([
       contract.name(),
@@ -261,10 +261,12 @@ export async function getCollectionTokenInfo(
 
 async function fetchMetaData(url: string, ipfsUri = DEFAULT_IPFS_URI) {
   if (validUrl.isUri(url)) {
+    let data: any
     if (url.startsWith('ipfs')) {
-      url = url.replace('ipfs://', ipfsUri)
+      data = await (await fetch(url.replace('ipfs://', ipfsUri))).json()
+    } else {
+      data = await (await fetch(url)).json()
     }
-    const data = await (await fetch(url)).json()
     if (typeof data === 'string')
       try {
         return JSON.parse(data)

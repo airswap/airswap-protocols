@@ -1,10 +1,10 @@
-import { ethers } from 'ethers'
-import { Registry__factory } from '@airswap/registry/typechain/factories/contracts'
-import registryDeploys from '@airswap/registry/deploys.js'
 import registryBlocks from '@airswap/registry/deploys-blocks.js'
+import registryDeploys from '@airswap/registry/deploys.js'
+import { Registry__factory } from '@airswap/registry/typechain/factories/contracts'
+import type { ethers } from 'ethers'
 
-import { Server } from './Server'
 import { Contract, SwapERC20 } from './Contracts'
+import { Server } from './Server'
 
 class ServerRegistry extends Contract {
   public constructor() {
