@@ -58,22 +58,22 @@ export class Server extends TypedEmitter<ServerEvents> {
   private senderWallet: string | null = null
 
   public constructor(
-    public locator: string,
+    private url: string,
     private swapContract = SwapERC20.addresses[ChainIds.MAINNET],
     private chainId = ChainIds.MAINNET,
     private staker?: string
   ) {
     super()
-    const protocol = parseUrl(locator).protocol
+    const protocol = parseUrl(url).protocol
     this.transportProtocol = protocol?.startsWith('http') ? 'http' : 'websocket'
   }
 
   public static async at(
-    locator: string,
+    url: string,
     options?: ServerOptions
   ): Promise<Server> {
     const server = new Server(
-      locator,
+      url,
       options?.swapContract,
       options?.chainId,
       options?.staker
@@ -84,6 +84,26 @@ export class Server extends TypedEmitter<ServerEvents> {
 
   public getStaker(): string | null {
     return this.staker
+  }
+
+  public getUrl(): string {
+    return this.url
+  }
+
+  public getChainId(): number {
+    return this.chainId
+  }
+
+  public setChainId(chainId: number): void {
+    this.chainId = chainId
+  }
+
+  public getSwapContract(): string {
+    return this.swapContract
+  }
+
+  public setSwapContract(swapContract: string): void {
+    this.swapContract = swapContract
   }
 
   public getSupportedProtocol(protocol: string): SupportedProtocolInfo | null {
@@ -372,9 +392,9 @@ export class Server extends TypedEmitter<ServerEvents> {
 
   private _init(initializeTimeout: number = DEFAULT_TIMEOUT) {
     if (this.transportProtocol === 'http') {
-      return this._initHTTPClient(this.locator)
+      return this._initHTTPClient(this.url)
     }
-    return this._initWebSocketClient(this.locator, initializeTimeout)
+    return this._initWebSocketClient(this.url, initializeTimeout)
   }
 
   private _initHTTPClient(locator: string, clientOnly?: boolean) {
@@ -482,8 +502,7 @@ export class Server extends TypedEmitter<ServerEvents> {
   private requireProtocolSupport(protocol: string) {
     if (!this.supportsProtocol(protocol)) {
       throw new Error(
-        `Server at ${this.locator} doesn't ` +
-          `support ${protocolNames[protocol]}`
+        `Server at ${this.url} doesn't support ${protocolNames[protocol]}`
       )
     }
   }
