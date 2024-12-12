@@ -72,7 +72,10 @@ describe('Registry', async () => {
       registry.address
     )
     expect(servers.length).to.be.equal(1)
-    expect(servers[0]).to.be.equal(SERVER_URL)
+    expect(servers[0]).to.be.deep.equal({
+      url: SERVER_URL,
+      staker: staker.address,
+    })
   })
 
   it('get URLs: none for incorrect protocol', async () => {

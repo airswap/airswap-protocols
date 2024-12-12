@@ -2,6 +2,7 @@ export type ServerOptions = {
   chainId?: number
   swapContract?: string
   initializeTimeout?: number
+  staker?: string
 }
 
 export type SupportedProtocolInfo = {

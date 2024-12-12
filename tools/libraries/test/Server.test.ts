@@ -150,6 +150,10 @@ function mockHttpServer(api) {
 }
 
 describe('HTTPServer', () => {
+  it('Server getStaker()', async () => {
+    const server = await Server.at(URL, { staker: wallet.address })
+    expect(server.getStaker()).to.be.equal(wallet.address)
+  })
   fancy
     .nock(`https://${URL}`, mockHttpServer)
     .it('Server getProtocols()', async () => {
@@ -430,6 +434,7 @@ describe('WebSocketServer', () => {
   it("should throw if the server doesn't initialize within timeout", async () => {
     const fakeTimers = useFakeTimers()
     // prevent server from initializing
+    // @ts-ignore
     mockServer.initOptions = null
     const initializePromise = Server.at(url)
     // This is the default timeout.

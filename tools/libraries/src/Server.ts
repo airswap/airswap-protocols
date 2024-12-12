@@ -60,7 +60,8 @@ export class Server extends TypedEmitter<ServerEvents> {
   public constructor(
     public locator: string,
     private swapContract = SwapERC20.addresses[ChainIds.MAINNET],
-    private chainId = ChainIds.MAINNET
+    private chainId = ChainIds.MAINNET,
+    private staker?: string
   ) {
     super()
     const protocol = parseUrl(locator).protocol
@@ -71,9 +72,18 @@ export class Server extends TypedEmitter<ServerEvents> {
     locator: string,
     options?: ServerOptions
   ): Promise<Server> {
-    const server = new Server(locator, options?.swapContract, options?.chainId)
+    const server = new Server(
+      locator,
+      options?.swapContract,
+      options?.chainId,
+      options?.staker
+    )
     await server._init(options?.initializeTimeout)
     return server
+  }
+
+  public getStaker(): string | null {
+    return this.staker
   }
 
   public getSupportedProtocol(protocol: string): SupportedProtocolInfo | null {
