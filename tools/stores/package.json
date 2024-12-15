@@ -1,6 +1,6 @@
 {
   "name": "@airswap/stores",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "description": "AirSwap: Storage for Indexing",
   "repository": {
     "type": "git",
