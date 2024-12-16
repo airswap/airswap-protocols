@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@airswap/staking": "5.0.1",
-    "@airswap/utils": "5.0.3",
+    "@airswap/utils": "5.0.5",
     "hardhat": "^2.12.7",
     "solady": "0.0.173",
     "typescript": "^5.0.4"

@@ -1,4 +1,4 @@
-import * as url from 'node:url'
+import * as url from 'url'
 import { isBrowser } from 'browser-or-node'
 import { ethers } from 'ethers'
 import { Client as HttpClient } from 'jayson'
