@@ -8,16 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Enable Corepack
-        run: corepack enable
-      - name: Use Node.js 18.x
-        uses: actions/setup-node@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
         with:
           node-version: "18.x"
-          cache: 'yarn'
-      - name: Install dependencies
-        run: yarn install --immutable
-      - run: lerna run compile --concurrency=1
-      - run: lerna publish from-package --yes
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          cache: "yarn"
+      - run: yarn install --immutable
+      - run: npm config set @airswap:registry https://registry.npmjs.org/
+      - run: npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+      - run: npx lerna run compile --concurrency=1
+      - run: npx lerna publish from-package --yes
+
