@@ -1,6 +1,6 @@
 import { assert, expect } from 'chai'
 import { ethers } from 'ethers'
-import type { FullOrderERC20, Levels, UnsignedOrderERC20 } from '../index'
+import { FullOrderERC20, Levels, UnsignedOrderERC20 } from '../index'
 
 import {
   ADDRESS_ZERO,

@@ -9,7 +9,7 @@ import {
 } from './constants'
 import TOKEN_DEFAULTS from './tokendefaults'
 import TOKEN_LISTS from './tokenlists'
-import type {
+import {
   CollectionTokenAttribute,
   CollectionTokenInfo,
   CollectionTokenMetadata,

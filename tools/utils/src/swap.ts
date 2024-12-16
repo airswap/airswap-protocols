@@ -15,7 +15,7 @@ import {
   SECONDS_IN_DAY,
 } from './constants'
 
-import type { Settlement, Signature } from './types'
+import { Settlement, Signature } from './types'
 
 export const EIP712Swap = {
   EIP712Domain: [

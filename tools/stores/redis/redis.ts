@@ -1,8 +1,8 @@
 import {
   Direction,
-  type FullOrder,
+  FullOrder,
   Indexes,
-  type OrderFilter,
+  OrderFilter,
   THIRTY_DAYS,
 } from '@airswap/utils'
 import { SchemaFieldTypes, createClient } from 'redis'

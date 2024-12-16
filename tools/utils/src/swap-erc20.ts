@@ -18,7 +18,7 @@ import {
   SECONDS_IN_DAY,
 } from './constants'
 
-import type { Signature, Settlement, Transfer } from './types'
+import { Signature, Settlement, Transfer } from './types'
 
 export const EIP712SwapERC20 = {
   EIP712Domain: [

@@ -1,11 +1,11 @@
 import * as url from 'node:url'
 import { isBrowser } from 'browser-or-node'
-import type { ethers } from 'ethers'
-import type { Client as HttpClient } from 'jayson'
+import { ethers } from 'ethers'
+import { Client as HttpClient } from 'jayson'
 import { TypedEmitter } from 'tiny-typed-emitter'
 
 import {
-  type JsonRpcError,
+  JsonRpcError,
   JsonRpcErrorCodes,
   JsonRpcWebsocket,
   WebsocketReadyStates,
@@ -14,16 +14,16 @@ import {
 import {
   ChainIds,
   Direction,
-  type FullOrder,
-  type FullOrderERC20,
+  FullOrder,
+  FullOrderERC20,
   Indexes,
-  type OrderERC20,
-  type OrderFilter,
-  type OrderResponse,
-  type Pricing,
+  OrderERC20,
+  OrderFilter,
+  OrderResponse,
+  Pricing,
   ProtocolIds,
-  type ServerOptions,
-  type SupportedProtocolInfo,
+  ServerOptions,
+  SupportedProtocolInfo,
   isValidOrderERC20,
   isValidPricingERC20,
   orderERC20PropsToStrings,

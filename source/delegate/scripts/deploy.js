@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const fs = require('node:fs')
+const fs = require('fs')
 const prettier = require('prettier')
 
 const { ethers, run } = require('hardhat')
@@ -53,7 +53,7 @@ async function main() {
         { ...prettierConfig, parser: 'babel' }
       )
     )
-    delegateCommits[chainId] = require('node:child_process')
+    delegateCommits[chainId] = require('child_process')
       .execSync('git rev-parse HEAD')
       .toString()
       .trim()

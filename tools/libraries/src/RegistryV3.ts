@@ -1,4 +1,4 @@
-import type { ethers } from 'ethers'
+import { ethers } from 'ethers'
 import { Registry__factory } from 'registry-v3/typechain/factories/contracts'
 
 import { Contract, SwapERC20 } from './Contracts'

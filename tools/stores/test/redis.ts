@@ -4,7 +4,7 @@ import { Redis, createIndex } from '../redis/redis'
 
 import {
   ADDRESS_ZERO,
-  type FullOrder,
+  FullOrder,
   createOrder,
   createOrderSignature,
 } from '@airswap/utils'

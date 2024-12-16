@@ -7,8 +7,8 @@ import sinonChai from 'sinon-chai'
 import {
   ADDRESS_ZERO,
   ChainIds,
-  type Levels,
-  type OrderERC20,
+  Levels,
+  OrderERC20,
   ProtocolIds,
   createOrder,
   createOrderERC20,
