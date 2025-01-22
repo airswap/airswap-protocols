@@ -22,18 +22,18 @@ interface IDelegate {
   event Revoke(address tmp, address signer);
 
   event SetRule(
-    address senderWallet,
-    address senderToken,
+    address indexed senderWallet,
+    address indexed senderToken,
     uint256 senderAmount,
-    address signerToken,
+    address indexed signerToken,
     uint256 signerAmount,
     uint256 expiry
   );
 
   event UnsetRule(
-    address senderWallet,
-    address senderToken,
-    address signerToken
+    address indexed senderWallet,
+    address indexed senderToken,
+    address indexed signerToken
   );
 
   error AddressInvalid();
