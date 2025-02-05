@@ -81,17 +81,17 @@ describe('Delegate Unit', () => {
       .returns(DEFAULT_SIGNER_AMOUNT)
   }
 
-  async function setUpApprovals() {
+  async function setUpApprovals(senderAmount, signerAmount) {
     await senderToken.mock.approve
-      .withArgs(delegate.address, DEFAULT_SENDER_AMOUNT)
+      .withArgs(delegate.address, senderAmount)
       .returns(true)
 
     await senderToken.mock.approve
-      .withArgs(swapERC20.address, DEFAULT_SENDER_AMOUNT)
+      .withArgs(swapERC20.address, senderAmount)
       .returns(true)
 
     await signerToken.mock.approve
-      .withArgs(swapERC20.address, DEFAULT_SIGNER_AMOUNT)
+      .withArgs(swapERC20.address, signerAmount)
       .returns(true)
   }
 
@@ -130,7 +130,7 @@ describe('Delegate Unit', () => {
     await senderToken.mock.transfer.returns(true)
     await signerToken.mock.transfer.returns(true)
 
-    setUpApprovals()
+    await setUpApprovals(DEFAULT_SENDER_AMOUNT, DEFAULT_SIGNER_AMOUNT)
   })
 
   describe('Constructor and admin functions', async () => {
@@ -407,6 +407,115 @@ describe('Delegate Unit', () => {
       )
       await setUpBalances(signer.address, sender.address)
 
+      await expect(
+        delegate.connect(signer).swap(sender.address, ...order)
+      ).to.emit(delegate, 'DelegatedSwapFor')
+    })
+
+    it('successfully swaps with a rounding error - Upper bound', async () => {
+      const senderAmount = '1100'
+      const signerAmount = '1600'
+
+      await delegate
+        .connect(sender)
+        .setRule(
+          sender.address,
+          senderToken.address,
+          senderAmount,
+          signerToken.address,
+          signerAmount,
+          RULE_EXPIRY
+        )
+
+      //1100 * 10 / 220 = 5000
+      const senderPartialFill = (
+        (BigInt(senderAmount) * BigInt(10)) /
+        BigInt(220)
+      ).toString()
+
+      //1600 * 10 / 22 = 72.7272727...
+      // rounds down to 72
+      const signerPartialFill = (
+        (BigInt(signerAmount) * BigInt(10)) /
+        BigInt(220)
+      ).toString()
+
+      expect(signerPartialFill).to.equal('72')
+
+      const order = await createSignedOrderERC20(
+        {
+          senderAmount: senderPartialFill,
+          signerAmount: signerPartialFill,
+        },
+        signer
+      )
+
+      await setUpAllowances(
+        sender.address,
+        senderPartialFill,
+        signer.address,
+        (BigInt(signerPartialFill) + BigInt(PROTOCOL_FEE)).toString()
+      )
+      await setUpBalances(signer.address, sender.address)
+
+      await setUpApprovals(
+        senderPartialFill,
+        (BigInt(signerPartialFill) + BigInt(PROTOCOL_FEE)).toString()
+      )
+
+      await expect(
+        delegate.connect(signer).swap(sender.address, ...order)
+      ).to.emit(delegate, 'DelegatedSwapFor')
+    })
+
+    it('successfully swaps with a rounding error - Lower bound', async () => {
+      const senderAmount = '1100'
+      const signerAmount = '1600'
+
+      await delegate
+        .connect(sender)
+        .setRule(
+          sender.address,
+          senderToken.address,
+          senderAmount,
+          signerToken.address,
+          signerAmount,
+          RULE_EXPIRY
+        )
+
+      //1100 * 10 / 22 = 500
+      const senderPartialFill = (
+        (BigInt(senderAmount) * BigInt(10)) /
+        BigInt(22)
+      ).toString()
+
+      //1600 * 10 / 22 = 727.272727...
+      // rounds down to 727
+      const signerPartialFill = (
+        (BigInt(signerAmount) * BigInt(10)) /
+        BigInt(22)
+      ).toString()
+
+      expect(signerPartialFill).to.equal('727')
+
+      const order = await createSignedOrderERC20(
+        {
+          senderAmount: senderPartialFill,
+          signerAmount: signerPartialFill,
+        },
+        signer
+      )
+      await setUpAllowances(
+        sender.address,
+        senderPartialFill,
+        signer.address,
+        (BigInt(signerPartialFill) + BigInt(PROTOCOL_FEE)).toString()
+      )
+      await setUpBalances(signer.address, sender.address)
+      await setUpApprovals(
+        senderPartialFill,
+        (BigInt(signerPartialFill) + BigInt(PROTOCOL_FEE)).toString()
+      )
       await expect(
         delegate.connect(signer).swap(sender.address, ...order)
       ).to.emit(delegate, 'DelegatedSwapFor')
