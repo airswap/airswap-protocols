@@ -412,7 +412,7 @@ describe('Delegate Unit', () => {
       ).to.emit(delegate, 'DelegatedSwapFor')
     })
 
-    it('successfully swaps with a rounding error - Upper bound', async () => {
+    it('successfully swaps with rounded-down values - Upper bound', async () => {
       const senderAmount = '1100'
       const signerAmount = '1600'
 
@@ -468,7 +468,7 @@ describe('Delegate Unit', () => {
       ).to.emit(delegate, 'DelegatedSwapFor')
     })
 
-    it('successfully swaps with a rounding error - Lower bound', async () => {
+    it('successfully swaps with rounded-down values - Lower bound', async () => {
       const senderAmount = '1100'
       const signerAmount = '1600'
 
