@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const fs = require('node:fs')
+const fs = require('fs')
 const prettier = require('prettier')
 const { ethers, run } = require('hardhat')
 const { chainLabels, ChainIds, getReceiptUrl } = require('@airswap/utils')
@@ -53,7 +53,7 @@ async function main() {
         { ...prettierConfig, parser: 'babel' }
       )
     )
-    poolCommits[chainId] = require('node:child_process')
+    poolCommits[chainId] = require('child_process')
       .execSync('git rev-parse HEAD')
       .toString()
       .trim()

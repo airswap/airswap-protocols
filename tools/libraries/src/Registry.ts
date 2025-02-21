@@ -1,7 +1,7 @@
 import registryBlocks from '@airswap/registry/deploys-blocks.js'
 import registryDeploys from '@airswap/registry/deploys.js'
 import { Registry__factory } from '@airswap/registry/typechain/factories/contracts'
-import type { ethers } from 'ethers'
+import { ethers } from 'ethers'
 
 import { Contract, SwapERC20 } from './Contracts'
 import { Server } from './Server'

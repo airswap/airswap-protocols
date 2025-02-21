@@ -7,8 +7,8 @@ import sinonChai from 'sinon-chai'
 import {
   ADDRESS_ZERO,
   ChainIds,
-  type Levels,
-  type OrderERC20,
+  Levels,
+  OrderERC20,
   ProtocolIds,
   createOrder,
   createOrderERC20,
@@ -150,9 +150,21 @@ function mockHttpServer(api) {
 }
 
 describe('HTTPServer', () => {
-  it('Server getStaker()', async () => {
+  it('Server getStaker', async () => {
     const server = await Server.at(URL, { staker: wallet.address })
     expect(server.getStaker()).to.be.equal(wallet.address)
+  })
+  it('Server getUrl', async () => {
+    const server = await Server.at(URL)
+    expect(server.getUrl()).to.be.equal(URL)
+  })
+  it('Server getSwapContract', async () => {
+    const server = await Server.at(URL, { swapContract: ADDRESS_ZERO })
+    expect(server.getSwapContract()).to.be.equal(ADDRESS_ZERO)
+  })
+  it('Server getChainId', async () => {
+    const server = await Server.at(URL, { chainId: ChainIds.SEPOLIA })
+    expect(server.getChainId()).to.be.equal(ChainIds.SEPOLIA)
   })
   fancy
     .nock(`https://${URL}`, mockHttpServer)

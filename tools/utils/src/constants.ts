@@ -159,7 +159,7 @@ export const currencyIcons: Record<number, number> = {
 }
 
 export const apiUrls: Record<number, string> = {
-  [ChainIds.MAINNET]: 'https://ethereum.publicnode.com',
+  [ChainIds.MAINNET]: 'https://ethereum-rpc.publicnode.com',
   [ChainIds.RSK]: 'https://public-node.rsk.co',
   [ChainIds.RSKTESTNET]: 'https://public-node.testnet.rsk.co',
   [ChainIds.TELOS]: 'https://mainnet.telos.net/evm',
@@ -167,8 +167,8 @@ export const apiUrls: Record<number, string> = {
   [ChainIds.BSC]: 'https://bsc-dataseed.binance.org',
   [ChainIds.BSCTESTNET]: 'https://data-seed-prebsc-1-s1.binance.org:8545',
   [ChainIds.POLYGON]: 'https://polygon-rpc.com',
-  [ChainIds.BASE]: 'https://base.publicnode.com',
-  [ChainIds.HOLESKY]: 'https://ethereum-holesky.publicnode.com',
+  [ChainIds.BASE]: 'https://mainnet.base.org',
+  [ChainIds.HOLESKY]: 'https://ethereum-holesky-rpc.publicnode.com',
   [ChainIds.ARBITRUM]: 'https://arb1.arbitrum.io/rpc',
   [ChainIds.FUJI]: 'https://api.avax-test.network/ext/bc/C/rpc',
   [ChainIds.AVALANCHE]: 'https://api.avax.network/ext/bc/C/rpc',
@@ -177,7 +177,7 @@ export const apiUrls: Record<number, string> = {
   [ChainIds.MUMBAI]: 'https://gateway.tenderly.co/public/polygon-mumbai',
   [ChainIds.BASESEPOLIA]: 'https://sepolia.base.org',
   [ChainIds.ARBITRUMSEPOLIA]: 'https://sepolia-rollup.arbitrum.io/rpc',
-  [ChainIds.SEPOLIA]: 'https://ethereum-sepolia.publicnode.com',
+  [ChainIds.SEPOLIA]: 'https://ethereum-sepolia-rpc.publicnode.com',
   [ChainIds.NEON]: 'https://neon-proxy-mainnet.solana.p2p.org',
   [ChainIds.NEONDEVNET]: 'https://devnet.neonevm.org',
 }

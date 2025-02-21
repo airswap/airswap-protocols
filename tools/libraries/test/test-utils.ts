@@ -1,5 +1,5 @@
-import type { EventEmitter } from 'node:events'
-import type {
+import { EventEmitter } from 'events'
+import {
   JsonRpcRequest,
   JsonRpcResponse,
 } from '@airswap/jsonrpc-client-websocket'
