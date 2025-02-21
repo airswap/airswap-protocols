@@ -1,6 +1,6 @@
 {
   "name": "@airswap/delegate",
-  "version": "5.0.2",
+  "version": "5.0.3-beta.0",
   "description": "AirSwap: Delegated On-chain Trading Rules",
   "license": "MIT",
   "repository": {
