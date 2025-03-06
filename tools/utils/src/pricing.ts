@@ -126,3 +126,16 @@ export function toAtomicString(
 ): string {
   return ethers.utils.parseUnits(value.toString(), decimals).toString()
 }
+
+export function calculateDelegateFillSignerAmount(
+  fillSenderAmount: string,
+  ruleSenderAmount: string,
+  ruleSignerAmount: string,
+  signerTokenDecimals: number
+): string {
+  return new BigNumber(ruleSignerAmount)
+    .multipliedBy(fillSenderAmount)
+    .dividedBy(ruleSenderAmount)
+    .decimalPlaces(signerTokenDecimals, BigNumber.ROUND_DOWN)
+    .toFixed()
+}
