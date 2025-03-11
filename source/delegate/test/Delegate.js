@@ -123,8 +123,13 @@ describe('Delegate Unit', () => {
     ).deploy(swapERC20.address)
     await delegate.deployed()
 
-    senderToken = await deployMockContract(deployer, IERC20.abi)
-    signerToken = await deployMockContract(deployer, IERC20.abi)
+    // Create mock contracts
+    const decimalsAbi = ['function decimals() external view returns (uint8)']
+    const combinedAbi = [...IERC20.abi, ...decimalsAbi]
+    senderToken = await deployMockContract(deployer, combinedAbi)
+    signerToken = await deployMockContract(deployer, combinedAbi)
+
+    // Set up basic mock functions
     await senderToken.mock.transferFrom.returns(true)
     await signerToken.mock.transferFrom.returns(true)
     await senderToken.mock.transfer.returns(true)
@@ -516,6 +521,178 @@ describe('Delegate Unit', () => {
         senderPartialFill,
         (BigInt(signerPartialFill) + BigInt(PROTOCOL_FEE)).toString()
       )
+      await expect(
+        delegate.connect(signer).swap(sender.address, ...order)
+      ).to.emit(delegate, 'DelegatedSwapFor')
+    })
+
+    it('successfully swaps tokens with different decimals', async () => {
+      // Mock the decimals functions
+      await senderToken.mock.decimals.returns(6) // e.g., USDC has 6 decimals
+      await signerToken.mock.decimals.returns(18) // e.g., ETH has 18 decimals
+
+      // Rule amounts in their respective decimal representations
+      const senderRuleAmount = '1000000' // 1 USDC (6 decimals)
+      const signerRuleAmount = '1000000000000000000' // 1 ETH (18 decimals)
+
+      await delegate
+        .connect(sender)
+        .setRule(
+          sender.address,
+          senderToken.address,
+          senderRuleAmount,
+          signerToken.address,
+          signerRuleAmount,
+          RULE_EXPIRY
+        )
+
+      // Create an order for 0.5 USDC to 0.5 ETH
+      const senderAmount = '500000' // 0.5 USDC
+      const signerAmount = '500000000000000000' // 0.5 ETH
+
+      const order = await createSignedOrderERC20(
+        {
+          senderAmount,
+          signerAmount,
+        },
+        signer
+      )
+
+      await setUpAllowances(
+        sender.address,
+        senderAmount,
+        signer.address,
+        (BigInt(signerAmount) + BigInt(PROTOCOL_FEE)).toString()
+      )
+      await setUpBalances(signer.address, sender.address)
+
+      await setUpApprovals(
+        senderAmount,
+        (BigInt(signerAmount) + BigInt(PROTOCOL_FEE)).toString()
+      )
+
+      await expect(
+        delegate.connect(signer).swap(sender.address, ...order)
+      ).to.emit(delegate, 'DelegatedSwapFor')
+    })
+
+    it('successfully swaps tokens with different decimals and handles rounding - Lower bound', async () => {
+      // Mock the decimals functions
+      await senderToken.mock.decimals.returns(6) // e.g., USDC has 6 decimals
+      await signerToken.mock.decimals.returns(18) // e.g., ETH has 18 decimals
+
+      // Rule amounts in their respective decimal representations
+      const senderRuleAmount = '1100000' // 1.1 USDC (6 decimals)
+      const signerRuleAmount = '1600000000000000000' // 1.6 ETH (18 decimals)
+
+      await delegate
+        .connect(sender)
+        .setRule(
+          sender.address,
+          senderToken.address,
+          senderRuleAmount,
+          signerToken.address,
+          signerRuleAmount,
+          RULE_EXPIRY
+        )
+
+      // Calculate partial amounts using the 10/22 ratio
+      // 1100000 * 10 / 22 = 500000
+      const senderPartialAmount = (
+        (BigInt(senderRuleAmount) * BigInt(10)) /
+        BigInt(22)
+      ).toString()
+
+      // 1600000000000000000 * 10 / 22 = 727272727272727272
+      const signerPartialAmount = (
+        (BigInt(signerRuleAmount) * BigInt(10)) /
+        BigInt(22)
+      ).toString()
+
+      expect(signerPartialAmount).to.equal('727272727272727272')
+
+      const order = await createSignedOrderERC20(
+        {
+          senderAmount: senderPartialAmount,
+          signerAmount: signerPartialAmount,
+        },
+        signer
+      )
+
+      await setUpAllowances(
+        sender.address,
+        senderPartialAmount,
+        signer.address,
+        (BigInt(signerPartialAmount) + BigInt(PROTOCOL_FEE)).toString()
+      )
+      await setUpBalances(signer.address, sender.address)
+
+      await setUpApprovals(
+        senderPartialAmount,
+        (BigInt(signerPartialAmount) + BigInt(PROTOCOL_FEE)).toString()
+      )
+
+      await expect(
+        delegate.connect(signer).swap(sender.address, ...order)
+      ).to.emit(delegate, 'DelegatedSwapFor')
+    })
+
+    it('successfully swaps tokens with different decimals and handles rounding - Upper bound', async () => {
+      // Mock the decimals functions
+      await senderToken.mock.decimals.returns(6) // e.g., USDC has 6 decimals
+      await signerToken.mock.decimals.returns(18) // e.g., ETH has 18 decimals
+
+      // Rule amounts in their respective decimal representations
+      const senderRuleAmount = '1100000' // 1.1 USDC (6 decimals)
+      const signerRuleAmount = '1600000000000000000' // 1.6 ETH (18 decimals)
+
+      await delegate
+        .connect(sender)
+        .setRule(
+          sender.address,
+          senderToken.address,
+          senderRuleAmount,
+          signerToken.address,
+          signerRuleAmount,
+          RULE_EXPIRY
+        )
+
+      // Calculate partial amounts using the 10/220 ratio
+      // 1100000 * 10 / 220 = 50000
+      const senderPartialAmount = (
+        (BigInt(senderRuleAmount) * BigInt(10)) /
+        BigInt(220)
+      ).toString()
+
+      // 1600000000000000000 * 10 / 220 = 72727272727272727
+      const signerPartialAmount = (
+        (BigInt(signerRuleAmount) * BigInt(10)) /
+        BigInt(220)
+      ).toString()
+
+      expect(signerPartialAmount).to.equal('72727272727272727')
+
+      const order = await createSignedOrderERC20(
+        {
+          senderAmount: senderPartialAmount,
+          signerAmount: signerPartialAmount,
+        },
+        signer
+      )
+
+      await setUpAllowances(
+        sender.address,
+        senderPartialAmount,
+        signer.address,
+        (BigInt(signerPartialAmount) + BigInt(PROTOCOL_FEE)).toString()
+      )
+      await setUpBalances(signer.address, sender.address)
+
+      await setUpApprovals(
+        senderPartialAmount,
+        (BigInt(signerPartialAmount) + BigInt(PROTOCOL_FEE)).toString()
+      )
+
       await expect(
         delegate.connect(signer).swap(sender.address, ...order)
       ).to.emit(delegate, 'DelegatedSwapFor')
