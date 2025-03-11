@@ -16,6 +16,7 @@ import {
   isValidOrderERC20,
   isValidPricingERC20,
   protocolInterfaces,
+  calculateDelegateFillSignerAmount,
 } from '../index'
 
 const signerPrivateKey =
@@ -218,6 +219,50 @@ describe('Utils', async () => {
       senderToken: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
       senderAmount: '461545050000000000',
       feeAmount: '705906',
+    })
+  })
+
+  describe('Delegate calculations', () => {
+    it('calculates correct signer amount for simple delegate fill', async () => {
+      // Test with different decimals (6 vs 18)
+      expect(
+        calculateDelegateFillSignerAmount(
+          '500000', // fillSenderAmount (0.5 USDC)
+          '1000000', // ruleSenderAmount (1 USDC)
+          '1000000000000000000' // ruleSignerAmount (1 ETH)
+        )
+      ).to.equal('500000000000000000') // Should get 0.5 ETH
+    })
+
+    it('calculates correct signer amount with rounding and different decimals', async () => {
+      // Rule amounts: 1.1 USDC (6 decimals) to 1.6 ETH (18 decimals)
+      const senderRuleAmount = '1100000' // 1.1 USDC
+      const signerRuleAmount = '1600000000000000000' // 1.6 ETH
+
+      // Calculate partial fill (10/220 ratio)
+      // 1100000 * 10 / 220 = 50000 (0.05 USDC)
+      const fillSenderAmount = (
+        (BigInt(senderRuleAmount) * BigInt(10)) /
+        BigInt(220)
+      ).toString()
+
+      // Calculate expected signer amount using the same integer division as the contract
+      const expectedSignerAmount = (
+        (BigInt(signerRuleAmount) * BigInt(fillSenderAmount)) /
+        BigInt(senderRuleAmount)
+      ).toString()
+
+      // Should get 0.072727272727272727 ETH
+      expect(
+        calculateDelegateFillSignerAmount(
+          fillSenderAmount,
+          senderRuleAmount,
+          signerRuleAmount
+        )
+      ).to.equal(expectedSignerAmount)
+
+      // Verify the exact value we expect
+      expect(expectedSignerAmount).to.equal('72727272727272727')
     })
   })
 })

@@ -130,12 +130,11 @@ export function toAtomicString(
 export function calculateDelegateFillSignerAmount(
   fillSenderAmount: string,
   ruleSenderAmount: string,
-  ruleSignerAmount: string,
-  signerTokenDecimals: number
+  ruleSignerAmount: string
 ): string {
   return new BigNumber(ruleSignerAmount)
     .multipliedBy(fillSenderAmount)
     .dividedBy(ruleSenderAmount)
-    .decimalPlaces(signerTokenDecimals, BigNumber.ROUND_DOWN)
-    .toFixed()
+    .integerValue(BigNumber.ROUND_DOWN)
+    .toString()
 }
