@@ -5,7 +5,7 @@ import { FullOrderERC20, Levels, UnsignedOrderERC20 } from '../index'
 import {
   ADDRESS_ZERO,
   SECONDS_IN_DAY,
-  calculateCostFromLevels,
+  getCostByLevels,
   compressFullOrderERC20,
   createOrderERC20Signature,
   decompressFullOrderERC20,
@@ -16,6 +16,7 @@ import {
   isValidOrderERC20,
   isValidPricingERC20,
   protocolInterfaces,
+  getCostByRule,
 } from '../index'
 
 const signerPrivateKey =
@@ -154,15 +155,15 @@ describe('Utils', async () => {
   })
 
   it('Calculates cost from levels', async () => {
-    expect(calculateCostFromLevels('200', levels)).to.equal('100')
-    expect(calculateCostFromLevels('250', levels)).to.equal('125')
-    expect(calculateCostFromLevels('255', levels)).to.equal('128')
-    expect(calculateCostFromLevels('600', levels)).to.equal('345')
+    expect(getCostByLevels('200', levels)).to.equal('100')
+    expect(getCostByLevels('250', levels)).to.equal('125')
+    expect(getCostByLevels('255', levels)).to.equal('128')
+    expect(getCostByLevels('600', levels)).to.equal('345')
   })
 
   it('Throws for amount over max', async () => {
     try {
-      calculateCostFromLevels('755', levels)
+      getCostByLevels('755', levels)
       assert(false)
     } catch (e) {
       assert(true)
@@ -218,6 +219,32 @@ describe('Utils', async () => {
       senderToken: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
       senderAmount: '461545050000000000',
       feeAmount: '705906',
+    })
+  })
+
+  describe('Delegate calculations', () => {
+    it('calculates correct signer amount for simple delegate fill', async () => {
+      // Test with different decimals (6 vs 18)
+      const fillAmount = '500000' // 0.5 USDC
+      const ruleAmount = '1000000' // 1 USDC
+      const signerAmount = '1000000000000000000' // 1 ETH
+
+      // Known result from contract test
+      expect(getCostByRule(fillAmount, ruleAmount, signerAmount)).to.equal(
+        '500000000000000000'
+      ) // 0.5 ETH
+    })
+
+    it('calculates correct signer amount with rounding and different decimals', async () => {
+      // Rule amounts: 1.1 USDC (6 decimals) to 1.6 ETH (18 decimals)
+      const senderRuleAmount = '1100000' // 1.1 USDC
+      const signerRuleAmount = '1600000000000000000' // 1.6 ETH
+      const fillSenderAmount = '50000' // 0.05 USDC (from 1.1 USDC * 10/220)
+
+      // Known result from contract test
+      expect(
+        getCostByRule(fillSenderAmount, senderRuleAmount, signerRuleAmount)
+      ).to.equal('72727272727272727') // ≈0.072727272727272727 ETH
     })
   })
 })

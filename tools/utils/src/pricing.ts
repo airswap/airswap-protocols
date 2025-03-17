@@ -46,7 +46,7 @@ export function isValidPricingERC20Pair(pricing: Pricing): boolean {
   )
 }
 
-export function getPriceForAmount(
+export function getCostByPricing(
   side: 'buy' | 'sell',
   amount: string,
   baseToken: string,
@@ -65,9 +65,9 @@ export function getPriceForAmount(
           )
         }
         if (side === 'buy') {
-          return calculateCost(amount, pricing[i].ask)
+          return getCost(amount, pricing[i].ask)
         }
-        return calculateCost(amount, pricing[i].bid)
+        return getCost(amount, pricing[i].bid)
       }
     }
   }
@@ -76,15 +76,15 @@ export function getPriceForAmount(
   )
 }
 
-export function calculateCost(amount: string, pricing: Formula | Levels) {
+export function getCost(amount: string, pricing: Formula | Levels) {
   // TODO: Formula support
   if (typeof pricing !== 'string') {
-    return calculateCostFromLevels(amount, pricing)
+    return getCostByLevels(amount, pricing)
   }
   return null
 }
 
-export function calculateCostFromLevels(amount: string, levels: Levels) {
+export function getCostByLevels(amount: string, levels: Levels) {
   const totalAmount = new BigNumber(amount)
   const totalAvailable = new BigNumber(levels[levels.length - 1][0])
   let totalCost = new BigNumber(0)
@@ -125,4 +125,16 @@ export function toAtomicString(
   decimals: string | number
 ): string {
   return ethers.utils.parseUnits(value.toString(), decimals).toString()
+}
+
+export function getCostByRule(
+  fillSenderAmount: string,
+  ruleSenderAmount: string,
+  ruleSignerAmount: string
+): string {
+  return new BigNumber(ruleSignerAmount)
+    .multipliedBy(fillSenderAmount)
+    .dividedBy(ruleSenderAmount)
+    .integerValue(BigNumber.ROUND_DOWN)
+    .toString()
 }
