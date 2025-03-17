@@ -3,6 +3,8 @@ pragma solidity 0.8.23;
 
 import { ERC20 } from "solady/src/tokens/ERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
 import "@airswap/registry/contracts/interfaces/IRegistry.sol";
@@ -14,6 +16,18 @@ contract BatchCall {
   using Address for address;
 
   error ArgumentInvalid();
+  error UnsupportedTokenType();
+
+  enum TokenType {
+    ERC721,
+    ERC1155
+  }
+
+  struct NFTQuery {
+    address contractAddress;
+    TokenType tokenType;
+    uint256 tokenId; // Used for both ERC721 and ERC1155
+  }
 
   /**
    * @notice Check the token balance of a wallet in a token contract
@@ -310,5 +324,132 @@ contract BatchCall {
       }
     }
     return tokensSupported;
+  }
+
+  /**
+   * @notice Check NFT balance for a specific token ID
+   * @param userAddress address The user to check balance for
+   * @param query NFTQuery The NFT contract details
+   * @return uint256 NFT balance (1 or 0 for ERC721, actual balance for ERC1155)
+   */
+  function getWalletNFTBalance(
+    address userAddress,
+    NFTQuery memory query
+  ) public view returns (uint256) {
+    if (!query.contractAddress.isContract()) return 0;
+
+    if (query.tokenType == TokenType.ERC721) {
+      IERC721 nft = IERC721(query.contractAddress);
+      try nft.ownerOf(query.tokenId) returns (address owner) {
+        return owner == userAddress ? 1 : 0;
+      } catch {
+        return 0;
+      }
+    } else if (query.tokenType == TokenType.ERC1155) {
+      IERC1155 nft = IERC1155(query.contractAddress);
+      try nft.balanceOf(userAddress, query.tokenId) returns (uint256 balance) {
+        return balance;
+      } catch {
+        return 0;
+      }
+    }
+
+    revert UnsupportedTokenType();
+  }
+
+  /**
+   * @notice Check NFT allowance for a specific operator and token
+   * @param userAddress address The user who granted the approval
+   * @param operatorAddress address The operator to check approval for
+   * @param query NFTQuery The NFT contract details
+   * @return bool Whether the operator is approved
+   */
+  function getWalletNFTAllowance(
+    address userAddress,
+    address operatorAddress,
+    NFTQuery memory query
+  ) public view returns (bool) {
+    if (!query.contractAddress.isContract()) return false;
+
+    if (query.tokenType == TokenType.ERC721) {
+      IERC721 nft = IERC721(query.contractAddress);
+      try nft.isApprovedForAll(userAddress, operatorAddress) returns (
+        bool isApproved
+      ) {
+        if (isApproved) return true;
+        try nft.getApproved(query.tokenId) returns (address approved) {
+          return approved == operatorAddress;
+        } catch {
+          return false;
+        }
+      } catch {
+        return false;
+      }
+    } else if (query.tokenType == TokenType.ERC1155) {
+      IERC1155 nft = IERC1155(query.contractAddress);
+      try nft.isApprovedForAll(userAddress, operatorAddress) returns (
+        bool approved
+      ) {
+        return approved;
+      } catch {
+        return false;
+      }
+    }
+
+    revert UnsupportedTokenType();
+  }
+
+  /**
+   * @notice Batch check NFT balances for multiple NFTs
+   * @param userAddress address The user to check balances for
+   * @param queries NFTQuery[] Array of NFT queries
+   * @return uint256[] Array of balances corresponding to each query
+   */
+  function getWalletNFTBalances(
+    address userAddress,
+    NFTQuery[] calldata queries
+  ) external view returns (uint256[] memory) {
+    if (queries.length == 0) revert ArgumentInvalid();
+
+    uint256[] memory balances = new uint256[](queries.length);
+
+    for (uint256 i; i < queries.length; ) {
+      balances[i] = getWalletNFTBalance(userAddress, queries[i]);
+      unchecked {
+        ++i;
+      }
+    }
+
+    return balances;
+  }
+
+  /**
+   * @notice Batch check NFT allowances for multiple NFTs
+   * @param userAddress address The user who granted the approval
+   * @param operatorAddress address The operator to check approval for
+   * @param queries NFTQuery[] Array of NFT queries
+   * @return bool[] Array of allowance states corresponding to each query
+   */
+  function getWalletNFTAllowances(
+    address userAddress,
+    address operatorAddress,
+    NFTQuery[] calldata queries
+  ) external view returns (bool[] memory) {
+    if (queries.length == 0) revert ArgumentInvalid();
+
+    bool[] memory allowances = new bool[](queries.length);
+
+    for (uint256 i; i < queries.length; ) {
+      allowances[i] = getWalletNFTAllowance(
+        userAddress,
+        operatorAddress,
+        queries[i]
+      );
+      unchecked {
+        ++i;
+      }
+    }
+
+    return allowances;
   }
 }
