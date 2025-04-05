@@ -21,6 +21,7 @@ import {
   fullOrderToParams,
   compressFullOrder,
   decompressFullOrder,
+  orderToParams,
 } from '../index'
 
 const signerPrivateKey =
@@ -343,5 +344,72 @@ describe('Utils', async () => {
 
     // Verify the decompressed order matches the original
     expect(decompressed).to.deep.equal(fullOrder)
+  })
+
+  it('Converts order to params array correctly', async () => {
+    // Create an unsigned order
+    const unsignedOrder = createOrder({
+      nonce: 1234567890,
+      expiry: '1234567890',
+      protocolFee: 300,
+      signer: {
+        wallet: '0x1234567890123456789012345678901234567890',
+        token: '0x2234567890123456789012345678901234567890',
+        kind: '0x36372b07',
+        id: '0',
+        amount: '1000000',
+      },
+      sender: {
+        wallet: '0x3234567890123456789012345678901234567890',
+        token: '0x4234567890123456789012345678901234567890',
+        kind: '0x36372b07',
+        id: '1',
+        amount: '2000000',
+      },
+      affiliateWallet: '0x5234567890123456789012345678901234567890',
+      affiliateAmount: 5000,
+    })
+
+    // Create signature
+    const signature = await createOrderSignature(
+      unsignedOrder,
+      wallet.privateKey,
+      ADDRESS_ZERO,
+      1
+    )
+
+    // Create order
+    const order = {
+      ...unsignedOrder,
+      ...signature,
+    }
+
+    // Convert to params
+    const params = orderToParams(order)
+
+    // Verify params array
+    expect(params).to.deep.equal([
+      '1234567890', // nonce
+      '1234567890', // expiry
+      '300', // protocolFee
+      '0x1234567890123456789012345678901234567890', // signer.wallet
+      '0x2234567890123456789012345678901234567890', // signer.token
+      '0x36372b07', // signer.kind
+      '0', // signer.id
+      '1000000', // signer.amount
+      '0x3234567890123456789012345678901234567890', // sender.wallet
+      '0x4234567890123456789012345678901234567890', // sender.token
+      '0x36372b07', // sender.kind
+      '1', // sender.id
+      '2000000', // sender.amount
+      '0x5234567890123456789012345678901234567890', // affiliateWallet
+      '5000', // affiliateAmount
+      signature.v, // v
+      signature.r, // r
+      signature.s, // s
+    ])
+
+    // Verify array length
+    expect(params.length).to.equal(18)
   })
 })
