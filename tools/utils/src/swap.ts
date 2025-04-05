@@ -252,8 +252,42 @@ export function fullOrderToParams(
   ]
 }
 
+export function paramsToFullOrder(str: string): FullOrder {
+  const split = str.split(',')
+  return {
+    chainId: Number(split[0]),
+    swapContract: split[1],
+    nonce: split[2],
+    expiry: split[3],
+    protocolFee: split[4],
+    signer: {
+      wallet: split[5],
+      token: split[6],
+      kind: split[7],
+      id: split[8],
+      amount: split[9],
+    },
+    sender: {
+      wallet: split[10],
+      token: split[11],
+      kind: split[12],
+      id: split[13],
+      amount: split[14],
+    },
+    affiliateWallet: split[15],
+    affiliateAmount: split[16],
+    v: split[17],
+    r: split[18],
+    s: split[19],
+  }
+}
+
 export function compressFullOrder(order: FullOrder): string {
   return lzString.compressToEncodedURIComponent(
     fullOrderToParams(order).join(',')
   )
+}
+
+export function decompressFullOrder(str: string): FullOrder {
+  return paramsToFullOrder(lzString.decompressFromEncodedURIComponent(str))
 }

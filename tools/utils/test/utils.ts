@@ -19,6 +19,8 @@ import {
   createOrder,
   createOrderSignature,
   fullOrderToParams,
+  compressFullOrder,
+  decompressFullOrder,
 } from '../index'
 
 const signerPrivateKey =
@@ -293,5 +295,53 @@ describe('Utils', async () => {
 
     // Verify array length
     expect(params.length).to.equal(20)
+  })
+
+  it('Compresses and decompresses a full order correctly', async () => {
+    // Create an unsigned order
+    const unsignedOrder = createOrder({
+      nonce: 1234567890,
+      expiry: '1234567890',
+      protocolFee: 300,
+      signer: {
+        wallet: '0x1234567890123456789012345678901234567890',
+        token: '0x2234567890123456789012345678901234567890',
+        kind: '0x36372b07',
+        id: '0',
+        amount: '1000000',
+      },
+      sender: {
+        wallet: '0x3234567890123456789012345678901234567890',
+        token: '0x4234567890123456789012345678901234567890',
+        kind: '0x36372b07',
+        id: '1',
+        amount: '2000000',
+      },
+      affiliateWallet: '0x5234567890123456789012345678901234567890',
+      affiliateAmount: 5000,
+    })
+
+    // Create signature
+    const signature = await createOrderSignature(
+      unsignedOrder,
+      wallet.privateKey,
+      ADDRESS_ZERO,
+      1
+    )
+
+    // Create full order
+    const fullOrder = {
+      ...unsignedOrder,
+      ...signature,
+      chainId: 1,
+      swapContract: ADDRESS_ZERO,
+    }
+
+    // Compress and then decompress
+    const compressed = compressFullOrder(fullOrder)
+    const decompressed = decompressFullOrder(compressed)
+
+    // Verify the decompressed order matches the original
+    expect(decompressed).to.deep.equal(fullOrder)
   })
 })
