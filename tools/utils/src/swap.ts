@@ -17,6 +17,8 @@ import {
 
 import { Settlement, Signature } from './types'
 
+import lzString from 'lz-string'
+
 export const EIP712Swap = {
   EIP712Domain: [
     { name: 'name', type: 'string' },
@@ -200,4 +202,58 @@ export function getSignerFromOrderSignature(
       message: order,
     },
   })
+}
+
+export function fullOrderToParams(
+  order: FullOrder
+): [
+  number,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string
+] {
+  return [
+    order.chainId,
+    order.swapContract,
+    order.nonce,
+    order.expiry,
+    order.protocolFee,
+    order.signer.wallet,
+    order.signer.token,
+    order.signer.kind,
+    order.signer.id,
+    order.signer.amount,
+    order.sender.wallet,
+    order.sender.token,
+    order.sender.kind,
+    order.sender.id,
+    order.sender.amount,
+    order.affiliateWallet,
+    order.affiliateAmount,
+    order.v,
+    order.r,
+    order.s,
+  ]
+}
+
+export function compressFullOrder(order: FullOrder): string {
+  return lzString.compressToEncodedURIComponent(
+    fullOrderToParams(order).join(',')
+  )
 }
