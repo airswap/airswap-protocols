@@ -437,17 +437,12 @@ describe('BatchCall Integration', () => {
           .withArgs(TOKEN_ID_1)
           .returns(sender.address)
 
-        const query = {
-          contractAddress: erc721token.address,
-          tokenType: 0, // ERC721
-          tokenId: TOKEN_ID_1,
-        }
-
-        const balance = await batchCall.getWalletNFTBalance(
+        const balances = await batchCall.getWalletERC721Balances(
           sender.address,
-          query
+          [erc721token.address],
+          [TOKEN_ID_1]
         )
-        expect(balance).to.equal(1)
+        expect(balances[0]).to.equal(1)
       })
 
       it('returns zero balance for unowned token', async () => {
@@ -455,17 +450,12 @@ describe('BatchCall Integration', () => {
           .withArgs(TOKEN_ID_1)
           .returns(signer.address)
 
-        const query = {
-          contractAddress: erc721token.address,
-          tokenType: 0,
-          tokenId: TOKEN_ID_1,
-        }
-
-        const balance = await batchCall.getWalletNFTBalance(
+        const balances = await batchCall.getWalletERC721Balances(
           sender.address,
-          query
+          [erc721token.address],
+          [TOKEN_ID_1]
         )
-        expect(balance).to.equal(0)
+        expect(balances[0]).to.equal(0)
       })
 
       it('returns correct allowance for approved operator', async () => {
@@ -476,18 +466,13 @@ describe('BatchCall Integration', () => {
           .withArgs(TOKEN_ID_1)
           .returns(ethers.constants.AddressZero)
 
-        const query = {
-          contractAddress: erc721token.address,
-          tokenType: 0,
-          tokenId: TOKEN_ID_1,
-        }
-
-        const isApproved = await batchCall.getWalletNFTAllowance(
+        const allowances = await batchCall.getWalletERC721Allowances(
           sender.address,
           signer.address,
-          query
+          [erc721token.address],
+          [TOKEN_ID_1]
         )
-        expect(isApproved).to.be.true
+        expect(allowances[0]).to.be.true
       })
 
       it('returns correct allowance for approved token', async () => {
@@ -498,18 +483,13 @@ describe('BatchCall Integration', () => {
           .withArgs(TOKEN_ID_1)
           .returns(signer.address)
 
-        const query = {
-          contractAddress: erc721token.address,
-          tokenType: 0,
-          tokenId: TOKEN_ID_1,
-        }
-
-        const isApproved = await batchCall.getWalletNFTAllowance(
+        const allowances = await batchCall.getWalletERC721Allowances(
           sender.address,
           signer.address,
-          query
+          [erc721token.address],
+          [TOKEN_ID_1]
         )
-        expect(isApproved).to.be.true
+        expect(allowances[0]).to.be.true
       })
     })
 
@@ -519,17 +499,12 @@ describe('BatchCall Integration', () => {
           .withArgs(sender.address, TOKEN_ID_1)
           .returns(AMOUNT_1155)
 
-        const query = {
-          contractAddress: erc1155token.address,
-          tokenType: 1, // ERC1155
-          tokenId: TOKEN_ID_1,
-        }
-
-        const balance = await batchCall.getWalletNFTBalance(
+        const balances = await batchCall.getWalletERC1155Balances(
           sender.address,
-          query
+          [erc1155token.address],
+          [TOKEN_ID_1]
         )
-        expect(balance).to.equal(AMOUNT_1155)
+        expect(balances[0]).to.equal(AMOUNT_1155)
       })
 
       it('returns correct allowance', async () => {
@@ -537,127 +512,175 @@ describe('BatchCall Integration', () => {
           .withArgs(sender.address, signer.address)
           .returns(true)
 
-        const query = {
-          contractAddress: erc1155token.address,
-          tokenType: 1,
-          tokenId: TOKEN_ID_1,
-        }
-
-        const isApproved = await batchCall.getWalletNFTAllowance(
+        const allowances = await batchCall.getWalletERC1155Allowances(
           sender.address,
           signer.address,
-          query
+          [erc1155token.address]
         )
-        expect(isApproved).to.be.true
+        expect(allowances[0]).to.be.true
       })
     })
 
     describe('Batch operations', () => {
-      it('returns correct balances for multiple NFTs', async () => {
-        // Set up mocks
+      it('returns correct balances for multiple ERC721s', async () => {
         await erc721token.mock.ownerOf
           .withArgs(TOKEN_ID_1)
           .returns(sender.address)
         await erc721token.mock.ownerOf
           .withArgs(TOKEN_ID_2)
           .returns(signer.address)
+
+        const balances = await batchCall.getWalletERC721Balances(
+          sender.address,
+          [erc721token.address, erc721token.address],
+          [TOKEN_ID_1, TOKEN_ID_2]
+        )
+        expect(balances.map((b) => b.toString())).to.deep.equal(['1', '0'])
+      })
+
+      it('returns correct balances for multiple ERC1155s', async () => {
         await erc1155token.mock.balanceOf
           .withArgs(sender.address, TOKEN_ID_1)
           .returns(AMOUNT_1155)
+        await erc1155token.mock.balanceOf
+          .withArgs(sender.address, TOKEN_ID_2)
+          .returns('2')
 
-        const queries = [
-          {
-            contractAddress: erc721token.address,
-            tokenType: 0,
-            tokenId: TOKEN_ID_1,
-          },
-          {
-            contractAddress: erc721token.address,
-            tokenType: 0,
-            tokenId: TOKEN_ID_2,
-          },
-          {
-            contractAddress: erc1155token.address,
-            tokenType: 1,
-            tokenId: TOKEN_ID_1,
-          },
-        ]
-
-        const balances = await batchCall.getWalletNFTBalances(
+        const balances = await batchCall.getWalletERC1155Balances(
           sender.address,
-          queries
+          [erc1155token.address, erc1155token.address],
+          [TOKEN_ID_1, TOKEN_ID_2]
         )
         expect(balances.map((b) => b.toString())).to.deep.equal([
-          '1',
-          '0',
           AMOUNT_1155,
+          '2',
         ])
       })
 
-      it('returns correct allowances for multiple NFTs', async () => {
-        // Set up mocks
+      it('returns correct allowances for multiple ERC721s', async () => {
         await erc721token.mock.isApprovedForAll
           .withArgs(sender.address, signer.address)
           .returns(true)
         await erc721token.mock.getApproved
           .withArgs(TOKEN_ID_1)
           .returns(ethers.constants.AddressZero)
+        await erc721token.mock.getApproved
+          .withArgs(TOKEN_ID_2)
+          .returns(signer.address)
+
+        const allowances = await batchCall.getWalletERC721Allowances(
+          sender.address,
+          signer.address,
+          [erc721token.address, erc721token.address],
+          [TOKEN_ID_1, TOKEN_ID_2]
+        )
+        expect(allowances).to.deep.equal([true, true])
+      })
+
+      it('returns correct allowances for multiple ERC1155s', async () => {
+        const erc1155token2 = await deployMockContract(deployer, IERC1155.abi)
         await erc1155token.mock.isApprovedForAll
+          .withArgs(sender.address, signer.address)
+          .returns(true)
+        await erc1155token2.mock.isApprovedForAll
           .withArgs(sender.address, signer.address)
           .returns(false)
 
-        const queries = [
-          {
-            contractAddress: erc721token.address,
-            tokenType: 0,
-            tokenId: TOKEN_ID_1,
-          },
-          {
-            contractAddress: erc1155token.address,
-            tokenType: 1,
-            tokenId: TOKEN_ID_1,
-          },
-        ]
-
-        const allowances = await batchCall.getWalletNFTAllowances(
+        const allowances = await batchCall.getWalletERC1155Allowances(
           sender.address,
           signer.address,
-          queries
+          [erc1155token.address, erc1155token2.address]
         )
         expect(allowances).to.deep.equal([true, false])
       })
 
-      it('reverts if queries array is empty', async () => {
+      it('reverts if arrays are empty for ERC721', async () => {
         await expect(
-          batchCall.getWalletNFTBalances(sender.address, [])
+          batchCall.getWalletERC721Balances(sender.address, [], [])
         ).to.be.revertedWith('ArgumentInvalid')
 
         await expect(
-          batchCall.getWalletNFTAllowances(sender.address, signer.address, [])
+          batchCall.getWalletERC721Allowances(
+            sender.address,
+            signer.address,
+            [],
+            []
+          )
+        ).to.be.revertedWith('ArgumentInvalid')
+      })
+
+      it('reverts if arrays are empty for ERC1155', async () => {
+        await expect(
+          batchCall.getWalletERC1155Balances(sender.address, [], [])
+        ).to.be.revertedWith('ArgumentInvalid')
+
+        await expect(
+          batchCall.getWalletERC1155Allowances(
+            sender.address,
+            signer.address,
+            []
+          )
+        ).to.be.revertedWith('ArgumentInvalid')
+      })
+
+      it('reverts if arrays have different lengths for ERC721', async () => {
+        await expect(
+          batchCall.getWalletERC721Balances(
+            sender.address,
+            [erc721token.address],
+            []
+          )
+        ).to.be.revertedWith('ArgumentInvalid')
+
+        await expect(
+          batchCall.getWalletERC721Allowances(
+            sender.address,
+            signer.address,
+            [erc721token.address],
+            []
+          )
+        ).to.be.revertedWith('ArgumentInvalid')
+      })
+
+      it('reverts if arrays have different lengths for ERC1155', async () => {
+        await expect(
+          batchCall.getWalletERC1155Balances(
+            sender.address,
+            [erc1155token.address],
+            []
+          )
         ).to.be.revertedWith('ArgumentInvalid')
       })
 
       it('handles invalid contract addresses', async () => {
-        const queries = [
-          {
-            contractAddress: ethers.constants.AddressZero,
-            tokenType: 0,
-            tokenId: TOKEN_ID_1,
-          },
-        ]
-
-        const balances = await batchCall.getWalletNFTBalances(
+        const balancesERC721 = await batchCall.getWalletERC721Balances(
           sender.address,
-          queries
+          [ethers.constants.AddressZero],
+          [TOKEN_ID_1]
         )
-        expect(balances[0]).to.equal(0)
+        expect(balancesERC721[0]).to.equal(0)
 
-        const allowances = await batchCall.getWalletNFTAllowances(
+        const balancesERC1155 = await batchCall.getWalletERC1155Balances(
+          sender.address,
+          [ethers.constants.AddressZero],
+          [TOKEN_ID_1]
+        )
+        expect(balancesERC1155[0]).to.equal(0)
+
+        const allowancesERC721 = await batchCall.getWalletERC721Allowances(
           sender.address,
           signer.address,
-          queries
+          [ethers.constants.AddressZero],
+          [TOKEN_ID_1]
         )
-        expect(allowances[0]).to.be.false
+        expect(allowancesERC721[0]).to.be.false
+
+        const allowancesERC1155 = await batchCall.getWalletERC1155Allowances(
+          sender.address,
+          signer.address,
+          [ethers.constants.AddressZero]
+        )
+        expect(allowancesERC1155[0]).to.be.false
       })
     })
   })

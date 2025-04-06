@@ -18,17 +18,6 @@ contract BatchCall {
   error ArgumentInvalid();
   error UnsupportedTokenType();
 
-  enum TokenType {
-    ERC721,
-    ERC1155
-  }
-
-  struct NFTQuery {
-    address contractAddress;
-    TokenType tokenType;
-    uint256 tokenId; // Used for both ERC721 and ERC1155
-  }
-
   /**
    * @notice Check the token balance of a wallet in a token contract
    * @dev return 0 on returns 0 on invalid spender contract or non-contract address
@@ -327,94 +316,35 @@ contract BatchCall {
   }
 
   /**
-   * @notice Check NFT balance for a specific token ID
-   * @param userAddress address The user to check balance for
-   * @param query NFTQuery The NFT contract details
-   * @return uint256 NFT balance (1 or 0 for ERC721, actual balance for ERC1155)
-   */
-  function getWalletNFTBalance(
-    address userAddress,
-    NFTQuery memory query
-  ) public view returns (uint256) {
-    if (!query.contractAddress.isContract()) return 0;
-
-    if (query.tokenType == TokenType.ERC721) {
-      IERC721 nft = IERC721(query.contractAddress);
-      try nft.ownerOf(query.tokenId) returns (address owner) {
-        return owner == userAddress ? 1 : 0;
-      } catch {
-        return 0;
-      }
-    } else if (query.tokenType == TokenType.ERC1155) {
-      IERC1155 nft = IERC1155(query.contractAddress);
-      try nft.balanceOf(userAddress, query.tokenId) returns (uint256 balance) {
-        return balance;
-      } catch {
-        return 0;
-      }
-    }
-
-    revert UnsupportedTokenType();
-  }
-
-  /**
-   * @notice Check NFT allowance for a specific operator and token
-   * @param userAddress address The user who granted the approval
-   * @param operatorAddress address The operator to check approval for
-   * @param query NFTQuery The NFT contract details
-   * @return bool Whether the operator is approved
-   */
-  function getWalletNFTAllowance(
-    address userAddress,
-    address operatorAddress,
-    NFTQuery memory query
-  ) public view returns (bool) {
-    if (!query.contractAddress.isContract()) return false;
-
-    if (query.tokenType == TokenType.ERC721) {
-      IERC721 nft = IERC721(query.contractAddress);
-      try nft.isApprovedForAll(userAddress, operatorAddress) returns (
-        bool isApproved
-      ) {
-        if (isApproved) return true;
-        try nft.getApproved(query.tokenId) returns (address approved) {
-          return approved == operatorAddress;
-        } catch {
-          return false;
-        }
-      } catch {
-        return false;
-      }
-    } else if (query.tokenType == TokenType.ERC1155) {
-      IERC1155 nft = IERC1155(query.contractAddress);
-      try nft.isApprovedForAll(userAddress, operatorAddress) returns (
-        bool approved
-      ) {
-        return approved;
-      } catch {
-        return false;
-      }
-    }
-
-    revert UnsupportedTokenType();
-  }
-
-  /**
-   * @notice Batch check NFT balances for multiple NFTs
+   * @notice Batch check ERC721 balances for multiple NFTs
    * @param userAddress address The user to check balances for
-   * @param queries NFTQuery[] Array of NFT queries
-   * @return uint256[] Array of balances corresponding to each query
+   * @param contractAddresses address[] Array of ERC721 contract addresses
+   * @param tokenIds uint256[] Array of token IDs
+   * @return uint256[] Array of balances (1 or 0) corresponding to each NFT
    */
-  function getWalletNFTBalances(
+  function getWalletERC721Balances(
     address userAddress,
-    NFTQuery[] calldata queries
+    address[] calldata contractAddresses,
+    uint256[] calldata tokenIds
   ) external view returns (uint256[] memory) {
-    if (queries.length == 0) revert ArgumentInvalid();
+    if (
+      contractAddresses.length == 0 ||
+      contractAddresses.length != tokenIds.length
+    ) revert ArgumentInvalid();
 
-    uint256[] memory balances = new uint256[](queries.length);
+    uint256[] memory balances = new uint256[](contractAddresses.length);
 
-    for (uint256 i; i < queries.length; ) {
-      balances[i] = getWalletNFTBalance(userAddress, queries[i]);
+    for (uint256 i; i < contractAddresses.length; ) {
+      if (contractAddresses[i].isContract()) {
+        IERC721 nft = IERC721(contractAddresses[i]);
+        try nft.ownerOf(tokenIds[i]) returns (address owner) {
+          balances[i] = owner == userAddress ? 1 : 0;
+        } catch {
+          balances[i] = 0;
+        }
+      } else {
+        balances[i] = 0;
+      }
       unchecked {
         ++i;
       }
@@ -424,27 +354,122 @@ contract BatchCall {
   }
 
   /**
-   * @notice Batch check NFT allowances for multiple NFTs
+   * @notice Batch check ERC1155 balances for multiple NFTs
+   * @param userAddress address The user to check balances for
+   * @param contractAddresses address[] Array of ERC1155 contract addresses
+   * @param tokenIds uint256[] Array of token IDs
+   * @return uint256[] Array of balances corresponding to each NFT
+   */
+  function getWalletERC1155Balances(
+    address userAddress,
+    address[] calldata contractAddresses,
+    uint256[] calldata tokenIds
+  ) external view returns (uint256[] memory) {
+    if (
+      contractAddresses.length == 0 ||
+      contractAddresses.length != tokenIds.length
+    ) revert ArgumentInvalid();
+
+    uint256[] memory balances = new uint256[](contractAddresses.length);
+
+    for (uint256 i; i < contractAddresses.length; ) {
+      if (contractAddresses[i].isContract()) {
+        IERC1155 nft = IERC1155(contractAddresses[i]);
+        try nft.balanceOf(userAddress, tokenIds[i]) returns (uint256 balance) {
+          balances[i] = balance;
+        } catch {
+          balances[i] = 0;
+        }
+      } else {
+        balances[i] = 0;
+      }
+      unchecked {
+        ++i;
+      }
+    }
+
+    return balances;
+  }
+
+  /**
+   * @notice Batch check ERC721 allowances for multiple NFTs
    * @param userAddress address The user who granted the approval
    * @param operatorAddress address The operator to check approval for
-   * @param queries NFTQuery[] Array of NFT queries
-   * @return bool[] Array of allowance states corresponding to each query
+   * @param contractAddresses address[] Array of ERC721 contract addresses
+   * @param tokenIds uint256[] Array of token IDs
+   * @return bool[] Array of allowance states corresponding to each NFT
    */
-  function getWalletNFTAllowances(
+  function getWalletERC721Allowances(
     address userAddress,
     address operatorAddress,
-    NFTQuery[] calldata queries
+    address[] calldata contractAddresses,
+    uint256[] calldata tokenIds
   ) external view returns (bool[] memory) {
-    if (queries.length == 0) revert ArgumentInvalid();
+    if (
+      contractAddresses.length == 0 ||
+      contractAddresses.length != tokenIds.length
+    ) revert ArgumentInvalid();
 
-    bool[] memory allowances = new bool[](queries.length);
+    bool[] memory allowances = new bool[](contractAddresses.length);
 
-    for (uint256 i; i < queries.length; ) {
-      allowances[i] = getWalletNFTAllowance(
-        userAddress,
-        operatorAddress,
-        queries[i]
-      );
+    for (uint256 i; i < contractAddresses.length; ) {
+      if (contractAddresses[i].isContract()) {
+        IERC721 nft = IERC721(contractAddresses[i]);
+        try nft.isApprovedForAll(userAddress, operatorAddress) returns (
+          bool isApproved
+        ) {
+          if (isApproved) {
+            allowances[i] = true;
+          } else {
+            try nft.getApproved(tokenIds[i]) returns (address approved) {
+              allowances[i] = approved == operatorAddress;
+            } catch {
+              allowances[i] = false;
+            }
+          }
+        } catch {
+          allowances[i] = false;
+        }
+      } else {
+        allowances[i] = false;
+      }
+      unchecked {
+        ++i;
+      }
+    }
+
+    return allowances;
+  }
+
+  /**
+   * @notice Batch check ERC1155 allowances for multiple NFTs
+   * @param userAddress address The user who granted the approval
+   * @param operatorAddress address The operator to check approval for
+   * @param contractAddresses address[] Array of ERC1155 contract addresses
+   * @return bool[] Array of allowance states corresponding to each NFT
+   */
+  function getWalletERC1155Allowances(
+    address userAddress,
+    address operatorAddress,
+    address[] calldata contractAddresses
+  ) external view returns (bool[] memory) {
+    if (contractAddresses.length == 0) revert ArgumentInvalid();
+
+    bool[] memory allowances = new bool[](contractAddresses.length);
+
+    for (uint256 i; i < contractAddresses.length; ) {
+      if (contractAddresses[i].isContract()) {
+        IERC1155 nft = IERC1155(contractAddresses[i]);
+        try nft.isApprovedForAll(userAddress, operatorAddress) returns (
+          bool approved
+        ) {
+          allowances[i] = approved;
+        } catch {
+          allowances[i] = false;
+        }
+      } else {
+        allowances[i] = false;
+      }
       unchecked {
         ++i;
       }
