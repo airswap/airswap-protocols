@@ -272,27 +272,47 @@ export function fullOrderToParams(
   string,
   string
 ] {
+  // Helper to get the type of a field from EIP712Swap
+  const getFieldType = (field: string): string => {
+    const orderField = EIP712Swap.Order.find((f) => f.name === field)
+    if (orderField) return orderField.type
+    const partyField = EIP712Swap.Party.find((f) => f.name === field)
+    if (partyField) return partyField.type
+    return 'string'
+  }
+
+  const sanitizeValue = (val: any, field: string): string => {
+    if (!val && val !== 0) {
+      const type = getFieldType(field)
+      if (type === 'address') return ADDRESS_ZERO
+      if (type === 'uint256') return '0'
+      if (type === 'bytes4') return '0x00000000'
+      return ''
+    }
+    return String(val)
+  }
+
   return [
     order.chainId,
     order.swapContract,
-    order.nonce,
-    order.expiry,
-    order.protocolFee,
-    order.signer.wallet,
-    order.signer.token,
-    order.signer.kind,
-    order.signer.id,
-    order.signer.amount,
-    order.sender.wallet,
-    order.sender.token,
-    order.sender.kind,
-    order.sender.id,
-    order.sender.amount,
-    order.affiliateWallet,
-    order.affiliateAmount,
-    order.v,
-    order.r,
-    order.s,
+    sanitizeValue(order.nonce, 'nonce'),
+    sanitizeValue(order.expiry, 'expiry'),
+    sanitizeValue(order.protocolFee, 'protocolFee'),
+    sanitizeValue(order.signer?.wallet, 'wallet'),
+    sanitizeValue(order.signer?.token, 'token'),
+    sanitizeValue(order.signer?.kind, 'kind'),
+    sanitizeValue(order.signer?.id, 'id'),
+    sanitizeValue(order.signer?.amount, 'amount'),
+    sanitizeValue(order.sender?.wallet, 'wallet'),
+    sanitizeValue(order.sender?.token, 'token'),
+    sanitizeValue(order.sender?.kind, 'kind'),
+    sanitizeValue(order.sender?.id, 'id'),
+    sanitizeValue(order.sender?.amount, 'amount'),
+    sanitizeValue(order.affiliateWallet, 'affiliateWallet'),
+    sanitizeValue(order.affiliateAmount, 'affiliateAmount'),
+    sanitizeValue(order.v, 'v'),
+    sanitizeValue(order.r, 'r'),
+    sanitizeValue(order.s, 's'),
   ]
 }
 

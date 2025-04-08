@@ -414,29 +414,356 @@ describe('Utils', async () => {
     expect(params.length).to.equal(18)
   })
 
-  describe('Delegate calculations', () => {
-    it('calculates correct signer amount for simple delegate fill', async () => {
-      // Test with different decimals (6 vs 18)
-      const fillAmount = '500000' // 0.5 USDC
-      const ruleAmount = '1000000' // 1 USDC
-      const signerAmount = '1000000000000000000' // 1 ETH
-
-      // Known result from contract test
-      expect(getCostByRule(fillAmount, ruleAmount, signerAmount)).to.equal(
-        '500000000000000000'
-      ) // 0.5 ETH
+  it('sanitizes empty values correctly', async () => {
+    // Create an unsigned order with valid values first
+    const unsignedOrder = createOrder({
+      nonce: 1234567890,
+      expiry: '1234567890',
+      protocolFee: 300,
+      signer: {
+        wallet: '0x1234567890123456789012345678901234567890',
+        token: '0x2234567890123456789012345678901234567890',
+        kind: '0x36372b07',
+        id: '0',
+        amount: '1000000',
+      },
+      sender: {
+        wallet: '0x3234567890123456789012345678901234567890',
+        token: '0x4234567890123456789012345678901234567890',
+        kind: '0x36372b07',
+        id: '1',
+        amount: '2000000',
+      },
     })
 
-    it('calculates correct signer amount with rounding and different decimals', async () => {
-      // Rule amounts: 1.1 USDC (6 decimals) to 1.6 ETH (18 decimals)
-      const senderRuleAmount = '1100000' // 1.1 USDC
-      const signerRuleAmount = '1600000000000000000' // 1.6 ETH
-      const fillSenderAmount = '50000' // 0.05 USDC (from 1.1 USDC * 10/220)
+    const signature = await createOrderSignature(
+      unsignedOrder,
+      wallet.privateKey,
+      ADDRESS_ZERO,
+      1
+    )
 
-      // Known result from contract test
-      expect(
-        getCostByRule(fillSenderAmount, senderRuleAmount, signerRuleAmount)
-      ).to.equal('72727272727272727') // ≈0.072727272727272727 ETH
+    // Create a full order with empty values
+    const emptyOrder = {
+      ...unsignedOrder,
+      ...signature,
+      chainId: 1,
+      swapContract: ADDRESS_ZERO,
+      sender: {
+        wallet: '',
+        token: '',
+        kind: '',
+        id: '',
+        amount: '2000000',
+      },
+    }
+
+    // Test that fullOrderToParams sanitizes the values
+    const params = fullOrderToParams(emptyOrder)
+
+    // Verify params have proper zero values for empty fields
+    expect(params[10]).to.equal(ADDRESS_ZERO) // sender.wallet
+    expect(params[11]).to.equal(ADDRESS_ZERO) // sender.token
+    expect(params[12]).to.equal('0x00000000') // sender.kind
+    expect(params[13]).to.equal('0') // sender.id
+    expect(params[14]).to.equal('2000000') // sender.amount
+  })
+
+  it('calculates correct signer amount for simple delegate fill', async () => {
+    // Test with different decimals (6 vs 18)
+    const fillAmount = '500000' // 0.5 USDC
+    const ruleAmount = '1000000' // 1 USDC
+    const signerAmount = '1000000000000000000' // 1 ETH
+
+    // Known result from contract test
+    expect(getCostByRule(fillAmount, ruleAmount, signerAmount)).to.equal(
+      '500000000000000000'
+    ) // 0.5 ETH
+  })
+
+  it('calculates correct signer amount with rounding and different decimals', async () => {
+    // Rule amounts: 1.1 USDC (6 decimals) to 1.6 ETH (18 decimals)
+    const senderRuleAmount = '1100000' // 1.1 USDC
+    const signerRuleAmount = '1600000000000000000' // 1.6 ETH
+    const fillSenderAmount = '50000' // 0.05 USDC (from 1.1 USDC * 10/220)
+
+    // Known result from contract test
+    expect(
+      getCostByRule(fillSenderAmount, senderRuleAmount, signerRuleAmount)
+    ).to.equal('72727272727272727') // ≈0.072727272727272727 ETH
+  })
+
+  it('handles missing affiliate values correctly', async () => {
+    // Create an unsigned order without affiliate info
+    const unsignedOrder = createOrder({
+      nonce: 1234567890,
+      expiry: '1234567890',
+      protocolFee: 300,
+      signer: {
+        wallet: '0x1234567890123456789012345678901234567890',
+        token: '0x2234567890123456789012345678901234567890',
+        kind: '0x36372b07',
+        id: '0',
+        amount: '1000000',
+      },
+      sender: {
+        wallet: '0x3234567890123456789012345678901234567890',
+        token: '0x4234567890123456789012345678901234567890',
+        kind: '0x36372b07',
+        id: '1',
+        amount: '2000000',
+      },
     })
+
+    // Create signature
+    const signature = await createOrderSignature(
+      unsignedOrder,
+      wallet.privateKey,
+      ADDRESS_ZERO,
+      1
+    )
+
+    // Create full order
+    const fullOrder = {
+      ...unsignedOrder,
+      ...signature,
+      chainId: 1,
+      swapContract: ADDRESS_ZERO,
+    }
+
+    // Compress and then decompress
+    const compressed = compressFullOrder(fullOrder)
+    const decompressed = decompressFullOrder(compressed)
+
+    // Verify affiliate values are empty strings
+    expect(decompressed.affiliateWallet).to.equal(ADDRESS_ZERO)
+    expect(decompressed.affiliateAmount).to.equal('0')
+
+    // Verify the rest of the order matches
+    expect(decompressed.chainId).to.equal(fullOrder.chainId)
+    expect(decompressed.swapContract.toLowerCase()).to.equal(
+      fullOrder.swapContract.toLowerCase()
+    )
+    expect(decompressed.nonce).to.equal(fullOrder.nonce)
+    expect(decompressed.signer.wallet.toLowerCase()).to.equal(
+      fullOrder.signer.wallet.toLowerCase()
+    )
+  })
+
+  it('handles default values correctly', async () => {
+    // Create a minimal order with only required values
+    const unsignedOrder = createOrder({
+      nonce: 1234567890,
+      expiry: '1234567890',
+      protocolFee: 300,
+      signer: {
+        wallet: '0x1234567890123456789012345678901234567890',
+        amount: '1000000',
+      },
+      sender: {
+        amount: '2000000',
+      },
+    })
+
+    const signature = await createOrderSignature(
+      unsignedOrder,
+      wallet.privateKey,
+      ADDRESS_ZERO,
+      1
+    )
+
+    const fullOrder = {
+      ...unsignedOrder,
+      ...signature,
+      chainId: 1,
+      swapContract: ADDRESS_ZERO,
+    }
+
+    const compressed = compressFullOrder(fullOrder)
+    const decompressed = decompressFullOrder(compressed)
+
+    // Verify default values
+    expect(decompressed.signer.token).to.equal(ADDRESS_ZERO)
+    expect(decompressed.signer.kind).to.equal('0x36372b07')
+    expect(decompressed.signer.id).to.equal('0')
+    expect(decompressed.sender.wallet).to.equal(ADDRESS_ZERO)
+    expect(decompressed.sender.token).to.equal(ADDRESS_ZERO)
+    expect(decompressed.sender.kind).to.equal('0x36372b07')
+    expect(decompressed.sender.id).to.equal('0')
+    expect(decompressed.affiliateWallet).to.equal(ADDRESS_ZERO)
+    expect(decompressed.affiliateAmount).to.equal('0')
+
+    // Verify explicitly set values remain intact
+    expect(decompressed.signer.wallet.toLowerCase()).to.equal(
+      fullOrder.signer.wallet.toLowerCase()
+    )
+    expect(decompressed.signer.amount).to.equal('1000000')
+    expect(decompressed.sender.amount).to.equal('2000000')
+  })
+
+  it('handles missing sender values correctly', async () => {
+    // Create an unsigned order with minimal sender info
+    const unsignedOrder = createOrder({
+      nonce: 1234567890,
+      expiry: '1234567890',
+      protocolFee: 300,
+      signer: {
+        wallet: '0x1234567890123456789012345678901234567890',
+        token: '0x2234567890123456789012345678901234567890',
+        kind: '0x36372b07',
+        id: '0',
+        amount: '1000000',
+      },
+      // Only specify sender amount, rest should be defaults
+      sender: {
+        amount: '2000000',
+      },
+    })
+
+    // Verify the defaults are set in the original order
+    expect(unsignedOrder.sender.wallet).to.equal(ADDRESS_ZERO)
+    expect(unsignedOrder.sender.token).to.equal(ADDRESS_ZERO)
+    expect(unsignedOrder.sender.kind).to.equal('0x36372b07')
+    expect(unsignedOrder.sender.id).to.equal('0')
+    expect(unsignedOrder.sender.amount).to.equal('2000000')
+
+    const signature = await createOrderSignature(
+      unsignedOrder,
+      wallet.privateKey,
+      ADDRESS_ZERO,
+      1
+    )
+
+    const fullOrder = {
+      ...unsignedOrder,
+      ...signature,
+      chainId: 1,
+      swapContract: ADDRESS_ZERO,
+    }
+
+    const compressed = compressFullOrder(fullOrder)
+    const decompressed = decompressFullOrder(compressed)
+
+    // Verify the values match the original defaults
+    expect(decompressed.sender.wallet).to.equal(unsignedOrder.sender.wallet)
+    expect(decompressed.sender.token).to.equal(unsignedOrder.sender.token)
+    expect(decompressed.sender.kind).to.equal(unsignedOrder.sender.kind)
+    expect(decompressed.sender.id).to.equal(unsignedOrder.sender.id)
+    expect(decompressed.sender.amount).to.equal(unsignedOrder.sender.amount)
+  })
+
+  it('handles falsey sender values correctly', async () => {
+    // Create an unsigned order with falsey sender values
+    const unsignedOrder = createOrder({
+      nonce: 1234567890,
+      expiry: '1234567890',
+      protocolFee: 300,
+      signer: {
+        wallet: '0x1234567890123456789012345678901234567890',
+        token: '0x2234567890123456789012345678901234567890',
+        kind: '0x36372b07',
+        id: '0',
+        amount: '1000000',
+      },
+      sender: {
+        wallet: ADDRESS_ZERO,
+        token: ADDRESS_ZERO,
+        kind: '0x00000000',
+        id: '0',
+        amount: '2000000',
+      },
+    })
+
+    // Create signature
+    const signature = await createOrderSignature(
+      unsignedOrder,
+      wallet.privateKey,
+      ADDRESS_ZERO,
+      1
+    )
+
+    const fullOrder = {
+      ...unsignedOrder,
+      ...signature,
+      chainId: 1,
+      swapContract: ADDRESS_ZERO,
+    }
+
+    // Now we can try to set falsey values after signing
+    const falseyOrder = {
+      ...fullOrder,
+      sender: {
+        ...fullOrder.sender,
+        wallet: '',
+        token: '',
+        kind: '',
+        id: '',
+        amount: '2000000',
+      },
+    }
+
+    const compressed = compressFullOrder(falseyOrder)
+    const decompressed = decompressFullOrder(compressed)
+
+    // Verify the values are sanitized to proper zero values
+    expect(decompressed.sender.wallet).to.equal(ADDRESS_ZERO)
+    expect(decompressed.sender.token).to.equal(ADDRESS_ZERO)
+    expect(decompressed.sender.kind).to.equal('0x00000000')
+    expect(decompressed.sender.id).to.equal('0')
+    expect(decompressed.sender.amount).to.equal('2000000')
+  })
+
+  it('handles zero sender values correctly', async () => {
+    // Create an unsigned order with zero sender values
+    const unsignedOrder = createOrder({
+      nonce: 1234567890,
+      expiry: '1234567890',
+      protocolFee: 300,
+      signer: {
+        wallet: '0x1234567890123456789012345678901234567890',
+        token: '0x2234567890123456789012345678901234567890',
+        kind: '0x36372b07',
+        id: '0',
+        amount: '1000000',
+      },
+      sender: {
+        wallet: ADDRESS_ZERO,
+        token: ADDRESS_ZERO,
+        kind: '0x00000000',
+        id: '0',
+        amount: '2000000',
+      },
+    })
+
+    // Verify the zero values in the original order
+    expect(unsignedOrder.sender.wallet).to.equal(ADDRESS_ZERO)
+    expect(unsignedOrder.sender.token).to.equal(ADDRESS_ZERO)
+    expect(unsignedOrder.sender.kind).to.equal('0x00000000')
+    expect(unsignedOrder.sender.id).to.equal('0')
+    expect(unsignedOrder.sender.amount).to.equal('2000000')
+
+    const signature = await createOrderSignature(
+      unsignedOrder,
+      wallet.privateKey,
+      ADDRESS_ZERO,
+      1
+    )
+
+    const fullOrder = {
+      ...unsignedOrder,
+      ...signature,
+      chainId: 1,
+      swapContract: ADDRESS_ZERO,
+    }
+
+    const compressed = compressFullOrder(fullOrder)
+    const decompressed = decompressFullOrder(compressed)
+
+    // Verify the values match the original zero values
+    expect(decompressed.sender.wallet).to.equal(unsignedOrder.sender.wallet)
+    expect(decompressed.sender.token).to.equal(unsignedOrder.sender.token)
+    expect(decompressed.sender.kind).to.equal(unsignedOrder.sender.kind)
+    expect(decompressed.sender.id).to.equal(unsignedOrder.sender.id)
+    expect(decompressed.sender.amount).to.equal(unsignedOrder.sender.amount)
   })
 })
