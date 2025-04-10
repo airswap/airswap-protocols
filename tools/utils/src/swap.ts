@@ -17,6 +17,8 @@ import {
 
 import { Settlement, Signature } from './types'
 
+import lzString from 'lz-string'
+
 export const EIP712Swap = {
   EIP712Domain: [
     { name: 'name', type: 'string' },
@@ -200,4 +202,156 @@ export function getSignerFromOrderSignature(
       message: order,
     },
   })
+}
+
+export function orderToParams(
+  order: Order
+): [
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string
+] {
+  return [
+    order.nonce,
+    order.expiry,
+    order.protocolFee,
+    order.signer.wallet,
+    order.signer.token,
+    order.signer.kind,
+    order.signer.id,
+    order.signer.amount,
+    order.sender.wallet,
+    order.sender.token,
+    order.sender.kind,
+    order.sender.id,
+    order.sender.amount,
+    order.affiliateWallet,
+    order.affiliateAmount,
+    order.v,
+    order.r,
+    order.s,
+  ]
+}
+
+export function fullOrderToParams(
+  order: FullOrder
+): [
+  number,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string
+] {
+  // Helper to get the type of a field from EIP712Swap
+  const getFieldType = (field: string): string => {
+    const orderField = EIP712Swap.Order.find((f) => f.name === field)
+    if (orderField) return orderField.type
+    const partyField = EIP712Swap.Party.find((f) => f.name === field)
+    if (partyField) return partyField.type
+    return 'string'
+  }
+
+  const sanitizeValue = (val: any, field: string): string => {
+    if (!val && val !== 0) {
+      const type = getFieldType(field)
+      if (type === 'address') return ADDRESS_ZERO
+      if (type === 'uint256') return '0'
+      if (type === 'bytes4') return '0x00000000'
+      return ''
+    }
+    return String(val)
+  }
+
+  return [
+    order.chainId,
+    order.swapContract,
+    sanitizeValue(order.nonce, 'nonce'),
+    sanitizeValue(order.expiry, 'expiry'),
+    sanitizeValue(order.protocolFee, 'protocolFee'),
+    sanitizeValue(order.signer?.wallet, 'wallet'),
+    sanitizeValue(order.signer?.token, 'token'),
+    sanitizeValue(order.signer?.kind, 'kind'),
+    sanitizeValue(order.signer?.id, 'id'),
+    sanitizeValue(order.signer?.amount, 'amount'),
+    sanitizeValue(order.sender?.wallet, 'wallet'),
+    sanitizeValue(order.sender?.token, 'token'),
+    sanitizeValue(order.sender?.kind, 'kind'),
+    sanitizeValue(order.sender?.id, 'id'),
+    sanitizeValue(order.sender?.amount, 'amount'),
+    sanitizeValue(order.affiliateWallet, 'affiliateWallet'),
+    sanitizeValue(order.affiliateAmount, 'affiliateAmount'),
+    sanitizeValue(order.v, 'v'),
+    sanitizeValue(order.r, 'r'),
+    sanitizeValue(order.s, 's'),
+  ]
+}
+
+export function paramsToFullOrder(str: string): FullOrder {
+  const split = str.split(',')
+  return {
+    chainId: Number(split[0]),
+    swapContract: split[1],
+    nonce: split[2],
+    expiry: split[3],
+    protocolFee: split[4],
+    signer: {
+      wallet: split[5],
+      token: split[6],
+      kind: split[7],
+      id: split[8],
+      amount: split[9],
+    },
+    sender: {
+      wallet: split[10],
+      token: split[11],
+      kind: split[12],
+      id: split[13],
+      amount: split[14],
+    },
+    affiliateWallet: split[15],
+    affiliateAmount: split[16],
+    v: split[17],
+    r: split[18],
+    s: split[19],
+  }
+}
+
+export function compressFullOrder(order: FullOrder): string {
+  return lzString.compressToEncodedURIComponent(
+    fullOrderToParams(order).join(',')
+  )
+}
+
+export function decompressFullOrder(str: string): FullOrder {
+  return paramsToFullOrder(lzString.decompressFromEncodedURIComponent(str))
 }
