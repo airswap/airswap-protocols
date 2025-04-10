@@ -16,7 +16,6 @@ contract BatchCall {
   using Address for address;
 
   error ArgumentInvalid();
-  error UnsupportedTokenType();
 
   /**
    * @notice Check the token balance of a wallet in a token contract
