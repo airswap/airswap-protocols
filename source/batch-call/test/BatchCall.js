@@ -437,7 +437,7 @@ describe('BatchCall Integration', () => {
           .withArgs(TOKEN_ID_1)
           .returns(sender.address)
 
-        const balances = await batchCall.getWalletERC721Balances(
+        const balances = await batchCall.walletBalancesERC721(
           sender.address,
           [erc721token.address],
           [TOKEN_ID_1]
@@ -450,7 +450,7 @@ describe('BatchCall Integration', () => {
           .withArgs(TOKEN_ID_1)
           .returns(signer.address)
 
-        const balances = await batchCall.getWalletERC721Balances(
+        const balances = await batchCall.walletBalancesERC721(
           sender.address,
           [erc721token.address],
           [TOKEN_ID_1]
@@ -466,7 +466,7 @@ describe('BatchCall Integration', () => {
           .withArgs(TOKEN_ID_1)
           .returns(ethers.constants.AddressZero)
 
-        const allowances = await batchCall.getWalletERC721Allowances(
+        const allowances = await batchCall.walletAllowancesERC721(
           sender.address,
           signer.address,
           [erc721token.address],
@@ -483,7 +483,7 @@ describe('BatchCall Integration', () => {
           .withArgs(TOKEN_ID_1)
           .returns(signer.address)
 
-        const allowances = await batchCall.getWalletERC721Allowances(
+        const allowances = await batchCall.walletAllowancesERC721(
           sender.address,
           signer.address,
           [erc721token.address],
@@ -499,7 +499,7 @@ describe('BatchCall Integration', () => {
           .withArgs(sender.address, TOKEN_ID_1)
           .returns(AMOUNT_1155)
 
-        const balances = await batchCall.getWalletERC1155Balances(
+        const balances = await batchCall.walletBalancesERC1155(
           sender.address,
           [erc1155token.address],
           [TOKEN_ID_1]
@@ -512,7 +512,7 @@ describe('BatchCall Integration', () => {
           .withArgs(sender.address, signer.address)
           .returns(true)
 
-        const allowances = await batchCall.getWalletERC1155Allowances(
+        const allowances = await batchCall.walletAllowancesERC1155(
           sender.address,
           signer.address,
           [erc1155token.address]
@@ -530,7 +530,7 @@ describe('BatchCall Integration', () => {
           .withArgs(TOKEN_ID_2)
           .returns(signer.address)
 
-        const balances = await batchCall.getWalletERC721Balances(
+        const balances = await batchCall.walletBalancesERC721(
           sender.address,
           [erc721token.address, erc721token.address],
           [TOKEN_ID_1, TOKEN_ID_2]
@@ -546,7 +546,7 @@ describe('BatchCall Integration', () => {
           .withArgs(sender.address, TOKEN_ID_2)
           .returns('2')
 
-        const balances = await batchCall.getWalletERC1155Balances(
+        const balances = await batchCall.walletBalancesERC1155(
           sender.address,
           [erc1155token.address, erc1155token.address],
           [TOKEN_ID_1, TOKEN_ID_2]
@@ -568,7 +568,7 @@ describe('BatchCall Integration', () => {
           .withArgs(TOKEN_ID_2)
           .returns(signer.address)
 
-        const allowances = await batchCall.getWalletERC721Allowances(
+        const allowances = await batchCall.walletAllowancesERC721(
           sender.address,
           signer.address,
           [erc721token.address, erc721token.address],
@@ -586,7 +586,7 @@ describe('BatchCall Integration', () => {
           .withArgs(sender.address, signer.address)
           .returns(false)
 
-        const allowances = await batchCall.getWalletERC1155Allowances(
+        const allowances = await batchCall.walletAllowancesERC1155(
           sender.address,
           signer.address,
           [erc1155token.address, erc1155token2.address]
@@ -596,11 +596,11 @@ describe('BatchCall Integration', () => {
 
       it('reverts if arrays are empty for ERC721', async () => {
         await expect(
-          batchCall.getWalletERC721Balances(sender.address, [], [])
+          batchCall.walletBalancesERC721(sender.address, [], [])
         ).to.be.revertedWith('ArgumentInvalid')
 
         await expect(
-          batchCall.getWalletERC721Allowances(
+          batchCall.walletAllowancesERC721(
             sender.address,
             signer.address,
             [],
@@ -611,21 +611,17 @@ describe('BatchCall Integration', () => {
 
       it('reverts if arrays are empty for ERC1155', async () => {
         await expect(
-          batchCall.getWalletERC1155Balances(sender.address, [], [])
+          batchCall.walletBalancesERC1155(sender.address, [], [])
         ).to.be.revertedWith('ArgumentInvalid')
 
         await expect(
-          batchCall.getWalletERC1155Allowances(
-            sender.address,
-            signer.address,
-            []
-          )
+          batchCall.walletAllowancesERC1155(sender.address, signer.address, [])
         ).to.be.revertedWith('ArgumentInvalid')
       })
 
       it('reverts if arrays have different lengths for ERC721', async () => {
         await expect(
-          batchCall.getWalletERC721Balances(
+          batchCall.walletBalancesERC721(
             sender.address,
             [erc721token.address],
             []
@@ -633,7 +629,7 @@ describe('BatchCall Integration', () => {
         ).to.be.revertedWith('ArgumentInvalid')
 
         await expect(
-          batchCall.getWalletERC721Allowances(
+          batchCall.walletAllowancesERC721(
             sender.address,
             signer.address,
             [erc721token.address],
@@ -644,7 +640,7 @@ describe('BatchCall Integration', () => {
 
       it('reverts if arrays have different lengths for ERC1155', async () => {
         await expect(
-          batchCall.getWalletERC1155Balances(
+          batchCall.walletBalancesERC1155(
             sender.address,
             [erc1155token.address],
             []
@@ -653,21 +649,21 @@ describe('BatchCall Integration', () => {
       })
 
       it('handles invalid contract addresses', async () => {
-        const balancesERC721 = await batchCall.getWalletERC721Balances(
+        const balancesERC721 = await batchCall.walletBalancesERC721(
           sender.address,
           [ethers.constants.AddressZero],
           [TOKEN_ID_1]
         )
         expect(balancesERC721[0]).to.equal(0)
 
-        const balancesERC1155 = await batchCall.getWalletERC1155Balances(
+        const balancesERC1155 = await batchCall.walletBalancesERC1155(
           sender.address,
           [ethers.constants.AddressZero],
           [TOKEN_ID_1]
         )
         expect(balancesERC1155[0]).to.equal(0)
 
-        const allowancesERC721 = await batchCall.getWalletERC721Allowances(
+        const allowancesERC721 = await batchCall.walletAllowancesERC721(
           sender.address,
           signer.address,
           [ethers.constants.AddressZero],
@@ -675,7 +671,7 @@ describe('BatchCall Integration', () => {
         )
         expect(allowancesERC721[0]).to.be.false
 
-        const allowancesERC1155 = await batchCall.getWalletERC1155Allowances(
+        const allowancesERC1155 = await batchCall.walletAllowancesERC1155(
           sender.address,
           signer.address,
           [ethers.constants.AddressZero]

@@ -321,7 +321,7 @@ contract BatchCall {
    * @param tokenIds uint256[] Array of token IDs
    * @return uint256[] Array of balances (1 or 0) corresponding to each NFT
    */
-  function getWalletERC721Balances(
+  function walletBalancesERC721(
     address userAddress,
     address[] calldata contractAddresses,
     uint256[] calldata tokenIds
@@ -359,7 +359,7 @@ contract BatchCall {
    * @param tokenIds uint256[] Array of token IDs
    * @return uint256[] Array of balances corresponding to each NFT
    */
-  function getWalletERC1155Balances(
+  function walletBalancesERC1155(
     address userAddress,
     address[] calldata contractAddresses,
     uint256[] calldata tokenIds
@@ -398,7 +398,7 @@ contract BatchCall {
    * @param tokenIds uint256[] Array of token IDs
    * @return bool[] Array of allowance states corresponding to each NFT
    */
-  function getWalletERC721Allowances(
+  function walletAllowancesERC721(
     address userAddress,
     address operatorAddress,
     address[] calldata contractAddresses,
@@ -447,7 +447,7 @@ contract BatchCall {
    * @param contractAddresses address[] Array of ERC1155 contract addresses
    * @return bool[] Array of allowance states corresponding to each NFT
    */
-  function getWalletERC1155Allowances(
+  function walletAllowancesERC1155(
     address userAddress,
     address operatorAddress,
     address[] calldata contractAddresses
