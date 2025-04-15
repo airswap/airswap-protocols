@@ -16,6 +16,7 @@ import {
   isValidOrderERC20,
   isValidPricingERC20,
   protocolInterfaces,
+  parseCheckResult,
 } from '../index'
 
 const signerPrivateKey =
@@ -218,6 +219,39 @@ describe('Utils', async () => {
       senderToken: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
       senderAmount: '461545050000000000',
       feeAmount: '705906',
+    })
+  })
+
+  describe('parseCheckResult', () => {
+    it('should parse error messages from both Swap and SwapERC20 contracts', () => {
+      // Mock error arrays as they would come from each contract
+      const swapErrors = [
+        '0x53656e646572416c6c6f77616e63654c6f770000000000000000000000000000', // SignerAllowanceLow
+        '0x53656e64657242616c616e63654c6f7700000000000000000000000000000000', // SignerBalanceLow
+        '0x5369676e6572416c6c6f77616e63654c6f770000000000000000000000000000', // SenderAllowanceLow
+        '0x5369676e657242616c616e63654c6f7700000000000000000000000000000000', // SenderBalanceLow
+      ]
+
+      const swapERC20Errors = [
+        '0x4f72646572457870697265640000000000000000000000000000000000000000', // OrderExpired
+        '0x5369676e657242616c616e63654c6f7700000000000000000000000000000000', // SignerBalanceLow
+      ]
+
+      // Test parsing Swap.sol errors
+      const parsedSwapErrors = parseCheckResult(swapErrors)
+      expect(parsedSwapErrors).to.deep.equal([
+        'SenderAllowanceLow',
+        'SenderBalanceLow',
+        'SignerAllowanceLow',
+        'SignerBalanceLow',
+      ])
+
+      // Test parsing SwapERC20.sol errors
+      const parsedSwapERC20Errors = parseCheckResult(swapERC20Errors)
+      expect(parsedSwapERC20Errors).to.deep.equal([
+        'OrderExpired',
+        'SignerBalanceLow',
+      ])
     })
   })
 })
