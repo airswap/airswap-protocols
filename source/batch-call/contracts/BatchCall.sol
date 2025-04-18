@@ -3,6 +3,8 @@ pragma solidity 0.8.23;
 
 import { ERC20 } from "solady/src/tokens/ERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@airswap/swap/contracts/interfaces/ISwap.sol";
 import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
 import "@airswap/registry/contracts/interfaces/IRegistry.sol";
@@ -310,5 +312,168 @@ contract BatchCall {
       }
     }
     return tokensSupported;
+  }
+
+  /**
+   * @notice Batch check ERC721 balances for multiple NFTs
+   * @param userAddress address The user to check balances for
+   * @param contractAddresses address[] Array of ERC721 contract addresses
+   * @param tokenIds uint256[] Array of token IDs
+   * @return uint256[] Array of balances (1 or 0) corresponding to each NFT
+   */
+  function walletBalancesERC721(
+    address userAddress,
+    address[] calldata contractAddresses,
+    uint256[] calldata tokenIds
+  ) external view returns (uint256[] memory) {
+    if (
+      contractAddresses.length == 0 ||
+      contractAddresses.length != tokenIds.length
+    ) revert ArgumentInvalid();
+
+    uint256[] memory balances = new uint256[](contractAddresses.length);
+
+    for (uint256 i; i < contractAddresses.length; ) {
+      if (contractAddresses[i].isContract()) {
+        IERC721 nft = IERC721(contractAddresses[i]);
+        try nft.ownerOf(tokenIds[i]) returns (address owner) {
+          balances[i] = owner == userAddress ? 1 : 0;
+        } catch {
+          balances[i] = 0;
+        }
+      } else {
+        balances[i] = 0;
+      }
+      unchecked {
+        ++i;
+      }
+    }
+
+    return balances;
+  }
+
+  /**
+   * @notice Batch check ERC1155 balances for multiple NFTs
+   * @param userAddress address The user to check balances for
+   * @param contractAddresses address[] Array of ERC1155 contract addresses
+   * @param tokenIds uint256[] Array of token IDs
+   * @return uint256[] Array of balances corresponding to each NFT
+   */
+  function walletBalancesERC1155(
+    address userAddress,
+    address[] calldata contractAddresses,
+    uint256[] calldata tokenIds
+  ) external view returns (uint256[] memory) {
+    if (
+      contractAddresses.length == 0 ||
+      contractAddresses.length != tokenIds.length
+    ) revert ArgumentInvalid();
+
+    uint256[] memory balances = new uint256[](contractAddresses.length);
+
+    for (uint256 i; i < contractAddresses.length; ) {
+      if (contractAddresses[i].isContract()) {
+        IERC1155 nft = IERC1155(contractAddresses[i]);
+        try nft.balanceOf(userAddress, tokenIds[i]) returns (uint256 balance) {
+          balances[i] = balance;
+        } catch {
+          balances[i] = 0;
+        }
+      } else {
+        balances[i] = 0;
+      }
+      unchecked {
+        ++i;
+      }
+    }
+
+    return balances;
+  }
+
+  /**
+   * @notice Batch check ERC721 allowances for multiple NFTs
+   * @param userAddress address The user who granted the approval
+   * @param operatorAddress address The operator to check approval for
+   * @param contractAddresses address[] Array of ERC721 contract addresses
+   * @param tokenIds uint256[] Array of token IDs
+   * @return bool[] Array of allowance states corresponding to each NFT
+   */
+  function walletAllowancesERC721(
+    address userAddress,
+    address operatorAddress,
+    address[] calldata contractAddresses,
+    uint256[] calldata tokenIds
+  ) external view returns (bool[] memory) {
+    if (
+      contractAddresses.length == 0 ||
+      contractAddresses.length != tokenIds.length
+    ) revert ArgumentInvalid();
+
+    bool[] memory allowances = new bool[](contractAddresses.length);
+
+    for (uint256 i; i < contractAddresses.length; ) {
+      if (contractAddresses[i].isContract()) {
+        IERC721 nft = IERC721(contractAddresses[i]);
+        try nft.isApprovedForAll(userAddress, operatorAddress) returns (
+          bool isApproved
+        ) {
+          if (isApproved) {
+            allowances[i] = true;
+          } else {
+            try nft.getApproved(tokenIds[i]) returns (address approved) {
+              allowances[i] = approved == operatorAddress;
+            } catch {
+              allowances[i] = false;
+            }
+          }
+        } catch {
+          allowances[i] = false;
+        }
+      } else {
+        allowances[i] = false;
+      }
+      unchecked {
+        ++i;
+      }
+    }
+
+    return allowances;
+  }
+
+  /**
+   * @notice Batch check ERC1155 allowances for multiple NFTs
+   * @param userAddress address The user who granted the approval
+   * @param operatorAddress address The operator to check approval for
+   * @param contractAddresses address[] Array of ERC1155 contract addresses
+   * @return bool[] Array of allowance states corresponding to each NFT
+   */
+  function walletAllowancesERC1155(
+    address userAddress,
+    address operatorAddress,
+    address[] calldata contractAddresses
+  ) external view returns (bool[] memory) {
+    if (contractAddresses.length == 0) revert ArgumentInvalid();
+
+    bool[] memory allowances = new bool[](contractAddresses.length);
+
+    for (uint256 i; i < contractAddresses.length; ) {
+      if (contractAddresses[i].isContract()) {
+        IERC1155 nft = IERC1155(contractAddresses[i]);
+        try nft.isApprovedForAll(userAddress, operatorAddress) returns (
+          bool approved
+        ) {
+          allowances[i] = approved;
+        } catch {
+          allowances[i] = false;
+        }
+      } else {
+        allowances[i] = false;
+      }
+      unchecked {
+        ++i;
+      }
+    }
+
+    return allowances;
   }
 }
