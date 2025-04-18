@@ -1,6 +1,6 @@
 {
   "name": "@airswap/batch-call",
-  "version": "5.0.1",
+  "version": "5.1.0",
   "description": "AirSwap: Balance, Allowance, Validity Checks",
   "license": "MIT",
   "repository": {
