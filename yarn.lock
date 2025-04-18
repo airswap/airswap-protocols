@@ -12,7 +12,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@airswap/batch-call@npm:5.0.1, @airswap/batch-call@workspace:source/batch-call":
+"@airswap/batch-call@npm:5.1.0, @airswap/batch-call@workspace:source/batch-call":
   version: 0.0.0-use.local
   resolution: "@airswap/batch-call@workspace:source/batch-call"
   dependencies:
@@ -51,7 +51,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@airswap/libraries@workspace:tools/libraries"
   dependencies:
-    "@airswap/batch-call": "npm:5.0.1"
+    "@airswap/batch-call": "npm:5.1.0"
     "@airswap/delegate": "npm:5.0.3-beta.0"
     "@airswap/jsonrpc-client-websocket": "npm:0.0.1"
     "@airswap/pool": "npm:5.0.1"
