@@ -15,6 +15,7 @@ const {
   createOrderERC20Signature,
   TokenKinds,
 } = require('@airswap/utils')
+const IERC1155 = require('@openzeppelin/contracts/build/contracts/ERC1155.json')
 
 const CHAIN_ID = 31337
 const PROTOCOL_FEE = '30'
@@ -25,6 +26,9 @@ const BONUS_SCALE = '10'
 const BONUS_MAX = '100'
 const STAKING_COST = '1000000000'
 const SUPPORT_COST = '1000000'
+const TOKEN_ID_1 = '1'
+const TOKEN_ID_2 = '2'
+const AMOUNT_1155 = '5'
 
 let snapshotId
 let deployer
@@ -38,6 +42,7 @@ let registry
 let swap
 let swapERC20
 let batchCall
+let erc1155token
 
 async function signOrder(order, wallet, swapContract) {
   return {
@@ -194,6 +199,10 @@ describe('BatchCall Integration', () => {
 
     batchCall = await (await ethers.getContractFactory('BatchCall')).deploy()
     await batchCall.deployed()
+
+    erc1155token = await deployMockContract(deployer, IERC1155.abi)
+    await erc1155token.mock.isApprovedForAll.returns(true)
+    await erc1155token.mock.balanceOf.returns(AMOUNT_1155)
   })
 
   describe('checks order validity', () => {
@@ -418,6 +427,257 @@ describe('BatchCall Integration', () => {
       await expect(
         batchCall.getTokensForStakers([], registry.address)
       ).to.be.revertedWith('ArgumentInvalid')
+    })
+  })
+
+  describe('NFT balance and allowance checks', () => {
+    describe('ERC721 checks', () => {
+      it('returns correct balance for owned token', async () => {
+        await erc721token.mock.ownerOf
+          .withArgs(TOKEN_ID_1)
+          .returns(sender.address)
+
+        const balances = await batchCall.walletBalancesERC721(
+          sender.address,
+          [erc721token.address],
+          [TOKEN_ID_1]
+        )
+        expect(balances[0]).to.equal(1)
+      })
+
+      it('returns zero balance for unowned token', async () => {
+        await erc721token.mock.ownerOf
+          .withArgs(TOKEN_ID_1)
+          .returns(signer.address)
+
+        const balances = await batchCall.walletBalancesERC721(
+          sender.address,
+          [erc721token.address],
+          [TOKEN_ID_1]
+        )
+        expect(balances[0]).to.equal(0)
+      })
+
+      it('returns correct allowance for approved operator', async () => {
+        await erc721token.mock.isApprovedForAll
+          .withArgs(sender.address, signer.address)
+          .returns(true)
+        await erc721token.mock.getApproved
+          .withArgs(TOKEN_ID_1)
+          .returns(ethers.constants.AddressZero)
+
+        const allowances = await batchCall.walletAllowancesERC721(
+          sender.address,
+          signer.address,
+          [erc721token.address],
+          [TOKEN_ID_1]
+        )
+        expect(allowances[0]).to.be.true
+      })
+
+      it('returns correct allowance for approved token', async () => {
+        await erc721token.mock.isApprovedForAll
+          .withArgs(sender.address, signer.address)
+          .returns(false)
+        await erc721token.mock.getApproved
+          .withArgs(TOKEN_ID_1)
+          .returns(signer.address)
+
+        const allowances = await batchCall.walletAllowancesERC721(
+          sender.address,
+          signer.address,
+          [erc721token.address],
+          [TOKEN_ID_1]
+        )
+        expect(allowances[0]).to.be.true
+      })
+    })
+
+    describe('ERC1155 checks', () => {
+      it('returns correct balance', async () => {
+        await erc1155token.mock.balanceOf
+          .withArgs(sender.address, TOKEN_ID_1)
+          .returns(AMOUNT_1155)
+
+        const balances = await batchCall.walletBalancesERC1155(
+          sender.address,
+          [erc1155token.address],
+          [TOKEN_ID_1]
+        )
+        expect(balances[0]).to.equal(AMOUNT_1155)
+      })
+
+      it('returns correct allowance', async () => {
+        await erc1155token.mock.isApprovedForAll
+          .withArgs(sender.address, signer.address)
+          .returns(true)
+
+        const allowances = await batchCall.walletAllowancesERC1155(
+          sender.address,
+          signer.address,
+          [erc1155token.address]
+        )
+        expect(allowances[0]).to.be.true
+      })
+    })
+
+    describe('Batch operations', () => {
+      it('returns correct balances for multiple ERC721s', async () => {
+        await erc721token.mock.ownerOf
+          .withArgs(TOKEN_ID_1)
+          .returns(sender.address)
+        await erc721token.mock.ownerOf
+          .withArgs(TOKEN_ID_2)
+          .returns(signer.address)
+
+        const balances = await batchCall.walletBalancesERC721(
+          sender.address,
+          [erc721token.address, erc721token.address],
+          [TOKEN_ID_1, TOKEN_ID_2]
+        )
+        expect(balances.map((b) => b.toString())).to.deep.equal(['1', '0'])
+      })
+
+      it('returns correct balances for multiple ERC1155s', async () => {
+        await erc1155token.mock.balanceOf
+          .withArgs(sender.address, TOKEN_ID_1)
+          .returns(AMOUNT_1155)
+        await erc1155token.mock.balanceOf
+          .withArgs(sender.address, TOKEN_ID_2)
+          .returns('2')
+
+        const balances = await batchCall.walletBalancesERC1155(
+          sender.address,
+          [erc1155token.address, erc1155token.address],
+          [TOKEN_ID_1, TOKEN_ID_2]
+        )
+        expect(balances.map((b) => b.toString())).to.deep.equal([
+          AMOUNT_1155,
+          '2',
+        ])
+      })
+
+      it('returns correct allowances for multiple ERC721s', async () => {
+        await erc721token.mock.isApprovedForAll
+          .withArgs(sender.address, signer.address)
+          .returns(true)
+        await erc721token.mock.getApproved
+          .withArgs(TOKEN_ID_1)
+          .returns(ethers.constants.AddressZero)
+        await erc721token.mock.getApproved
+          .withArgs(TOKEN_ID_2)
+          .returns(signer.address)
+
+        const allowances = await batchCall.walletAllowancesERC721(
+          sender.address,
+          signer.address,
+          [erc721token.address, erc721token.address],
+          [TOKEN_ID_1, TOKEN_ID_2]
+        )
+        expect(allowances).to.deep.equal([true, true])
+      })
+
+      it('returns correct allowances for multiple ERC1155s', async () => {
+        const erc1155token2 = await deployMockContract(deployer, IERC1155.abi)
+        await erc1155token.mock.isApprovedForAll
+          .withArgs(sender.address, signer.address)
+          .returns(true)
+        await erc1155token2.mock.isApprovedForAll
+          .withArgs(sender.address, signer.address)
+          .returns(false)
+
+        const allowances = await batchCall.walletAllowancesERC1155(
+          sender.address,
+          signer.address,
+          [erc1155token.address, erc1155token2.address]
+        )
+        expect(allowances).to.deep.equal([true, false])
+      })
+
+      it('reverts if arrays are empty for ERC721', async () => {
+        await expect(
+          batchCall.walletBalancesERC721(sender.address, [], [])
+        ).to.be.revertedWith('ArgumentInvalid')
+
+        await expect(
+          batchCall.walletAllowancesERC721(
+            sender.address,
+            signer.address,
+            [],
+            []
+          )
+        ).to.be.revertedWith('ArgumentInvalid')
+      })
+
+      it('reverts if arrays are empty for ERC1155', async () => {
+        await expect(
+          batchCall.walletBalancesERC1155(sender.address, [], [])
+        ).to.be.revertedWith('ArgumentInvalid')
+
+        await expect(
+          batchCall.walletAllowancesERC1155(sender.address, signer.address, [])
+        ).to.be.revertedWith('ArgumentInvalid')
+      })
+
+      it('reverts if arrays have different lengths for ERC721', async () => {
+        await expect(
+          batchCall.walletBalancesERC721(
+            sender.address,
+            [erc721token.address],
+            []
+          )
+        ).to.be.revertedWith('ArgumentInvalid')
+
+        await expect(
+          batchCall.walletAllowancesERC721(
+            sender.address,
+            signer.address,
+            [erc721token.address],
+            []
+          )
+        ).to.be.revertedWith('ArgumentInvalid')
+      })
+
+      it('reverts if arrays have different lengths for ERC1155', async () => {
+        await expect(
+          batchCall.walletBalancesERC1155(
+            sender.address,
+            [erc1155token.address],
+            []
+          )
+        ).to.be.revertedWith('ArgumentInvalid')
+      })
+
+      it('handles invalid contract addresses', async () => {
+        const balancesERC721 = await batchCall.walletBalancesERC721(
+          sender.address,
+          [ethers.constants.AddressZero],
+          [TOKEN_ID_1]
+        )
+        expect(balancesERC721[0]).to.equal(0)
+
+        const balancesERC1155 = await batchCall.walletBalancesERC1155(
+          sender.address,
+          [ethers.constants.AddressZero],
+          [TOKEN_ID_1]
+        )
+        expect(balancesERC1155[0]).to.equal(0)
+
+        const allowancesERC721 = await batchCall.walletAllowancesERC721(
+          sender.address,
+          signer.address,
+          [ethers.constants.AddressZero],
+          [TOKEN_ID_1]
+        )
+        expect(allowancesERC721[0]).to.be.false
+
+        const allowancesERC1155 = await batchCall.walletAllowancesERC1155(
+          sender.address,
+          signer.address,
+          [ethers.constants.AddressZero]
+        )
+        expect(allowancesERC1155[0]).to.be.false
+      })
     })
   })
 })
