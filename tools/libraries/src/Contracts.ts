@@ -20,6 +20,7 @@ import delegateBlocks from '@airswap/delegate/deploys-blocks.js'
 import poolBlocks from '@airswap/pool/deploys-blocks.js'
 import stakingBlocks from '@airswap/staking/deploys-blocks.js'
 import swapERC20Blocks from '@airswap/swap-erc20/deploys-blocks.js'
+import swapBlocks from '@airswap/swap/deploys-blocks.js'
 import wethBlocks from '@airswap/wrapper/deploys-blocks-weth.js'
 import wrapperBlocks from '@airswap/wrapper/deploys-blocks.js'
 
@@ -72,7 +73,7 @@ export const Staking = new Contract(
   stakingBlocks,
   Staking__factory
 )
-export const Swap = new Contract('Swap', swapDeploys, {}, Swap__factory)
+export const Swap = new Contract('Swap', swapDeploys, swapBlocks, Swap__factory)
 export const SwapERC20 = new Contract(
   'SwapERC20',
   swapERC20Deploys,
