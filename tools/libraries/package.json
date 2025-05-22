@@ -1,6 +1,6 @@
 {
   "name": "@airswap/libraries",
-  "version": "5.0.10-beta.1",
+  "version": "5.0.12",
   "description": "AirSwap: Libraries for Developers",
   "repository": {
     "type": "git",
@@ -22,7 +22,7 @@
     "test:ci": "yarn test"
   },
   "dependencies": {
-    "@airswap/batch-call": "5.0.1",
+    "@airswap/batch-call": "5.1.0",
     "@airswap/delegate": "5.0.3-beta.0",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
     "@airswap/pool": "5.0.1",
@@ -30,7 +30,7 @@
     "@airswap/staking": "5.0.1",
     "@airswap/swap": "5.0.1",
     "@airswap/swap-erc20": "5.0.1",
-    "@airswap/utils": "5.0.5",
+    "@airswap/utils": "5.2.0",
     "@airswap/wrapper": "5.0.1",
     "browser-or-node": "^2.1.1",
     "ethers": "^5.7.2",
