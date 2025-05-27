@@ -22,6 +22,9 @@ contract Delegate is IDelegate, Ownable {
   // Mapping of senderWallet to an authorized manager
   mapping(address => address) public authorized;
 
+  // Contract pause status
+  bool public contractPaused;
+
   /**
    * @notice Constructor
    * @param _swapERC20Contract address
@@ -48,6 +51,9 @@ contract Delegate is IDelegate, Ownable {
     uint256 _signerAmount,
     uint256 _expiry
   ) external {
+    // Check if the contract is paused
+    if (contractPaused) revert ContractPaused();
+
     if (authorized[_senderWallet] != address(0)) {
       // If an authorized manager is set, message sender must be the manager
       if (msg.sender != authorized[_senderWallet]) revert SenderInvalid();
@@ -132,6 +138,9 @@ contract Delegate is IDelegate, Ownable {
     bytes32 _r,
     bytes32 _s
   ) external {
+    // Check if the contract is paused
+    if (contractPaused) revert ContractPaused();
+
     Rule storage rule = rules[_senderWallet][_senderToken][_signerToken];
     // Ensure the expiry is not passed
     if (rule.expiry <= block.timestamp) revert RuleExpiredOrDoesNotExist();
@@ -216,5 +225,14 @@ contract Delegate is IDelegate, Ownable {
   function setSwapERC20Contract(address _swapERC20Contract) external onlyOwner {
     if (_swapERC20Contract == address(0)) revert AddressInvalid();
     swapERC20Contract = ISwapERC20(_swapERC20Contract);
+  }
+
+  /**
+   * @notice Pause/unpause the contract
+   * @param _pauseStatus bool
+   */
+  function pause(bool _pauseStatus) external onlyOwner {
+    contractPaused = _pauseStatus;
+    emit PauseStatus(_pauseStatus);
   }
 }

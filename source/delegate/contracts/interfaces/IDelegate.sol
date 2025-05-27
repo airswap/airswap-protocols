@@ -19,6 +19,8 @@ interface IDelegate {
     address indexed signerWallet,
     uint256 indexed nonce
   );
+
+  event PauseStatus(bool pauseStatus);
   event Revoke(address tmp, address signer);
 
   event SetRule(
@@ -37,11 +39,12 @@ interface IDelegate {
   );
 
   error AddressInvalid();
+  error ContractPaused();
+  error ManagerInvalid();
   error RuleExpiredOrDoesNotExist();
   error SenderAmountInvalid();
   error SignerAmountInvalid();
   error SenderInvalid();
-  error ManagerInvalid();
   error TransferFromFailed();
 
   function setRule(

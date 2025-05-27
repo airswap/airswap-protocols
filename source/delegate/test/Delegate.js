@@ -156,6 +156,84 @@ describe('Delegate Unit', () => {
         delegate.connect(anyone).setSwapERC20Contract(UPDATE_SWAP_ERC20_ADDRESS)
       ).to.be.revertedWith('Unauthorized')
     })
+
+    it('only owner can pause the contract', async () => {
+      await expect(delegate.connect(anyone).pause(true)).to.be.revertedWith(
+        'Unauthorized'
+      )
+
+      await expect(delegate.connect(deployer).pause(true))
+        .to.emit(delegate, 'PauseStatus')
+        .withArgs(true)
+
+      expect(await delegate.contractPaused()).to.equal(true)
+    })
+
+    it('only owner can unpause the contract', async () => {
+      // First pause
+      await expect(delegate.connect(deployer).pause(true))
+        .to.emit(delegate, 'PauseStatus')
+        .withArgs(true)
+
+      await expect(delegate.connect(anyone).pause(false)).to.be.revertedWith(
+        'Unauthorized'
+      )
+
+      await expect(delegate.connect(deployer).pause(false))
+        .to.emit(delegate, 'PauseStatus')
+        .withArgs(false)
+
+      expect(await delegate.contractPaused()).to.equal(false)
+    })
+
+    it('cannot set rule when contract is paused', async () => {
+      await delegate.connect(deployer).pause(true)
+
+      await expect(
+        delegate
+          .connect(sender)
+          .setRule(
+            sender.address,
+            senderToken.address,
+            DEFAULT_SENDER_AMOUNT,
+            signerToken.address,
+            DEFAULT_SIGNER_AMOUNT,
+            RULE_EXPIRY
+          )
+      ).to.be.revertedWith('ContractPaused')
+    })
+
+    it('cannot swap when contract is paused', async () => {
+      // First set up a valid rule
+      await delegate
+        .connect(sender)
+        .setRule(
+          sender.address,
+          senderToken.address,
+          DEFAULT_SENDER_AMOUNT,
+          signerToken.address,
+          DEFAULT_SIGNER_AMOUNT,
+          RULE_EXPIRY
+        )
+
+      // Set up the order
+      const order = await createSignedOrderERC20({}, signer)
+      await setUpAllowances(
+        sender.address,
+        DEFAULT_SENDER_AMOUNT,
+        signer.address,
+        DEFAULT_SIGNER_AMOUNT + PROTOCOL_FEE
+      )
+      await setUpBalances(signer.address, sender.address)
+
+      // Pause the contract
+      await delegate.connect(deployer).pause(true)
+
+      // Try to swap
+      await expect(
+        delegate.connect(signer).swap(sender.address, ...order)
+      ).to.be.revertedWith('ContractPaused')
+    })
   })
 
   describe('Rules', async () => {
