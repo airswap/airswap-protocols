@@ -22,8 +22,8 @@ contract Delegate is IDelegate, Ownable {
   // Mapping of senderWallet to an authorized manager
   mapping(address => address) public authorized;
 
-  // Contract pause status
-  bool public contractPaused;
+  // Contract locked status
+  bool public locked;
 
   /**
    * @notice Constructor
@@ -51,8 +51,8 @@ contract Delegate is IDelegate, Ownable {
     uint256 _signerAmount,
     uint256 _expiry
   ) external {
-    // Check if the contract is paused
-    if (contractPaused) revert ContractPaused();
+    // Check if the contract is locked
+    if (locked) revert ContractLocked();
 
     if (authorized[_senderWallet] != address(0)) {
       // If an authorized manager is set, message sender must be the manager
@@ -138,8 +138,8 @@ contract Delegate is IDelegate, Ownable {
     bytes32 _r,
     bytes32 _s
   ) external {
-    // Check if the contract is paused
-    if (contractPaused) revert ContractPaused();
+    // Check if the contract is locked
+    if (locked) revert ContractLocked();
 
     Rule storage rule = rules[_senderWallet][_senderToken][_signerToken];
     // Ensure the expiry is not passed
@@ -228,11 +228,11 @@ contract Delegate is IDelegate, Ownable {
   }
 
   /**
-   * @notice Pause/unpause the contract
-   * @param _pauseStatus bool
+   * @notice Lock/Unlock the contract
+   * @param _lockStatus bool
    */
-  function pause(bool _pauseStatus) external onlyOwner {
-    contractPaused = _pauseStatus;
-    emit PauseStatus(_pauseStatus);
+  function lock(bool _lockStatus) external onlyOwner {
+    locked = _lockStatus;
+    emit Lock(_lockStatus);
   }
 }

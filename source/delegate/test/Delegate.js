@@ -157,37 +157,37 @@ describe('Delegate Unit', () => {
       ).to.be.revertedWith('Unauthorized')
     })
 
-    it('only owner can pause the contract', async () => {
-      await expect(delegate.connect(anyone).pause(true)).to.be.revertedWith(
+    it('only owner can lock the contract', async () => {
+      await expect(delegate.connect(anyone).lock(true)).to.be.revertedWith(
         'Unauthorized'
       )
 
-      await expect(delegate.connect(deployer).pause(true))
-        .to.emit(delegate, 'PauseStatus')
+      await expect(delegate.connect(deployer).lock(true))
+        .to.emit(delegate, 'Lock')
         .withArgs(true)
 
-      expect(await delegate.contractPaused()).to.equal(true)
+      expect(await delegate.locked()).to.equal(true)
     })
 
-    it('only owner can unpause the contract', async () => {
-      // First pause
-      await expect(delegate.connect(deployer).pause(true))
-        .to.emit(delegate, 'PauseStatus')
+    it('only owner can lock the contract', async () => {
+      // First lock
+      await expect(delegate.connect(deployer).lock(true))
+        .to.emit(delegate, 'Lock')
         .withArgs(true)
 
-      await expect(delegate.connect(anyone).pause(false)).to.be.revertedWith(
+      await expect(delegate.connect(anyone).lock(false)).to.be.revertedWith(
         'Unauthorized'
       )
 
-      await expect(delegate.connect(deployer).pause(false))
-        .to.emit(delegate, 'PauseStatus')
+      await expect(delegate.connect(deployer).lock(false))
+        .to.emit(delegate, 'Lock')
         .withArgs(false)
 
-      expect(await delegate.contractPaused()).to.equal(false)
+      expect(await delegate.locked()).to.equal(false)
     })
 
-    it('cannot set rule when contract is paused', async () => {
-      await delegate.connect(deployer).pause(true)
+    it('cannot set rule when contract is locked', async () => {
+      await delegate.connect(deployer).lock(true)
 
       await expect(
         delegate
@@ -200,10 +200,10 @@ describe('Delegate Unit', () => {
             DEFAULT_SIGNER_AMOUNT,
             RULE_EXPIRY
           )
-      ).to.be.revertedWith('ContractPaused')
+      ).to.be.revertedWith('ContractLocked')
     })
 
-    it('cannot swap when contract is paused', async () => {
+    it('cannot swap when contract is locked', async () => {
       // First set up a valid rule
       await delegate
         .connect(sender)
@@ -226,13 +226,13 @@ describe('Delegate Unit', () => {
       )
       await setUpBalances(signer.address, sender.address)
 
-      // Pause the contract
-      await delegate.connect(deployer).pause(true)
+      // Lock the contract
+      await delegate.connect(deployer).lock(true)
 
       // Try to swap
       await expect(
         delegate.connect(signer).swap(sender.address, ...order)
-      ).to.be.revertedWith('ContractPaused')
+      ).to.be.revertedWith('ContractLocked')
     })
   })
 
