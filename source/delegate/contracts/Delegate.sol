@@ -52,7 +52,7 @@ contract Delegate is IDelegate, Ownable {
     uint256 _expiry
   ) external {
     // Check if the contract is locked
-    if (locked) revert ContractLocked();
+    if (locked) revert Locked();
 
     if (authorized[_senderWallet] != address(0)) {
       // If an authorized manager is set, message sender must be the manager
@@ -139,7 +139,7 @@ contract Delegate is IDelegate, Ownable {
     bytes32 _s
   ) external {
     // Check if the contract is locked
-    if (locked) revert ContractLocked();
+    if (locked) revert Locked();
 
     Rule storage rule = rules[_senderWallet][_senderToken][_signerToken];
     // Ensure the expiry is not passed
@@ -229,10 +229,10 @@ contract Delegate is IDelegate, Ownable {
 
   /**
    * @notice Lock/Unlock the contract
-   * @param _lockStatus bool
+   * @param _locked bool
    */
-  function lock(bool _lockStatus) external onlyOwner {
-    locked = _lockStatus;
-    emit Lock(_lockStatus);
+  function setLock(bool _locked) external onlyOwner {
+    locked = _locked;
+    emit SetLock(_locked);
   }
 }

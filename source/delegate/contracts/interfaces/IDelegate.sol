@@ -20,7 +20,7 @@ interface IDelegate {
     uint256 indexed nonce
   );
 
-  event Lock(bool lockStatus);
+  event SetLock(bool lock);
   event Revoke(address tmp, address signer);
 
   event SetRule(
@@ -39,7 +39,7 @@ interface IDelegate {
   );
 
   error AddressInvalid();
-  error ContractLocked();
+  error Locked();
   error ManagerInvalid();
   error RuleExpiredOrDoesNotExist();
   error SenderAmountInvalid();
