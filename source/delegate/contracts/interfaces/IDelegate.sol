@@ -20,7 +20,7 @@ interface IDelegate {
     uint256 indexed nonce
   );
 
-  event SetLock(bool lock);
+  event SetLocked(bool lock);
   event Revoke(address tmp, address signer);
 
   event SetRule(

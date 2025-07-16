@@ -158,12 +158,12 @@ describe('Delegate Unit', () => {
     })
 
     it('only owner can lock the contract', async () => {
-      await expect(delegate.connect(anyone).setLock(true)).to.be.revertedWith(
+      await expect(delegate.connect(anyone).setLocked(true)).to.be.revertedWith(
         'Unauthorized'
       )
 
-      await expect(delegate.connect(deployer).setLock(true))
-        .to.emit(delegate, 'SetLock')
+      await expect(delegate.connect(deployer).setLocked(true))
+        .to.emit(delegate, 'SetLocked')
         .withArgs(true)
 
       expect(await delegate.locked()).to.equal(true)
@@ -171,23 +171,23 @@ describe('Delegate Unit', () => {
 
     it('only owner can lock the contract', async () => {
       // First lock
-      await expect(delegate.connect(deployer).setLock(true))
-        .to.emit(delegate, 'SetLock')
+      await expect(delegate.connect(deployer).setLocked(true))
+        .to.emit(delegate, 'SetLocked')
         .withArgs(true)
 
-      await expect(delegate.connect(anyone).setLock(false)).to.be.revertedWith(
-        'Unauthorized'
-      )
+      await expect(
+        delegate.connect(anyone).setLocked(false)
+      ).to.be.revertedWith('Unauthorized')
 
-      await expect(delegate.connect(deployer).setLock(false))
-        .to.emit(delegate, 'SetLock')
+      await expect(delegate.connect(deployer).setLocked(false))
+        .to.emit(delegate, 'SetLocked')
         .withArgs(false)
 
       expect(await delegate.locked()).to.equal(false)
     })
 
     it('cannot set rule when contract is locked', async () => {
-      await delegate.connect(deployer).setLock(true)
+      await delegate.connect(deployer).setLocked(true)
 
       await expect(
         delegate
@@ -227,7 +227,7 @@ describe('Delegate Unit', () => {
       await setUpBalances(signer.address, sender.address)
 
       // Lock the contract
-      await delegate.connect(deployer).setLock(true)
+      await delegate.connect(deployer).setLocked(true)
 
       // Try to swap
       await expect(

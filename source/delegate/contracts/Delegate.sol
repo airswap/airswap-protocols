@@ -231,8 +231,8 @@ contract Delegate is IDelegate, Ownable {
    * @notice Lock/Unlock the contract
    * @param _locked bool
    */
-  function setLock(bool _locked) external onlyOwner {
+  function setLocked(bool _locked) external onlyOwner {
     locked = _locked;
-    emit SetLock(_locked);
+    emit SetLocked(_locked);
   }
 }
