@@ -156,6 +156,84 @@ describe('Delegate Unit', () => {
         delegate.connect(anyone).setSwapERC20Contract(UPDATE_SWAP_ERC20_ADDRESS)
       ).to.be.revertedWith('Unauthorized')
     })
+
+    it('only owner can lock the contract', async () => {
+      await expect(delegate.connect(anyone).setLocked(true)).to.be.revertedWith(
+        'Unauthorized'
+      )
+
+      await expect(delegate.connect(deployer).setLocked(true))
+        .to.emit(delegate, 'SetLocked')
+        .withArgs(true)
+
+      expect(await delegate.locked()).to.equal(true)
+    })
+
+    it('only owner can lock the contract', async () => {
+      // First lock
+      await expect(delegate.connect(deployer).setLocked(true))
+        .to.emit(delegate, 'SetLocked')
+        .withArgs(true)
+
+      await expect(
+        delegate.connect(anyone).setLocked(false)
+      ).to.be.revertedWith('Unauthorized')
+
+      await expect(delegate.connect(deployer).setLocked(false))
+        .to.emit(delegate, 'SetLocked')
+        .withArgs(false)
+
+      expect(await delegate.locked()).to.equal(false)
+    })
+
+    it('cannot set rule when contract is locked', async () => {
+      await delegate.connect(deployer).setLocked(true)
+
+      await expect(
+        delegate
+          .connect(sender)
+          .setRule(
+            sender.address,
+            senderToken.address,
+            DEFAULT_SENDER_AMOUNT,
+            signerToken.address,
+            DEFAULT_SIGNER_AMOUNT,
+            RULE_EXPIRY
+          )
+      ).to.be.revertedWith('Locked')
+    })
+
+    it('cannot swap when contract is locked', async () => {
+      // First set up a valid rule
+      await delegate
+        .connect(sender)
+        .setRule(
+          sender.address,
+          senderToken.address,
+          DEFAULT_SENDER_AMOUNT,
+          signerToken.address,
+          DEFAULT_SIGNER_AMOUNT,
+          RULE_EXPIRY
+        )
+
+      // Set up the order
+      const order = await createSignedOrderERC20({}, signer)
+      await setUpAllowances(
+        sender.address,
+        DEFAULT_SENDER_AMOUNT,
+        signer.address,
+        DEFAULT_SIGNER_AMOUNT + PROTOCOL_FEE
+      )
+      await setUpBalances(signer.address, sender.address)
+
+      // Lock the contract
+      await delegate.connect(deployer).setLocked(true)
+
+      // Try to swap
+      await expect(
+        delegate.connect(signer).swap(sender.address, ...order)
+      ).to.be.revertedWith('Locked')
+    })
   })
 
   describe('Rules', async () => {
