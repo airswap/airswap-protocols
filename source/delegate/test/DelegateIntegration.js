@@ -160,7 +160,7 @@ describe('Delegate Integration', () => {
       }
 
       // Set the rule
-      await delegate.connect(sender).setRule(signedRuleOrder)
+      await delegate.connect(sender).setRule(sender.address, signedRuleOrder)
 
       // Execute the swap
       await expect(
@@ -218,7 +218,7 @@ describe('Delegate Integration', () => {
       }
 
       // Set the rule
-      await delegate.connect(sender).setRule(signedRuleOrder)
+      await delegate.connect(sender).setRule(sender.address, signedRuleOrder)
 
       // Execute the swap
       await expect(
@@ -280,7 +280,7 @@ describe('Delegate Integration', () => {
       }
 
       // Set the rule
-      await delegate.connect(sender).setRule(signedRuleOrder)
+      await delegate.connect(sender).setRule(sender.address, signedRuleOrder)
 
       // Execute the swap
       await expect(

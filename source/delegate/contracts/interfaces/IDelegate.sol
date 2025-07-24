@@ -41,7 +41,7 @@ interface IDelegate {
   error TransferFromFailed();
   error TokenKindUnknown();
 
-  function setRule(ISwap.Order calldata order) external;
+  function setRule(address _senderWallet, ISwap.Order calldata order) external;
 
   function swap(
     ISwap.Order calldata _order,
@@ -49,7 +49,11 @@ interface IDelegate {
     uint256 _maxRoyalty
   ) external;
 
-  function unsetRule(address _senderToken, address _signerToken) external;
+  function unsetRule(
+    address _senderWallet,
+    address _senderToken,
+    address _signerToken
+  ) external;
 
   function authorize(address manager) external;
 

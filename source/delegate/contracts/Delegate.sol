@@ -58,14 +58,20 @@ contract Delegate is IDelegate, Ownable {
    * @notice Set a Rule
    * @param _order ISwap.Order The order to be stored as a rule
    */
-  function setRule(ISwap.Order calldata _order) external {
+  function setRule(
+    address _senderWallet,
+    ISwap.Order calldata _order
+  ) external {
     // Ensure the sender wallet is the delegate contract
     if (_order.sender.wallet != address(this)) revert SenderInvalid();
 
-    // Get the sender wallet from the authorized manager if set, otherwise use the message sender
-    address _senderWallet = senderWallets[msg.sender] != address(0)
-      ? senderWallets[msg.sender]
-      : msg.sender;
+    if (authorized[_senderWallet] != address(0)) {
+      // If an authorized manager is set, the message sender must be the manager
+      if (msg.sender != authorized[_senderWallet]) revert SenderInvalid();
+    } else {
+      // Otherwise the message sender must be the sender wallet
+      if (msg.sender != _senderWallet) revert SenderInvalid();
+    }
 
     // Set the rule. Overwrites an existing rule.
     // TODO: handle tokenId
@@ -89,17 +95,24 @@ contract Delegate is IDelegate, Ownable {
    * @param _senderToken address Token the sender would transfer
    * @param _signerToken address Token the signer would transfer
    */
-  function unsetRule(address _senderToken, address _signerToken) external {
-    // Get the sender wallet from the authorized manager if set, otherwise use the message sender
-    address senderWallet = senderWallets[msg.sender] != address(0)
-      ? senderWallets[msg.sender]
-      : msg.sender;
+  function unsetRule(
+    address _senderWallet,
+    address _senderToken,
+    address _signerToken
+  ) external {
+    if (authorized[_senderWallet] != address(0)) {
+      // If an authorized manager is set, the message sender must be the manager
+      if (msg.sender != authorized[_senderWallet]) revert SenderInvalid();
+    } else {
+      // Otherwise the message sender must be the sender wallet
+      if (msg.sender != _senderWallet) revert SenderInvalid();
+    }
 
     // Delete the rule
-    delete rules[senderWallet][_senderToken][_signerToken];
+    delete rules[_senderWallet][_senderToken][_signerToken];
 
     // Emit an UnsetRule event
-    emit UnsetRule(senderWallet, _senderToken, _signerToken);
+    emit UnsetRule(_senderWallet, _senderToken, _signerToken);
   }
 
   /**
