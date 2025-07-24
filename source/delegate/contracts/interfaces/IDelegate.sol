@@ -2,15 +2,11 @@
 
 pragma solidity 0.8.23;
 
+import "@airswap/swap/contracts/interfaces/ISwap.sol";
+
 interface IDelegate {
   struct Rule {
-    address senderWallet;
-    address senderToken;
-    uint256 senderAmount;
-    uint256 senderFilledAmount;
-    address signerToken;
-    uint256 signerAmount;
-    uint256 expiry;
+    ISwap.Order order;
   }
 
   event Authorize(address signatory, address signer);
@@ -23,10 +19,10 @@ interface IDelegate {
 
   event SetRule(
     address indexed senderWallet,
-    address indexed senderToken,
-    uint256 senderAmount,
     address indexed signerToken,
+    address indexed senderToken,
     uint256 signerAmount,
+    uint256 senderAmount,
     uint256 expiry
   );
 
@@ -43,39 +39,25 @@ interface IDelegate {
   error SenderInvalid();
   error ManagerInvalid();
   error TransferFromFailed();
+  error TokenKindUnknown();
 
-  function setRule(
-    address senderWallet,
-    address senderToken,
-    uint256 senderAmount,
-    address signerToken,
-    uint256 signerAmount,
-    uint256 expiry
-  ) external;
+  function setRule(ISwap.Order calldata order) external;
 
   function swap(
-    address senderWallet,
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
+    ISwap.Order calldata _order,
+    address _senderWallet,
+    uint256 _maxRoyalty
   ) external;
 
   function unsetRule(
-    address senderWallet,
-    address senderToken,
-    address signerToken
+    address _senderWallet,
+    address _senderToken,
+    address _signerToken
   ) external;
 
   function authorize(address manager) external;
 
   function revoke() external;
 
-  function setSwapERC20Contract(address _swapERC20Contract) external;
+  function setSwapContract(address _swapContract) external;
 }
