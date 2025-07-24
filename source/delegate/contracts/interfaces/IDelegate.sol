@@ -49,11 +49,7 @@ interface IDelegate {
     uint256 _maxRoyalty
   ) external;
 
-  function unsetRule(
-    address _senderWallet,
-    address _senderToken,
-    address _signerToken
-  ) external;
+  function unsetRule(address _senderToken, address _signerToken) external;
 
   function authorize(address manager) external;
 

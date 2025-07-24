@@ -29,7 +29,9 @@ describe('Delegate Integration', () => {
   const DEFAULT_BALANCE = '1000000'
   const RULE_EXPIRY =
     Math.round(Date.now() / 1000 + SECONDS_IN_DAY).toString() + 1
-  const MAX_ROYALTY = '100'
+  const MAX_ROYALTY = '1000'
+  const ERC721_NFT_ROYALTY = '100'
+  const ERC1155_NFT_ROYALTY = '0'
 
   beforeEach(async () => {
     snapshotId = await ethers.provider.send('evm_snapshot')
@@ -173,7 +175,10 @@ describe('Delegate Integration', () => {
         DEFAULT_SENDER_AMOUNT
       ) // Sender gets the ERC20
       expect(await erc20Token.balanceOf(sender.address)).to.equal(
-        DEFAULT_BALANCE - DEFAULT_SENDER_AMOUNT - PROTOCOL_FEE - MAX_ROYALTY
+        DEFAULT_BALANCE -
+          DEFAULT_SENDER_AMOUNT -
+          PROTOCOL_FEE -
+          ERC721_NFT_ROYALTY
       )
     })
 
@@ -228,7 +233,10 @@ describe('Delegate Integration', () => {
         DEFAULT_SENDER_AMOUNT
       ) // Signer gets the ERC20
       expect(await erc20Token.balanceOf(sender.address)).to.equal(
-        DEFAULT_BALANCE - DEFAULT_SENDER_AMOUNT - PROTOCOL_FEE - MAX_ROYALTY
+        DEFAULT_BALANCE -
+          DEFAULT_SENDER_AMOUNT -
+          PROTOCOL_FEE -
+          ERC1155_NFT_ROYALTY
       )
     })
 
@@ -287,7 +295,10 @@ describe('Delegate Integration', () => {
         DEFAULT_SENDER_AMOUNT
       ) // Signer gets the ERC20
       expect(await erc20Token.balanceOf(sender.address)).to.equal(
-        DEFAULT_BALANCE - DEFAULT_SENDER_AMOUNT - PROTOCOL_FEE - MAX_ROYALTY
+        DEFAULT_BALANCE -
+          DEFAULT_SENDER_AMOUNT -
+          PROTOCOL_FEE -
+          ERC1155_NFT_ROYALTY
       )
     })
   })

@@ -10,6 +10,8 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import { Ownable } from "solady/src/auth/Ownable.sol";
 import { SafeTransferLib } from "solady/src/utils/SafeTransferLib.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/interfaces/IERC2981.sol";
+import "hardhat/console.sol";
 
 /**
  * @title AirSwap: Delegated On-chain Trading Rules
@@ -84,25 +86,20 @@ contract Delegate is IDelegate, Ownable {
 
   /**
    * @notice Unset a Rule
-   * @param _senderWallet address Address of the delegating sender wallet
    * @param _senderToken address Token the sender would transfer
    * @param _signerToken address Token the signer would transfer
    */
-  function unsetRule(
-    address _senderWallet,
-    address _senderToken,
-    address _signerToken
-  ) external {
+  function unsetRule(address _senderToken, address _signerToken) external {
     // Get the sender wallet from the authorized manager if set, otherwise use the message sender
     address senderWallet = senderWallets[msg.sender] != address(0)
       ? senderWallets[msg.sender]
       : msg.sender;
 
     // Delete the rule
-    delete rules[_senderWallet][_senderToken][_signerToken];
+    delete rules[senderWallet][_senderToken][_signerToken];
 
     // Emit an UnsetRule event
-    emit UnsetRule(_senderWallet, _senderToken, _signerToken);
+    emit UnsetRule(senderWallet, _senderToken, _signerToken);
   }
 
   /**
@@ -134,12 +131,20 @@ contract Delegate is IDelegate, Ownable {
     uint256 protocolFeeAmount = (rule.order.sender.amount * protocolFee) /
       protocolFeeDivisor;
 
-    // Calculate the sender amount including affiliate amount
-    // TODO: maxRoyalty should be the royalty amount
+    // Calculate the sender amount including affiliate amount, protocol fee and royalty amount
+    uint256 royaltyAmount;
+    if (supportsRoyalties(_order.signer.token)) {
+      (, royaltyAmount) = IERC2981(_order.signer.token).royaltyInfo(
+        _order.signer.id,
+        _order.sender.amount
+      );
+    }
+
+    // Calculate the total sender cost which includes NFT price, affiliate amount, protocol fee and royalty amount
     uint256 _senderAmount = rule.order.sender.amount +
       rule.order.affiliateAmount +
       protocolFeeAmount +
-      _maxRoyalty;
+      royaltyAmount;
 
     // Transfer the sender token to this contract using the appropriate adapter
     _transfer(
@@ -242,6 +247,20 @@ contract Delegate is IDelegate, Ownable {
       )
     );
     if (!success) revert TransferFromFailed();
+  }
+
+  /**
+   * @notice Checks whether a token implements EIP-2981
+   * @param token address token to check
+   */
+  function supportsRoyalties(address token) private view returns (bool) {
+    try IERC165(token).supportsInterface(type(IERC2981).interfaceId) returns (
+      bool result
+    ) {
+      return result;
+    } catch {
+      return false;
+    }
   }
 
   /**
