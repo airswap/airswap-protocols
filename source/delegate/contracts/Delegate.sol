@@ -128,9 +128,8 @@ contract Delegate is IDelegate, Ownable {
     }
 
     // Calculate the protocol fee amount using Swap contract
-    // TODO: get protocol fee and protocol fee divisor from Swap contract
-    uint256 protocolFee = 30;
-    uint256 protocolFeeDivisor = 10000;
+    uint256 protocolFee = swapContract.protocolFee();
+    uint256 protocolFeeDivisor = swapContract.FEE_DIVISOR();
 
     uint256 protocolFeeAmount = (rule.order.sender.amount * protocolFee) /
       protocolFeeDivisor;
