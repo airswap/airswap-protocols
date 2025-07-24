@@ -176,5 +176,119 @@ describe('Delegate Integration', () => {
         DEFAULT_BALANCE - DEFAULT_SENDER_AMOUNT - PROTOCOL_FEE - MAX_ROYALTY
       )
     })
+
+    it('test a delegated swap ERC1155 for ERC20', async () => {
+      // Create the order for setting the rule - signer is selling ERC1155
+      const ruleOrder = createOrder({
+        nonce: Date.now().toString(),
+        expiry: RULE_EXPIRY,
+        protocolFee: PROTOCOL_FEE,
+        signer: {
+          wallet: signer.address,
+          token: erc1155Token.address, // Signer is selling the ERC1155
+          kind: TokenKinds.ERC1155,
+          id: '1',
+          amount: '1',
+        },
+        sender: {
+          wallet: delegate.address,
+          token: erc20Token.address, // Sender is buying with ERC20
+          kind: TokenKinds.ERC20,
+          id: '0',
+          amount: DEFAULT_SENDER_AMOUNT,
+        },
+        affiliateWallet: ethers.constants.AddressZero,
+        affiliateAmount: '0',
+      })
+
+      // Sign the rule order
+      const signedRuleOrder = {
+        ...ruleOrder,
+        ...(await createOrderSignature(
+          ruleOrder,
+          signer,
+          swap.address,
+          CHAIN_ID
+        )),
+      }
+
+      // Set the rule
+      await delegate.connect(sender).setRule(signedRuleOrder)
+
+      // Execute the swap
+      await expect(
+        delegate
+          .connect(signer)
+          .swap(signedRuleOrder, sender.address, MAX_ROYALTY)
+      ).to.emit(delegate, 'DelegatedSwapFor')
+
+      // Verify balances
+      expect(await erc1155Token.balanceOf(sender.address, '1')).to.equal('1') // Sender gets the ERC1155
+      expect(await erc20Token.balanceOf(signer.address)).to.equal(
+        DEFAULT_SENDER_AMOUNT
+      ) // Signer gets the ERC20
+      expect(await erc20Token.balanceOf(sender.address)).to.equal(
+        DEFAULT_BALANCE - DEFAULT_SENDER_AMOUNT - PROTOCOL_FEE - MAX_ROYALTY
+      )
+    })
+
+    it('test a delegated swap multiple ERC1155 for ERC20', async () => {
+      // Mint additional ERC1155 tokens to signer
+      await erc1155Token.mint(signer.address, '2', '5', '0x00')
+      await erc1155Token.mint(signer.address, '3', '10', '0x00')
+
+      // Create the order for setting the rule - signer is selling multiple ERC1155
+      const ruleOrder = createOrder({
+        nonce: Date.now().toString(),
+        expiry: RULE_EXPIRY,
+        protocolFee: PROTOCOL_FEE,
+        signer: {
+          wallet: signer.address,
+          token: erc1155Token.address, // Signer is selling the ERC1155
+          kind: TokenKinds.ERC1155,
+          id: '2',
+          amount: '5',
+        },
+        sender: {
+          wallet: delegate.address,
+          token: erc20Token.address, // Sender is buying with ERC20
+          kind: TokenKinds.ERC20,
+          id: '0',
+          amount: DEFAULT_SENDER_AMOUNT,
+        },
+        affiliateWallet: ethers.constants.AddressZero,
+        affiliateAmount: '0',
+      })
+
+      // Sign the rule order
+      const signedRuleOrder = {
+        ...ruleOrder,
+        ...(await createOrderSignature(
+          ruleOrder,
+          signer,
+          swap.address,
+          CHAIN_ID
+        )),
+      }
+
+      // Set the rule
+      await delegate.connect(sender).setRule(signedRuleOrder)
+
+      // Execute the swap
+      await expect(
+        delegate
+          .connect(signer)
+          .swap(signedRuleOrder, sender.address, MAX_ROYALTY)
+      ).to.emit(delegate, 'DelegatedSwapFor')
+
+      // Verify balances
+      expect(await erc1155Token.balanceOf(sender.address, '2')).to.equal('5') // Sender gets 5 ERC1155 tokens with ID 2
+      expect(await erc20Token.balanceOf(signer.address)).to.equal(
+        DEFAULT_SENDER_AMOUNT
+      ) // Signer gets the ERC20
+      expect(await erc20Token.balanceOf(sender.address)).to.equal(
+        DEFAULT_BALANCE - DEFAULT_SENDER_AMOUNT - PROTOCOL_FEE - MAX_ROYALTY
+      )
+    })
   })
 })
