@@ -33,6 +33,10 @@ contract Delegate is IDelegate, Ownable {
 
   // Mapping of authorized manager to senderWallet
   mapping(address => address) public senderWallets;
+  
+  // Contract locked status
+  bool public locked;
+
 
   /**
    * @notice Constructor
@@ -62,8 +66,12 @@ contract Delegate is IDelegate, Ownable {
     address _senderWallet,
     ISwap.Order calldata _order
   ) external {
+
     // Ensure the sender wallet is the delegate contract
     if (_order.sender.wallet != address(this)) revert SenderInvalid();
+    
+    // Check if the contract is locked
+    if (locked) revert Locked();
 
     if (authorized[_senderWallet] != address(0)) {
       // If an authorized manager is set, the message sender must be the manager
@@ -125,9 +133,16 @@ contract Delegate is IDelegate, Ownable {
     address _senderWallet,
     uint256 _maxRoyalty
   ) external {
+
     Rule storage rule = rules[_senderWallet][_order.sender.token][
       _order.signer.token
     ];
+
+    // Check if the contract is locked
+    if (locked) revert Locked();
+
+    Rule storage rule = rules[_senderWallet][_senderToken][_signerToken];
+    
     // Ensure the expiry is not passed
     if (rule.order.expiry <= block.timestamp)
       revert RuleExpiredOrDoesNotExist();
@@ -318,5 +333,14 @@ contract Delegate is IDelegate, Ownable {
     bytes calldata /* data */
   ) external pure returns (bytes4) {
     return this.onERC1155BatchReceived.selector;
+  }
+
+  /**
+   * @notice Lock/Unlock the contract
+   * @param _locked bool
+   */
+  function setLocked(bool _locked) external onlyOwner {
+    locked = _locked;
+    emit SetLocked(_locked);
   }
 }
