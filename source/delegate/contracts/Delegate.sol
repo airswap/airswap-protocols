@@ -3,86 +3,97 @@
 pragma solidity 0.8.23;
 
 import "./interfaces/IDelegate.sol";
-import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
+import "@airswap/swap/contracts/interfaces/ISwap.sol";
+import "@airswap/swap/contracts/interfaces/IAdapter.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import { Ownable } from "solady/src/auth/Ownable.sol";
 import { SafeTransferLib } from "solady/src/utils/SafeTransferLib.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/interfaces/IERC2981.sol";
+import "hardhat/console.sol";
 
 /**
  * @title AirSwap: Delegated On-chain Trading Rules
- * @notice Supports ERC-20 tokens
+ * @notice Supports multiple token types (ERC-20, ERC-721, ERC-1155)
  * @dev inherits IDelegate, Ownable; uses SafeTransferLib
  */
 contract Delegate is IDelegate, Ownable {
-  // The SwapERC20 contract to be used to execute orders
-  ISwapERC20 public swapERC20Contract;
+  // The Swap contract to be used to execute orders
+  ISwap public swapContract;
 
-  // Mapping of senderWallet to senderToken to to signerToken to Rule
+  // Mapping of ERC165 interface ID to token adapter
+  mapping(bytes4 => IAdapter) public adapters;
+
+  // Mapping of senderWallet to senderToken to signerToken to Rule
   mapping(address => mapping(address => mapping(address => Rule))) public rules;
 
   // Mapping of senderWallet to an authorized manager
   mapping(address => address) public authorized;
 
+  // Mapping of authorized manager to senderWallet
+  mapping(address => address) public senderWallets;
+
   /**
    * @notice Constructor
-   * @param _swapERC20Contract address
+   * @param _swapContract address
+   * @param _erc20Adapter address
+   * @param _erc721Adapter address
+   * @param _erc1155Adapter address
    */
-  constructor(address _swapERC20Contract) {
+  constructor(
+    address _swapContract,
+    address _erc20Adapter,
+    address _erc721Adapter,
+    address _erc1155Adapter
+  ) {
     _initializeOwner(msg.sender);
-    swapERC20Contract = ISwapERC20(_swapERC20Contract);
+    swapContract = ISwap(_swapContract);
+    adapters[0x36372b07] = IAdapter(_erc20Adapter); // ERC20
+    adapters[0x80ac58cd] = IAdapter(_erc721Adapter); // ERC721
+    adapters[0xd9b67a26] = IAdapter(_erc1155Adapter); // ERC1155
   }
 
   /**
    * @notice Set a Rule
-   * @param _senderWallet address Address of the delegating sender wallet
-   * @param _senderToken address ERC-20 token the sender would transfer
-   * @param _senderAmount uint256 Maximum sender amount for the rule
-   * @param _signerToken address ERC-20 token the signer would transfer
-   * @param _signerAmount uint256 Maximum signer amount for the rule
-   * @param _expiry uint256 Expiry in seconds since 1 January 1970
+   * @param _order ISwap.Order The order to be stored as a rule
    */
   function setRule(
     address _senderWallet,
-    address _senderToken,
-    uint256 _senderAmount,
-    address _signerToken,
-    uint256 _signerAmount,
-    uint256 _expiry
+    ISwap.Order calldata _order
   ) external {
+    // Ensure the sender wallet is the delegate contract
+    if (_order.sender.wallet != address(this)) revert SenderInvalid();
+
     if (authorized[_senderWallet] != address(0)) {
-      // If an authorized manager is set, message sender must be the manager
+      // If an authorized manager is set, the message sender must be the manager
       if (msg.sender != authorized[_senderWallet]) revert SenderInvalid();
     } else {
-      // Otherwise message sender must be the sender wallet
+      // Otherwise the message sender must be the sender wallet
       if (msg.sender != _senderWallet) revert SenderInvalid();
     }
 
     // Set the rule. Overwrites an existing rule.
-    rules[_senderWallet][_senderToken][_signerToken] = Rule(
-      _senderWallet,
-      _senderToken,
-      _senderAmount,
-      0,
-      _signerToken,
-      _signerAmount,
-      _expiry
+    // TODO: handle tokenId
+    rules[_senderWallet][_order.sender.token][_order.signer.token] = Rule(
+      _order
     );
 
     // Emit a SetRule event
     emit SetRule(
       _senderWallet,
-      _senderToken,
-      _senderAmount,
-      _signerToken,
-      _signerAmount,
-      _expiry
+      _order.signer.token,
+      _order.sender.token,
+      _order.signer.amount,
+      _order.sender.amount,
+      _order.expiry
     );
   }
 
   /**
    * @notice Unset a Rule
-   * @param _senderWallet address Address of the delegating sender wallet
-   * @param _senderToken address ERC-20 token the sender would transfer
-   * @param _signerToken address ERC-20 token the signer would transfer
+   * @param _senderToken address Token the sender would transfer
+   * @param _signerToken address Token the signer would transfer
    */
   function unsetRule(
     address _senderWallet,
@@ -105,87 +116,84 @@ contract Delegate is IDelegate, Ownable {
   }
 
   /**
-   * @notice Perform an atomic ERC-20 swap
-   * @dev Forwards to underlying SwapERC20 contract
-   * @param _senderWallet address Wallet to receive sender proceeds
-   * @param _nonce uint256 Unique and should be sequential
-   * @param _expiry uint256 Expiry in seconds since 1 January 1970
-   * @param _signerWallet address Wallet of the signer
-   * @param _signerToken address ERC-20 token transferred from the signer
-   * @param _signerAmount uint256 Amount transferred from the signer
-   * @param _senderToken address ERC-20 token transferred from the sender
-   * @param _senderAmount uint256 Amount transferred from the sender
-   * @param _v uint8 "v" value of the ECDSA signature
-   * @param _r bytes32 "r" value of the ECDSA signature
-   * @param _s bytes32 "s" value of the ECDSA signature
+   * @notice Perform an atomic swap using the Swap contract
+   * @dev Forwards to underlying Swap contract
+   * @param _order ISwap.Order The order to be executed
    */
   function swap(
+    ISwap.Order calldata _order,
     address _senderWallet,
-    uint256 _nonce,
-    uint256 _expiry,
-    address _signerWallet,
-    address _signerToken,
-    uint256 _signerAmount,
-    address _senderToken,
-    uint256 _senderAmount,
-    uint8 _v,
-    bytes32 _r,
-    bytes32 _s
+    uint256 _maxRoyalty
   ) external {
-    Rule storage rule = rules[_senderWallet][_senderToken][_signerToken];
+    Rule storage rule = rules[_senderWallet][_order.sender.token][
+      _order.signer.token
+    ];
     // Ensure the expiry is not passed
-    if (rule.expiry <= block.timestamp) revert RuleExpiredOrDoesNotExist();
+    if (rule.order.expiry <= block.timestamp)
+      revert RuleExpiredOrDoesNotExist();
 
-    // Ensure the sender amount is valid
-    if (_senderAmount > (rule.senderAmount - rule.senderFilledAmount)) {
+    // Ensure the sender amount matches the rule
+    if (_order.sender.amount != rule.order.sender.amount) {
       revert SenderAmountInvalid();
     }
 
-    // Ensure the signer amount is valid
-    if (
-      _signerAmount != (rule.signerAmount * _senderAmount) / rule.senderAmount
-    ) {
-      revert SignerAmountInvalid();
+    // Calculate the protocol fee amount using Swap contract
+    uint256 protocolFee = swapContract.protocolFee();
+    uint256 protocolFeeDivisor = swapContract.FEE_DIVISOR();
+
+    uint256 protocolFeeAmount = (rule.order.sender.amount * protocolFee) /
+      protocolFeeDivisor;
+
+    // Calculate the sender amount including affiliate amount, protocol fee and royalty amount
+    uint256 royaltyAmount;
+    if (supportsRoyalties(_order.signer.token)) {
+      (, royaltyAmount) = IERC2981(_order.signer.token).royaltyInfo(
+        _order.signer.id,
+        _order.sender.amount
+      );
     }
 
-    // Transfer the sender token to this contract
-    SafeTransferLib.safeTransferFrom(
-      _senderToken,
+    // Calculate the total sender cost which includes NFT price, affiliate amount, protocol fee and royalty amount
+    uint256 _senderAmount = rule.order.sender.amount +
+      rule.order.affiliateAmount +
+      protocolFeeAmount +
+      royaltyAmount;
+
+    // Transfer the sender token to this contract using the appropriate adapter
+    _transfer(
       _senderWallet,
       address(this),
-      _senderAmount
-    );
-
-    // Approve the SwapERC20 contract to transfer the sender token
-    SafeTransferLib.safeApprove(
-      _senderToken,
-      address(swapERC20Contract),
-      _senderAmount
-    );
-
-    // Execute the swap
-    swapERC20Contract.swapLight(
-      _nonce,
-      _expiry,
-      _signerWallet,
-      _signerToken,
-      _signerAmount,
-      _senderToken,
       _senderAmount,
-      _v,
-      _r,
-      _s
+      rule.order.sender.id,
+      rule.order.sender.token,
+      rule.order.sender.kind
     );
 
-    // Transfer the signer token to the sender wallet
-    SafeTransferLib.safeTransfer(_signerToken, _senderWallet, _signerAmount);
+    SafeTransferLib.safeApprove(
+      rule.order.sender.token,
+      address(swapContract),
+      _senderAmount
+    );
 
-    // Update the filled amount
-    rules[_senderWallet][_senderToken][_signerToken]
-      .senderFilledAmount += _senderAmount;
+    // Execute the swap - the Swap contract will transfer from this contract to signer
+    swapContract.swap(address(this), _maxRoyalty, _order);
+
+    // Transfer NFT to signer wallet
+    _transfer(
+      address(this),
+      _senderWallet,
+      rule.order.signer.amount,
+      rule.order.signer.id,
+      rule.order.signer.token,
+      rule.order.signer.kind
+    );
 
     // Emit a DelegatedSwapFor event
-    emit DelegatedSwapFor(_senderWallet, _signerWallet, _nonce);
+    emit DelegatedSwapFor(
+      _senderWallet,
+      rule.order.signer.wallet,
+      rule.order.nonce
+    );
   }
 
   /**
@@ -196,6 +204,7 @@ contract Delegate is IDelegate, Ownable {
   function authorize(address _manager) external {
     if (_manager == address(0)) revert ManagerInvalid();
     authorized[msg.sender] = _manager;
+    senderWallets[_manager] = msg.sender;
     emit Authorize(_manager, msg.sender);
   }
 
@@ -206,15 +215,108 @@ contract Delegate is IDelegate, Ownable {
   function revoke() external {
     address _tmp = authorized[msg.sender];
     delete authorized[msg.sender];
+    delete senderWallets[_tmp];
     emit Revoke(_tmp, msg.sender);
   }
 
   /**
-   * @notice Sets the SwapERC20 contract
-   * @param _swapERC20Contract address
+   * @notice Sets the Swap contract
+   * @param _swapContract address
    */
-  function setSwapERC20Contract(address _swapERC20Contract) external onlyOwner {
-    if (_swapERC20Contract == address(0)) revert AddressInvalid();
-    swapERC20Contract = ISwapERC20(_swapERC20Contract);
+  function setSwapContract(address _swapContract) external onlyOwner {
+    if (_swapContract == address(0)) revert AddressInvalid();
+    swapContract = ISwap(_swapContract);
+  }
+
+  /**
+   * @notice Performs token transfer using adapters
+   * @param from address Wallet address to transfer from
+   * @param to address Wallet address to transfer to
+   * @param amount uint256 Amount for ERC-20
+   * @param id uint256 token ID for ERC-721, ERC-1155
+   * @param token address Contract address of token
+   * @param kind bytes4 EIP-165 interface ID of the token
+   */
+  function _transfer(
+    address from,
+    address to,
+    uint256 amount,
+    uint256 id,
+    address token,
+    bytes4 kind
+  ) private {
+    IAdapter adapter = adapters[kind];
+    if (address(adapter) == address(0)) revert TokenKindUnknown();
+
+    // Use delegatecall so underlying transfer is called as Delegate
+    (bool success, ) = address(adapter).delegatecall(
+      abi.encodeWithSelector(
+        adapter.transfer.selector,
+        from,
+        to,
+        amount,
+        id,
+        token
+      )
+    );
+    if (!success) revert TransferFromFailed();
+  }
+
+  /**
+   * @notice Checks whether a token implements EIP-2981
+   * @param token address token to check
+   */
+  function supportsRoyalties(address token) private view returns (bool) {
+    try IERC165(token).supportsInterface(type(IERC2981).interfaceId) returns (
+      bool result
+    ) {
+      return result;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * @notice ERC721Receiver implementation
+   * @dev This is a no-op implementation, needed as the contract temporarily receives ERC721 tokens
+   * @return bytes4 `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
+   */
+  function onERC721Received(
+    address /* operator */,
+    address /* from */,
+    uint256 /* tokenId */,
+    bytes calldata /* data */
+  ) external pure returns (bytes4) {
+    return this.onERC721Received.selector;
+  }
+
+  /**
+   * @notice ERC1155Receiver implementation
+   * @dev This is a no-op implementation, needed as the contract temporarily receives ERC1155 tokens
+   * @return bytes4 `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))`
+   */
+  function onERC1155Received(
+    address /* operator */,
+    address /* from */,
+    uint256 /* id */,
+    uint256 /* value */,
+    bytes calldata /* data */
+  ) external pure returns (bytes4) {
+    return this.onERC1155Received.selector;
+  }
+
+  /**
+   * @notice ERC1155Receiver batch implementation
+   * @dev This is a no-op implementation, needed as the contract temporarily receives ERC1155 tokens
+   * @return bytes4 `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`
+   */
+  function onERC1155BatchReceived(
+    address /* operator */,
+    address /* from */,
+    uint256[] calldata /* ids */,
+    uint256[] calldata /* values */,
+    bytes calldata /* data */
+  ) external pure returns (bytes4) {
+    return this.onERC1155BatchReceived.selector;
   }
 }
