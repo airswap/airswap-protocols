@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.23;
 
-interface IDelegate {
+interface IDelegateERC20 {
   struct Rule {
     address senderWallet;
     address senderToken;
@@ -14,16 +14,14 @@ interface IDelegate {
   }
 
   event Authorize(address signatory, address signer);
-  event DelegatedSwapFor(
+  event DelegatedSwapERC20For(
     address indexed senderWallet,
     address indexed signerWallet,
     uint256 indexed nonce
   );
-
-  event SetLocked(bool lock);
   event Revoke(address tmp, address signer);
 
-  event SetRule(
+  event SetRuleERC20(
     address indexed senderWallet,
     address indexed senderToken,
     uint256 senderAmount,
@@ -32,22 +30,21 @@ interface IDelegate {
     uint256 expiry
   );
 
-  event UnsetRule(
+  event UnsetRuleERC20(
     address indexed senderWallet,
     address indexed senderToken,
     address indexed signerToken
   );
 
   error AddressInvalid();
-  error Locked();
-  error ManagerInvalid();
-  error RuleExpiredOrDoesNotExist();
+  error RuleERC20ExpiredOrDoesNotExist();
   error SenderAmountInvalid();
   error SignerAmountInvalid();
   error SenderInvalid();
+  error ManagerInvalid();
   error TransferFromFailed();
 
-  function setRule(
+  function setRuleERC20(
     address senderWallet,
     address senderToken,
     uint256 senderAmount,
@@ -56,7 +53,7 @@ interface IDelegate {
     uint256 expiry
   ) external;
 
-  function swap(
+  function swapERC20(
     address senderWallet,
     uint256 nonce,
     uint256 expiry,
@@ -70,7 +67,7 @@ interface IDelegate {
     bytes32 s
   ) external;
 
-  function unsetRule(
+  function unsetRuleERC20(
     address senderWallet,
     address senderToken,
     address signerToken

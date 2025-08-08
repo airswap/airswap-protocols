@@ -10,10 +10,10 @@ async function main() {
     const provider = new ethers.providers.JsonRpcProvider(apiUrl)
     const deployer = new ethers.Wallet(process.env.PRIVATE_KEY, provider)
 
-    const deploys = require('../source/delegate/deploys.js')
+    const deploys = require('../source/delegate-erc20/deploys.js')
     const {
-      Delegate__factory,
-    } = require('@airswap/delegate/typechain/factories/contracts')
+      DelegateERC20__factory: Delegate__factory,
+    } = require('@airswap/delegate-erc20/typechain/factories/contracts')
     if (deploys[chainId]) {
       const contract = Delegate__factory.connect(deploys[chainId], deployer)
       const currentSwapERC20 = await contract.swapERC20Contract()
