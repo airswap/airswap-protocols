@@ -1,4 +1,1 @@
-module.exports = {
-  1: '0xDe1Ebf9b429F5066FD060F86847657e29bD49Bb0',
-  11155111: '0x35010796699e5c2C9C002F550756A1548921d503',
-}
+module.exports = {}

@@ -1,4 +1,1 @@
-module.exports = {
-  1: 22968069,
-  11155111: 8811987,
-}
+module.exports = {}

@@ -1,1 +1,1 @@
-declare module '@airswap/delegate/deploys-commits.js'
+declare module '@airswap/delegate-erc20/deploys-commits.js'

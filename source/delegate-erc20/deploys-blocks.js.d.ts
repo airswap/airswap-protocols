@@ -1,1 +1,1 @@
-declare module '@airswap/delegate/deploys-blocks.js'
+declare module '@airswap/delegate-erc20/deploys-blocks.js'
