@@ -79,4 +79,8 @@ interface ISwap {
   function authorized(address) external view returns (address);
 
   function signatoryMinimumNonce(address) external view returns (uint256);
+
+  function protocolFee() external view returns (uint256);
+
+  function FEE_DIVISOR() external view returns (uint256);
 }
