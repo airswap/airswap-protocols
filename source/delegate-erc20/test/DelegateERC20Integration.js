@@ -9,7 +9,7 @@ const { ethers } = require('hardhat')
 const ERC20 = require('@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json')
 const SWAP_ERC20 = require('@airswap/swap-erc20/build/contracts/SwapERC20.sol/SwapERC20.json')
 
-describe('Delegate Integration', () => {
+describe('DelegateERC20 Integration', () => {
   let snapshotId
   let signerToken
   let senderToken
@@ -73,7 +73,7 @@ describe('Delegate Integration', () => {
     await swapERC20.deployed()
 
     delegate = await (
-      await ethers.getContractFactory('Delegate')
+      await ethers.getContractFactory('DelegateERC20')
     ).deploy(swapERC20.address)
     await delegate.deployed()
 
@@ -94,10 +94,10 @@ describe('Delegate Integration', () => {
   })
 
   describe('Test transfers', async () => {
-    it('test a delegated swap', async () => {
+    it('test a delegated swapERC20', async () => {
       await delegate
         .connect(sender)
-        .setRule(
+        .setRuleERC20(
           sender.address,
           senderToken.address,
           DEFAULT_SENDER_AMOUNT,
@@ -113,8 +113,8 @@ describe('Delegate Integration', () => {
       const order = await createSignedOrderERC20({}, signer)
 
       await expect(
-        delegate.connect(signer).swap(sender.address, ...order)
-      ).to.emit(delegate, 'DelegatedSwapFor')
+        delegate.connect(signer).swapERC20(sender.address, ...order)
+      ).to.emit(delegate, 'DelegatedSwapERC20For')
 
       expect(await signerToken.balanceOf(sender.address)).to.equal(
         DEFAULT_SIGNER_AMOUNT
