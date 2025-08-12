@@ -133,27 +133,8 @@ contract Delegate is IDelegate, Ownable {
       revert SenderAmountInvalid();
     }
 
-    // Calculate the protocol fee amount using Swap contract
-    uint256 protocolFee = swapContract.protocolFee();
-    uint256 protocolFeeDivisor = swapContract.FEE_DIVISOR();
-
-    uint256 protocolFeeAmount = (rule.order.sender.amount * protocolFee) /
-      protocolFeeDivisor;
-
-    // Calculate the sender amount including affiliate amount, protocol fee and royalty amount
-    uint256 royaltyAmount;
-    if (swapContract.supportsRoyalties(_order.signer.token)) {
-      (, royaltyAmount) = IERC2981(_order.signer.token).royaltyInfo(
-        _order.signer.id,
-        _order.sender.amount
-      );
-    }
-
     // Calculate the total sender cost which includes NFT price, affiliate amount, protocol fee and royalty amount
-    uint256 _senderAmount = rule.order.sender.amount +
-      rule.order.affiliateAmount +
-      protocolFeeAmount +
-      royaltyAmount;
+    uint256 _senderAmount = swapContract.calculateSenderAmount(rule.order);
 
     // Transfer the sender token to this contract using the appropriate adapter
     _transfer(
