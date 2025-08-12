@@ -37,21 +37,17 @@ contract Delegate is IDelegate, Ownable {
   /**
    * @notice Constructor
    * @param _swapContract address
-   * @param _erc20Adapter address
-   * @param _erc721Adapter address
-   * @param _erc1155Adapter address
+   * @param _adapters IAdapter[] array of token adapters
    */
-  constructor(
-    address _swapContract,
-    address _erc20Adapter,
-    address _erc721Adapter,
-    address _erc1155Adapter
-  ) {
+  constructor(address _swapContract, IAdapter[] memory _adapters) {
     _initializeOwner(msg.sender);
     swapContract = ISwap(_swapContract);
-    adapters[0x36372b07] = IAdapter(_erc20Adapter); // ERC20
-    adapters[0x80ac58cd] = IAdapter(_erc721Adapter); // ERC721
-    adapters[0xd9b67a26] = IAdapter(_erc1155Adapter); // ERC1155
+    for (uint256 i; i < _adapters.length; ) {
+      adapters[_adapters[i].interfaceId()] = _adapters[i];
+      unchecked {
+        ++i;
+      }
+    }
   }
 
   /**

@@ -80,12 +80,11 @@ describe('Delegate Integration', () => {
     // Deploy Delegate contract
     delegate = await (
       await ethers.getContractFactory('Delegate')
-    ).deploy(
-      swap.address,
+    ).deploy(swap.address, [
       erc20Adapter.address,
       erc721Adapter.address,
-      erc1155Adapter.address
-    )
+      erc1155Adapter.address,
+    ])
     await delegate.deployed()
 
     // Deploy tokens
