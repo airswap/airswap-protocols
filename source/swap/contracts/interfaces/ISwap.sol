@@ -83,4 +83,6 @@ interface ISwap {
   function protocolFee() external view returns (uint256);
 
   function FEE_DIVISOR() external view returns (uint256);
+
+  function supportsRoyalties(address token) external view returns (bool);
 }

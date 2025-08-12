@@ -142,7 +142,7 @@ contract Delegate is IDelegate, Ownable {
 
     // Calculate the sender amount including affiliate amount, protocol fee and royalty amount
     uint256 royaltyAmount;
-    if (supportsRoyalties(_order.signer.token)) {
+    if (swapContract.supportsRoyalties(_order.signer.token)) {
       (, royaltyAmount) = IERC2981(_order.signer.token).royaltyInfo(
         _order.signer.id,
         _order.sender.amount
@@ -256,20 +256,6 @@ contract Delegate is IDelegate, Ownable {
       )
     );
     if (!success) revert TransferFromFailed();
-  }
-
-  /**
-   * @notice Checks whether a token implements EIP-2981
-   * @param token address token to check
-   */
-  function supportsRoyalties(address token) private view returns (bool) {
-    try IERC165(token).supportsInterface(type(IERC2981).interfaceId) returns (
-      bool result
-    ) {
-      return result;
-    } catch {
-      return false;
-    }
   }
 
   /**

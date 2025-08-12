@@ -402,7 +402,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
    * @notice Checks whether a token implements EIP-2981
    * @param token address token to check
    */
-  function supportsRoyalties(address token) private view returns (bool) {
+  function supportsRoyalties(address token) public view returns (bool) {
     try IERC165(token).supportsInterface(type(IERC2981).interfaceId) returns (
       bool result
     ) {
