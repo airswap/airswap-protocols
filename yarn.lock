@@ -26,9 +26,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@airswap/delegate@npm:5.0.3-beta.0, @airswap/delegate@workspace:source/delegate":
+"@airswap/delegate-erc20@npm:5.1.0, @airswap/delegate-erc20@workspace:source/delegate-erc20":
   version: 0.0.0-use.local
-  resolution: "@airswap/delegate@workspace:source/delegate"
+  resolution: "@airswap/delegate-erc20@workspace:source/delegate-erc20"
   dependencies:
     "@airswap/swap-erc20": "npm:5.0.1"
     "@airswap/utils": "npm:5.2.1"
@@ -52,7 +52,7 @@ __metadata:
   resolution: "@airswap/libraries@workspace:tools/libraries"
   dependencies:
     "@airswap/batch-call": "npm:5.1.0"
-    "@airswap/delegate": "npm:5.0.3-beta.0"
+    "@airswap/delegate-erc20": "npm:5.1.0"
     "@airswap/jsonrpc-client-websocket": "npm:0.0.1"
     "@airswap/pool": "npm:5.0.1"
     "@airswap/registry": "npm:5.0.1"
