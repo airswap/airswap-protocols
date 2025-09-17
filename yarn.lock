@@ -26,6 +26,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@airswap/client@workspace:tools/client":
+  version: 0.0.0-use.local
+  resolution: "@airswap/client@workspace:tools/client"
+  dependencies:
+    "@types/node": "npm:^18.15.11"
+    ethers: "npm:^5.7.2"
+    typescript: "npm:^5.0.4"
+  languageName: unknown
+  linkType: soft
+
 "@airswap/delegate-erc20@npm:5.1.0, @airswap/delegate-erc20@workspace:source/delegate-erc20":
   version: 0.0.0-use.local
   resolution: "@airswap/delegate-erc20@workspace:source/delegate-erc20"

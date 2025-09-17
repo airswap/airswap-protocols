@@ -1,0 +1,40 @@
+{
+  "name": "@airswap/client",
+  "version": "1.0.0",
+  "description": "AirSwap: TypeScript RPC Client",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airswap/airswap-protocols"
+  },
+  "keywords": [
+    "airswap",
+    "trading",
+    "defi",
+    "ethereum",
+    "client",
+    "typescript"
+  ],
+  "license": "MIT",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "files": [
+    "/build/index.js",
+    "/build/index.d.ts",
+    "/build/generated"
+  ],
+  "scripts": {
+    "clean": "rm -rf ./build",
+    "compile": "yarn clean && tsc -b",
+    "generate": "./generate.sh"
+  },
+  "dependencies": {
+    "ethers": "^5.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.11",
+    "typescript": "^5.0.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

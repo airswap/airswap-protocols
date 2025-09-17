@@ -1,0 +1,359 @@
+{
+  "openrpc": "1.2.6",
+  "info": {
+    "title": "AirSwap RPC Client",
+    "description": "An RPC client for to discover and interact with AirSwap servers.",
+    "version": "1.0.0"
+  },
+  "methods": [
+    {
+      "name": "getProtocols",
+      "summary": "Get supported protocols and configuration",
+      "description": "Returns a list of supported protocols with their configuration parameters including chain IDs and contract addresses.",
+      "params": [],
+      "result": {
+        "name": "protocols",
+        "description": "Array of supported protocol configurations",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/ProtocolInfo"
+          }
+        }
+      }
+    },
+    {
+      "name": "getTokens",
+      "summary": "Get all supported tokens organized by chain",
+      "description": "Returns all tokens supported by registered servers, organized by chain ID.",
+      "params": [],
+      "result": {
+        "name": "tokens",
+        "description": "Object mapping chain IDs to arrays of supported token addresses",
+        "schema": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "getSignerSideOrderERC20",
+      "summary": "Get a signer-side order for ERC20 tokens",
+      "description": "Request a signer-side order where the signer provides tokens and the sender provides payment. The forwarder routes this to appropriate market makers and returns the best order based on highest signer amount.",
+      "params": [
+        {
+          "name": "chainId",
+          "description": "The blockchain network chain ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          }
+        },
+        {
+          "name": "swapContractAddress",
+          "description": "Address of the AirSwap SwapERC20 contract",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$"
+          }
+        },
+        {
+          "name": "senderAmount",
+          "description": "Amount of tokens the sender will provide (in wei)",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          }
+        },
+        {
+          "name": "signerToken",
+          "description": "Address of the token the signer will provide",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$"
+          }
+        },
+        {
+          "name": "senderToken",
+          "description": "Address of the token the sender will provide",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$"
+          }
+        },
+        {
+          "name": "senderWallet",
+          "description": "Address of the sender's wallet",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$"
+          }
+        },
+        {
+          "name": "minExpiry",
+          "description": "Minimum expiry timestamp for the order (Unix timestamp)",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          }
+        },
+        {
+          "name": "proxyingFor",
+          "description": "Address being proxied for (optional, empty string if not proxying)",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "order",
+        "description": "The best signer-side order from available market makers",
+        "schema": {
+          "$ref": "#/components/schemas/OrderERC20Response"
+        }
+      }
+    },
+    {
+      "name": "getSenderSideOrderERC20",
+      "summary": "Get a sender-side order for ERC20 tokens",
+      "description": "Request a sender-side order where the sender provides tokens and the signer provides payment. The forwarder routes this to appropriate market makers and returns the best order based on lowest sender amount.",
+      "params": [
+        {
+          "name": "chainId",
+          "description": "The blockchain network chain ID",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          }
+        },
+        {
+          "name": "swapContractAddress",
+          "description": "Address of the AirSwap SwapERC20 contract",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$"
+          }
+        },
+        {
+          "name": "signerAmount",
+          "description": "Amount of tokens the signer will provide (in wei)",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          }
+        },
+        {
+          "name": "signerToken",
+          "description": "Address of the token the signer will provide",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$"
+          }
+        },
+        {
+          "name": "senderToken",
+          "description": "Address of the token the sender will provide",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$"
+          }
+        },
+        {
+          "name": "senderWallet",
+          "description": "Address of the sender's wallet",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$"
+          }
+        },
+        {
+          "name": "minExpiry",
+          "description": "Minimum expiry timestamp for the order (Unix timestamp)",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          }
+        },
+        {
+          "name": "proxyingFor",
+          "description": "Address being proxied for (optional, empty string if not proxying)",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "order",
+        "description": "The best sender-side order from available market makers",
+        "schema": {
+          "$ref": "#/components/schemas/OrderERC20Response"
+        }
+      }
+    },
+    {
+      "name": "getPricingERC20",
+      "summary": "Get pricing information for ERC20 token pairs",
+      "description": "Request pricing information for specific ERC20 token pairs from market makers. Returns the first available pricing response.",
+      "params": [
+        {
+          "name": "tokenPairs",
+          "description": "Array of token pair arrays to get pricing for",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^0x[a-fA-F0-9]{40}$"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          }
+        },
+        {
+          "name": "minExpiry",
+          "description": "Minimum expiry timestamp for pricing (Unix timestamp)",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          }
+        }
+      ],
+      "result": {
+        "name": "pricing",
+        "description": "Pricing information from market makers",
+        "schema": {
+          "type": "object",
+          "description": "Pricing response format varies by market maker implementation"
+        }
+      }
+    }
+  ],
+  "components": {
+    "schemas": {
+      "ProtocolInfo": {
+        "type": "object",
+        "description": "Information about a supported trading protocol",
+        "properties": {
+          "interfaceId": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{8}$",
+            "description": "Protocol interface identifier (e.g., 0x02ad05d3 for RequestForQuoteERC20)"
+          },
+          "params": {
+            "type": "object",
+            "properties": {
+              "chainId": {
+                "type": "string",
+                "pattern": "^[0-9]+$",
+                "description": "Blockchain network chain ID"
+              },
+              "swapContractAddress": {
+                "type": "string",
+                "pattern": "^0x[a-fA-F0-9]{40}$",
+                "description": "Address of the AirSwap SwapERC20 contract"
+              },
+              "walletAddress": {
+                "type": "string",
+                "pattern": "^0x[a-fA-F0-9]{40}$",
+                "description": "Wallet address (forwarder uses zero address)"
+              }
+            },
+            "required": ["chainId", "swapContractAddress", "walletAddress"]
+          }
+        },
+        "required": ["interfaceId", "params"]
+      },
+      "OrderERC20Response": {
+        "type": "object",
+        "description": "ERC20 order response in AirSwap format",
+        "properties": {
+          "nonce": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Unique order nonce"
+          },
+          "expiry": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Order expiry timestamp (Unix timestamp)"
+          },
+          "signerWallet": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$",
+            "description": "Address of the signer's wallet"
+          },
+          "signerToken": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$",
+            "description": "Address of the token the signer will provide"
+          },
+          "signerAmount": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Amount of tokens the signer will provide (in wei)"
+          },
+          "senderToken": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$",
+            "description": "Address of the token the sender will provide"
+          },
+          "senderAmount": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Amount of tokens the sender will provide (in wei)"
+          },
+          "v": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "ECDSA signature recovery parameter (optional)"
+          },
+          "r": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{64}$",
+            "description": "ECDSA signature r parameter (optional)"
+          },
+          "s": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{64}$",
+            "description": "ECDSA signature s parameter (optional)"
+          }
+        },
+        "required": [
+          "nonce",
+          "expiry",
+          "signerWallet",
+          "signerToken",
+          "signerAmount",
+          "senderToken",
+          "senderAmount"
+        ]
+      }
+    }
+  }
+}
