@@ -52,12 +52,12 @@ export class OpenRPCClientGenerator {
   private spec: OpenRPCSpec
   private outputDir: string
 
-  constructor(specPath: string, outputDir: string) {
+  public constructor(specPath: string, outputDir: string) {
     this.spec = JSON.parse(fs.readFileSync(specPath, 'utf8'))
     this.outputDir = outputDir
   }
 
-  generate(): void {
+  public generate(): void {
     console.info('Generating TypeScript client from OpenRPC specification...')
 
     // Ensure output directory exists
@@ -92,7 +92,9 @@ export class OpenRPCClientGenerator {
     let content = '// Generated types from OpenRPC specification\n\n'
 
     // Generate schema types
-    for (const [schemaName, schema] of Object.entries(this.spec.components.schemas)) {
+    for (const [schemaName, schema] of Object.entries(
+      this.spec.components.schemas
+    )) {
       content += this.generateSchemaType(schemaName, schema)
       content += '\n\n'
     }
@@ -134,7 +136,9 @@ export class OpenRPCClientGenerator {
       for (const [propName, propSchema] of Object.entries(schema.properties)) {
         const optional = schema.required?.includes(propName) ? '' : '?'
         const type = this.schemaToTypeScript(propSchema)
-        content += `  /** ${propSchema.description || `${propName} property`} */\n`
+        content += `  /** ${
+          propSchema.description || `${propName} property`
+        } */\n`
         content += `  ${propName}${optional}: ${type}\n`
       }
 
@@ -169,14 +173,23 @@ export class OpenRPCClientGenerator {
         if (schema.additionalProperties === true) {
           return 'Record<string, unknown>'
         }
-        if (schema.additionalProperties && typeof schema.additionalProperties === 'object') {
-          return `Record<string, ${this.schemaToTypeScript(schema.additionalProperties)}>`
+        if (
+          schema.additionalProperties &&
+          typeof schema.additionalProperties === 'object'
+        ) {
+          return `Record<string, ${this.schemaToTypeScript(
+            schema.additionalProperties
+          )}>`
         }
         if (schema.properties) {
           let objType = '{\n'
-          for (const [propName, propSchema] of Object.entries(schema.properties)) {
+          for (const [propName, propSchema] of Object.entries(
+            schema.properties
+          )) {
             const optional = schema.required?.includes(propName) ? '' : '?'
-            objType += `    ${propName}${optional}: ${this.schemaToTypeScript(propSchema)}\n`
+            objType += `    ${propName}${optional}: ${this.schemaToTypeScript(
+              propSchema
+            )}\n`
           }
           objType += '  }'
           return objType
@@ -264,7 +277,9 @@ export class AirSwapClient {
   private generateMethodImplementation(method: Method): string {
     const methodName = method.name
     const hasParams = method.params.length > 0
-    const paramTypeName = hasParams ? `types.${this.capitalize(methodName)}Params` : 'void'
+    const paramTypeName = hasParams
+      ? `types.${this.capitalize(methodName)}Params`
+      : 'void'
     const resultTypeName = `types.${this.capitalize(methodName)}Result`
 
     let content = `  /**\n`
@@ -334,7 +349,10 @@ async function examples() {
         content += `    const ${method.name}Result = await client.${method.name}({\n`
 
         for (const param of method.params) {
-          const exampleValue = this.generateExampleValue(param.schema, param.name)
+          const exampleValue = this.generateExampleValue(
+            param.schema,
+            param.name
+          )
           content += `      ${param.name}: ${exampleValue}, // ${param.description}\n`
         }
 
@@ -385,7 +403,10 @@ examples().catch(console.error)
       case 'boolean':
         return 'true'
       case 'array':
-        if (schema.items?.type === 'array' && schema.items.items?.pattern === '^0x[a-fA-F0-9]{40}$') {
+        if (
+          schema.items?.type === 'array' &&
+          schema.items.items?.pattern === '^0x[a-fA-F0-9]{40}$'
+        ) {
           return "[['0x742d35Cc6634C0532925a3b8D400E4C', '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984']]"
         }
         return '[]'
@@ -479,7 +500,10 @@ ${method.description}
       if (method.params.length > 0) {
         content += `const result = await client.${method.name}({\n`
         for (const param of method.params) {
-          const exampleValue = this.generateExampleValue(param.schema, param.name)
+          const exampleValue = this.generateExampleValue(
+            param.schema,
+            param.name
+          )
           content += `  ${param.name}: ${exampleValue}\n`
         }
         content += `})\n`
@@ -574,7 +598,13 @@ export * from './types'
 
 // CLI functionality
 function main() {
-  const specPath = path.join(__dirname, '..', '..', 'src', 'airswap-open-rpc.json')
+  const specPath = path.join(
+    __dirname,
+    '..',
+    '..',
+    'src',
+    'airswap-open-rpc.json'
+  )
   const outputDir = path.join(__dirname, '..', 'generated')
 
   console.info('AirSwap OpenRPC Client Generator')
@@ -586,8 +616,6 @@ function main() {
   try {
     const generator = new OpenRPCClientGenerator(specPath, outputDir)
     generator.generate()
-
-
   } catch (error) {
     console.error('❌ Error generating client:', error)
     process.exit(1)

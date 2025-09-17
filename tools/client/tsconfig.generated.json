@@ -8,7 +8,5 @@
     "sourceMap": true,
     "declaration": true
   },
-  "include": [
-    "build/generated/**/*.ts"
-  ]
+  "include": ["build/generated/**/*.ts"]
 }
