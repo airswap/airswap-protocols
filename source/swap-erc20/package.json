@@ -33,7 +33,7 @@
     "@airswap/utils": "5.2.1",
     "hardhat": "^2.20.1",
     "solady": "0.0.173",
-    "typescript": "^5.0.4"
+    "typescript": "^5.9.3"
   },
   "publishConfig": {
     "access": "public"
