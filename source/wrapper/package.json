@@ -30,7 +30,7 @@
     "@airswap/utils": "5.2.1",
     "@openzeppelin/contracts": "^4.8.3",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
-    "hardhat": "^2.12.7",
+    "hardhat": "^2.20.1",
     "typescript": "^5.0.4"
   },
   "publishConfig": {

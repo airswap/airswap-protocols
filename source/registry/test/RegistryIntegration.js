@@ -43,7 +43,7 @@ describe('Registry Integration', () => {
       .connect(deployer)
       .deploy(stakingToken.address, STAKING_COST, SUPPORT_COST)
     await registry.deployed()
-    stakingToken.connect(account1).approve(registry.address, TOKEN_BALANCE)
+    await stakingToken.connect(account1).approve(registry.address, TOKEN_BALANCE)
   })
 
   describe('constructor values', async () => {

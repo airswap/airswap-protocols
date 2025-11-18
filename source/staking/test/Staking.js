@@ -619,7 +619,7 @@ describe('Staking Unit', () => {
 
     it('unsuccessful delegate set if delegate stakes after proposal', async () => {
       await token.mock.transferFrom.returns(true)
-      staking.connect(account1).proposeDelegate(account2.address)
+      await staking.connect(account1).proposeDelegate(account2.address)
       await staking.connect(account2).stake('100')
       await expect(
         staking.connect(account2).acceptDelegateProposal(account1.address)
