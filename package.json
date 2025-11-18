@@ -36,7 +36,7 @@
     "@typechain/ethers-v5": "^11.1.2",
     "@typechain/hardhat": "^7.0.0",
     "@types/mocha": "^10.0.1",
-    "@types/node": "^18.15.11",
+    "@types/node": "^18.19.130",
     "@types/sinon-chai": "^3.2.12",
     "@typescript-eslint/eslint-plugin": "^7.1.0",
     "@typescript-eslint/parser": "^7.1.0",
@@ -47,18 +47,18 @@
     "eslint-plugin-prettier": "^4.2.1",
     "ethereum-waffle": "^4.0.10",
     "ethers": "^5.7.2",
-    "hardhat": "^2.12.7",
-    "hardhat-gas-reporter": "^1.0.9",
+    "hardhat": "^2.20.1",
+    "hardhat-gas-reporter": "^1.0.10",
     "husky": "^8.0.1",
     "lerna": "^7.3.0",
     "nx": "^16.5.5",
     "prettier": "^2.8.4",
     "prettier-plugin-solidity": "^1.1.2",
     "prompt-confirm": "^2.0.4",
-    "solidity-coverage": "^0.8.5",
+    "solidity-coverage": "^0.8.10",
     "ts-node": "^10.9.1",
     "typechain": "^8.1.1",
-    "typescript": "^5.0.4"
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=18.16.0 <19.0.0"

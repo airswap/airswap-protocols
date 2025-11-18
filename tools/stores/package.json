@@ -26,8 +26,12 @@
     "redis": "^4.6.13"
   },
   "devDependencies": {
+    "@types/mocha": "^10",
+    "@types/node": "^18.19.130",
     "dotenv": "^16.0.1",
-    "typescript": "^5.0.4"
+    "mocha": "^10.8.2",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.9.3"
   },
   "publishConfig": {
     "access": "public"
