@@ -244,20 +244,7 @@ contract BatchCall {
     bool[] memory orderValidity = new bool[](orders.length);
 
     for (uint256 i; i < orders.length; ) {
-      ISwapERC20.OrderERC20 memory order = orders[i];
-      bytes32[] memory errors = swapERC20Contract.check(
-        senderWallet,
-        order.nonce,
-        order.expiry,
-        order.signerWallet,
-        order.signerToken,
-        order.signerAmount,
-        order.senderToken,
-        order.senderAmount,
-        order.v,
-        order.r,
-        order.s
-      );
+      bytes32[] memory errors = swapERC20Contract.check(senderWallet, orders[i]);
       orderValidity[i] = errors.length == 0 ? true : false;
       unchecked {
         ++i;

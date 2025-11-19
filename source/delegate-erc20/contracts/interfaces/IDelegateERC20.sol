@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.23;
 
+import "@airswap/swap-erc20/contracts/interfaces/ISwapERC20.sol";
+
 interface IDelegateERC20 {
   struct Rule {
     address senderWallet;
@@ -36,6 +38,8 @@ interface IDelegateERC20 {
     address indexed signerToken
   );
 
+  event SetFeeReceiver(address indexed feeReceiver);
+
   error AddressInvalid();
   error RuleERC20ExpiredOrDoesNotExist();
   error SenderAmountInvalid();
@@ -43,6 +47,8 @@ interface IDelegateERC20 {
   error SenderInvalid();
   error ManagerInvalid();
   error TransferFromFailed();
+  error FeeReceiverNotSet();
+  error FeeReceiverMismatch();
 
   function setRuleERC20(
     address senderWallet,
@@ -55,16 +61,8 @@ interface IDelegateERC20 {
 
   function swapERC20(
     address senderWallet,
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
+    ISwapERC20.OrderERC20 calldata order,
+    address feeReceiver
   ) external;
 
   function unsetRuleERC20(
@@ -78,4 +76,6 @@ interface IDelegateERC20 {
   function revoke() external;
 
   function setSwapERC20Contract(address _swapERC20Contract) external;
+
+  function setFeeReceiver(address _feeReceiver) external;
 }

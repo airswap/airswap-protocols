@@ -1,7 +1,6 @@
 const { expect } = require('chai')
 const {
   createOrderERC20,
-  orderERC20ToParams,
   createOrderERC20Signature,
 } = require('@airswap/utils')
 const { ethers } = require('hardhat')
@@ -19,6 +18,7 @@ describe('SwapERC20 Integration', () => {
   let sender
   let signer
   let protocolFeeWallet
+  let feeReceiver
 
   const CHAIN_ID = 31337
   const BONUS_SCALE = '10'
@@ -40,7 +40,7 @@ describe('SwapERC20 Integration', () => {
       senderAmount: DEFAULT_AMOUNT,
       ...params,
     })
-    return orderERC20ToParams({
+    return {
       ...unsignedOrder,
       ...(await createOrderERC20Signature(
         unsignedOrder,
@@ -48,7 +48,7 @@ describe('SwapERC20 Integration', () => {
         swap.address,
         CHAIN_ID
       )),
-    })
+    }
   }
 
   beforeEach(async () => {
@@ -60,7 +60,7 @@ describe('SwapERC20 Integration', () => {
   })
 
   before('get signers and deploy', async () => {
-    ;[deployer, sender, signer, protocolFeeWallet] = await ethers.getSigners()
+    ;[deployer, sender, signer, protocolFeeWallet, feeReceiver] = await ethers.getSigners()
 
     stakingToken = await (
       await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
@@ -93,6 +93,9 @@ describe('SwapERC20 Integration', () => {
       BONUS_MAX
     )
     await swap.deployed()
+
+    // Authorize fee receiver by default for tests
+    await swap.connect(deployer).setFeeReceiver(feeReceiver.address)
   })
 
   describe('Test token holder bonuss', async () => {
@@ -104,7 +107,7 @@ describe('SwapERC20 Integration', () => {
       const order = await createSignedOrder({}, signer)
 
       await expect(
-        swap.connect(sender).swap(sender.address, ...order)
+        swap.connect(sender).swap(order, sender.address, feeReceiver.address)
       ).to.be.revertedWith('TransferFromFailed')
     })
 
@@ -116,7 +119,7 @@ describe('SwapERC20 Integration', () => {
       const order = await createSignedOrder({}, signer)
 
       await expect(
-        swap.connect(sender).swap(sender.address, ...order)
+        swap.connect(sender).swap(order, sender.address, feeReceiver.address)
       ).to.be.revertedWith('TransferFromFailed')
     })
 
@@ -128,7 +131,7 @@ describe('SwapERC20 Integration', () => {
       const order = await createSignedOrder({}, signer)
 
       await expect(
-        swap.connect(sender).swap(sender.address, ...order)
+        swap.connect(sender).swap(order, sender.address, feeReceiver.address)
       ).to.be.revertedWith('TransferFromFailed')
     })
 
@@ -140,7 +143,7 @@ describe('SwapERC20 Integration', () => {
       const order = await createSignedOrder({}, signer)
 
       await expect(
-        swap.connect(sender).swap(sender.address, ...order)
+        swap.connect(sender).swap(order, sender.address, feeReceiver.address)
       ).to.be.revertedWith('TransferFromFailed')
     })
 
@@ -152,7 +155,7 @@ describe('SwapERC20 Integration', () => {
 
       const order = await createSignedOrder({}, signer)
 
-      await expect(swap.connect(sender).swap(sender.address, ...order)).to.emit(
+      await expect(swap.connect(sender).swap(order, sender.address, feeReceiver.address)).to.emit(
         swap,
         'SwapERC20'
       )
@@ -163,8 +166,8 @@ describe('SwapERC20 Integration', () => {
       // Expect full amount to have been sent to sender
       expect(await signerToken.balanceOf(sender.address)).to.equal('10000')
 
-      // Expect full fee to have been sent to fee wallet
-      expect(await signerToken.balanceOf(protocolFeeWallet.address)).to.equal(
+      // Expect full fee to have been sent to fee receiver
+      expect(await signerToken.balanceOf(feeReceiver.address)).to.equal(
         '30'
       )
     })
@@ -186,7 +189,7 @@ describe('SwapERC20 Integration', () => {
       const order = await createSignedOrder({}, signer)
 
       await expect(
-        await swap.connect(sender).swap(sender.address, ...order)
+        await swap.connect(sender).swap(order, sender.address, feeReceiver.address)
       ).to.emit(swap, 'SwapERC20')
 
       // Expect full 30 to be taken from signer
@@ -195,8 +198,8 @@ describe('SwapERC20 Integration', () => {
       // Expect half of the fee to have gone to the sender as bonus
       expect(await signerToken.balanceOf(sender.address)).to.equal('10015')
 
-      // Expect half of the fee to have gone to the fee wallet
-      expect(await signerToken.balanceOf(protocolFeeWallet.address)).to.equal(
+      // Expect half of the fee to have gone to the fee receiver
+      expect(await signerToken.balanceOf(feeReceiver.address)).to.equal(
         '15'
       )
     })
@@ -213,7 +216,7 @@ describe('SwapERC20 Integration', () => {
         },
         signer
       )
-      await expect(await swap.connect(sender).swapLight(...order)).to.emit(
+      await expect(await swap.connect(sender).swapLight(order, sender.address, feeReceiver.address)).to.emit(
         swap,
         'SwapERC20'
       )
@@ -224,8 +227,8 @@ describe('SwapERC20 Integration', () => {
       // Expect no fee to have gone to the sender
       expect(await signerToken.balanceOf(sender.address)).to.equal('10000')
 
-      // Expect full fee to have gone to the fee wallet
-      expect(await signerToken.balanceOf(protocolFeeWallet.address)).to.equal(
+      // Expect full fee to have gone to the fee receiver
+      expect(await signerToken.balanceOf(feeReceiver.address)).to.equal(
         '7'
       )
     })

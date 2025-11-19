@@ -197,6 +197,10 @@ describe('BatchCall Integration', () => {
     )
     await swapERC20.deployed()
 
+    // Authorize fee receiver for tests
+    const feeReceiver = (await ethers.getSigners())[10]
+    await swapERC20.connect(deployer).setFeeReceiver(feeReceiver.address)
+
     batchCall = await (await ethers.getContractFactory('BatchCall')).deploy()
     await batchCall.deployed()
 
@@ -339,20 +343,13 @@ describe('BatchCall Integration', () => {
         },
         signer
       )
+      const feeReceiver = (await ethers.getSigners())[10]
       await swapERC20
         .connect(sender)
         .swap(
+          ERC20order,
           sender.address,
-          ERC20order.nonce,
-          ERC20order.expiry,
-          ERC20order.signerWallet,
-          ERC20order.signerToken,
-          ERC20order.signerAmount,
-          ERC20order.senderToken,
-          ERC20order.senderAmount,
-          ERC20order.v,
-          ERC20order.r,
-          ERC20order.s
+          feeReceiver.address
         )
       const orderValidities = await batchCall
         .connect(sender)

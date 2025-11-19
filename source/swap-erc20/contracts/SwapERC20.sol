@@ -40,6 +40,9 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   // Mapping of signer to authorized signatory
   mapping(address => address) public override authorized;
 
+  // Mapping of authorized fee receivers
+  mapping(address => bool) public authorizedFeeReceivers;
+
   uint256 public protocolFee;
   uint256 public protocolFeeLight;
   address public protocolFeeWallet;
@@ -96,162 +99,125 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
 
   /**
    * @notice Atomic ERC20 Swap
-   * @param recipient address Wallet to receive sender proceeds
-   * @param nonce uint256 Unique and should be sequential
-   * @param expiry uint256 Expiry in seconds since 1 January 1970
-   * @param signerWallet address Wallet of the signer
-   * @param signerToken address ERC20 token transferred from the signer
-   * @param signerAmount uint256 Amount transferred from the signer
-   * @param senderToken address ERC20 token transferred from the sender
-   * @param senderAmount uint256 Amount transferred from the sender
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
+   * @param order OrderERC20 struct containing order details and signature
+   * @param senderReceiver address Wallet to receive signer token proceeds
+   * @param feeReceiver address Wallet to receive protocol fees
    */
   function swap(
-    address recipient,
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
+    OrderERC20 calldata order,
+    address senderReceiver,
+    address feeReceiver
   ) external override {
+    // Ensure fee receiver is authorized
+    if (!authorizedFeeReceivers[feeReceiver]) revert FeeReceiverInvalid();
+
     // Ensure the order is valid
     _check(
-      nonce,
-      expiry,
-      signerWallet,
-      signerToken,
-      signerAmount,
+      order.nonce,
+      order.expiry,
+      order.signerWallet,
+      order.signerToken,
+      order.signerAmount,
       msg.sender,
-      senderToken,
-      senderAmount,
-      v,
-      r,
-      s
+      order.senderToken,
+      order.senderAmount,
+      order.v,
+      order.r,
+      order.s
     );
 
     // Transfer token from sender to signer
     SafeTransferLib.safeTransferFrom(
-      senderToken,
+      order.senderToken,
       msg.sender,
-      signerWallet,
-      senderAmount
+      order.signerWallet,
+      order.senderAmount
     );
 
-    // Transfer token from signer to recipient
+    // Transfer token from signer to senderReceiver
     SafeTransferLib.safeTransferFrom(
-      signerToken,
-      signerWallet,
-      recipient,
-      signerAmount
+      order.signerToken,
+      order.signerWallet,
+      senderReceiver,
+      order.signerAmount
     );
 
     // Calculate and transfer protocol fee
-    _transferProtocolFee(signerToken, signerWallet, signerAmount);
+    _transferProtocolFee(order.signerToken, order.signerWallet, order.signerAmount, feeReceiver);
 
     // Emit event
-    emit SwapERC20(nonce, signerWallet);
+    emit SwapERC20(order.nonce, order.signerWallet);
   }
 
   /**
    * @notice Atomic ERC20 Swap for Any Sender
-   * @param recipient address Wallet to receive sender proceeds
-   * @param nonce uint256 Unique and should be sequential
-   * @param expiry uint256 Expiry in seconds since 1 January 1970
-   * @param signerWallet address Wallet of the signer
-   * @param signerToken address ERC20 token transferred from the signer
-   * @param signerAmount uint256 Amount transferred from the signer
-   * @param senderToken address ERC20 token transferred from the sender
-   * @param senderAmount uint256 Amount transferred from the sender
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
+   * @param order OrderERC20 struct containing order details and signature
+   * @param senderReceiver address Wallet to receive signer token proceeds
+   * @param feeReceiver address Wallet to receive protocol fees
    */
   function swapAnySender(
-    address recipient,
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
+    OrderERC20 calldata order,
+    address senderReceiver,
+    address feeReceiver
   ) external override {
+    // Ensure fee receiver is authorized
+    if (!authorizedFeeReceivers[feeReceiver]) revert FeeReceiverInvalid();
+
     // Ensure the order is valid
     _check(
-      nonce,
-      expiry,
-      signerWallet,
-      signerToken,
-      signerAmount,
+      order.nonce,
+      order.expiry,
+      order.signerWallet,
+      order.signerToken,
+      order.signerAmount,
       address(0),
-      senderToken,
-      senderAmount,
-      v,
-      r,
-      s
+      order.senderToken,
+      order.senderAmount,
+      order.v,
+      order.r,
+      order.s
     );
 
     // Transfer token from sender to signer
     SafeTransferLib.safeTransferFrom(
-      senderToken,
+      order.senderToken,
       msg.sender,
-      signerWallet,
-      senderAmount
+      order.signerWallet,
+      order.senderAmount
     );
 
-    // Transfer token from signer to recipient
+    // Transfer token from signer to senderReceiver
     SafeTransferLib.safeTransferFrom(
-      signerToken,
-      signerWallet,
-      recipient,
-      signerAmount
+      order.signerToken,
+      order.signerWallet,
+      senderReceiver,
+      order.signerAmount
     );
 
     // Calculate and transfer protocol fee
-    _transferProtocolFee(signerToken, signerWallet, signerAmount);
+    _transferProtocolFee(order.signerToken, order.signerWallet, order.signerAmount, feeReceiver);
 
     // Emit event
-    emit SwapERC20(nonce, signerWallet);
+    emit SwapERC20(order.nonce, order.signerWallet);
   }
 
   /**
    * @notice Swap Atomic ERC20 Swap (Minimal Gas)
    * @dev No transfer checks. Only use with known tokens.
-   * @param nonce uint256 Unique and should be sequential
-   * @param expiry uint256 Expiry in seconds since 1 January 1970
-   * @param signerWallet address Wallet of the signer
-   * @param signerToken address ERC20 token transferred from the signer
-   * @param signerAmount uint256 Amount transferred from the signer
-   * @param senderToken address ERC20 token transferred from the sender
-   * @param senderAmount uint256 Amount transferred from the sender
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
+   * @param order OrderERC20 struct containing order details and signature
+   * @param senderReceiver address Wallet to receive signer token proceeds
+   * @param feeReceiver address Wallet to receive protocol fees
    */
   function swapLight(
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
+    OrderERC20 calldata order,
+    address senderReceiver,
+    address feeReceiver
   ) external override {
+    // Ensure fee receiver is authorized
+    if (!authorizedFeeReceivers[feeReceiver]) revert FeeReceiverInvalid();
+
     // Ensure the expiry is not passed
-    if (expiry <= block.timestamp) revert OrderExpired();
+    if (order.expiry <= block.timestamp) revert OrderExpired();
 
     // Recover the signatory from the hash and signature
     address signatory = ECDSA.tryRecover(
@@ -259,63 +225,63 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
         keccak256(
           abi.encode(
             ORDER_TYPEHASH,
-            nonce,
-            expiry,
-            signerWallet,
-            signerToken,
-            signerAmount,
+            order.nonce,
+            order.expiry,
+            order.signerWallet,
+            order.signerToken,
+            order.signerAmount,
             protocolFeeLight,
             msg.sender,
-            senderToken,
-            senderAmount
+            order.senderToken,
+            order.senderAmount
           )
         )
       ),
-      v,
-      r,
-      s
+      order.v,
+      order.r,
+      order.s
     );
     // Ensure the signatory is not null
     if (signatory == address(0)) revert SignatureInvalid();
 
     // Ensure the nonce is not yet used and if not mark it used
-    if (!_markNonceAsUsed(signatory, nonce)) revert NonceAlreadyUsed(nonce);
+    if (!_markNonceAsUsed(signatory, order.nonce)) revert NonceAlreadyUsed(order.nonce);
 
     // Ensure signatory is authorized to sign
-    if (authorized[signerWallet] != address(0)) {
+    if (authorized[order.signerWallet] != address(0)) {
       // If one is set by signer wallet, signatory must be authorized
-      if (signatory != authorized[signerWallet]) revert SignatureInvalid();
+      if (signatory != authorized[order.signerWallet]) revert SignatureInvalid();
     } else {
       // Otherwise, signatory must be signer wallet
-      if (signatory != signerWallet) revert SignatureInvalid();
+      if (signatory != order.signerWallet) revert SignatureInvalid();
     }
 
     // Transfer token from sender to signer
     SafeTransferLib.safeTransferFrom(
-      senderToken,
+      order.senderToken,
       msg.sender,
-      signerWallet,
-      senderAmount
+      order.signerWallet,
+      order.senderAmount
     );
 
-    // Transfer token from signer to sender
+    // Transfer token from signer to senderReceiver
     SafeTransferLib.safeTransferFrom(
-      signerToken,
-      signerWallet,
-      msg.sender,
-      signerAmount
+      order.signerToken,
+      order.signerWallet,
+      senderReceiver,
+      order.signerAmount
     );
 
-    // Transfer protocol fee from signer to fee wallet
+    // Transfer protocol fee from signer to feeReceiver
     SafeTransferLib.safeTransferFrom(
-      signerToken,
-      signerWallet,
-      protocolFeeWallet,
-      (signerAmount * protocolFeeLight) / FEE_DIVISOR
+      order.signerToken,
+      order.signerWallet,
+      feeReceiver,
+      (order.signerAmount * protocolFeeLight) / FEE_DIVISOR
     );
 
     // Emit event
-    emit SwapERC20(nonce, signerWallet);
+    emit SwapERC20(order.nonce, order.signerWallet);
   }
 
   /**
@@ -385,6 +351,27 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   }
 
   /**
+   * @notice Authorize a fee receiver
+   * @param _feeReceiver address Wallet authorized to receive protocol fees
+   * @dev Only owner
+   */
+  function setFeeReceiver(address _feeReceiver) external onlyOwner {
+    if (_feeReceiver == address(0)) revert FeeReceiverInvalid();
+    authorizedFeeReceivers[_feeReceiver] = true;
+    emit SetFeeReceiver(_feeReceiver);
+  }
+
+  /**
+   * @notice Revoke a fee receiver authorization
+   * @param _feeReceiver address Wallet to revoke authorization from
+   * @dev Only owner
+   */
+  function revokeFeeReceiver(address _feeReceiver) external onlyOwner {
+    delete authorizedFeeReceivers[_feeReceiver];
+    emit RevokeFeeReceiver(_feeReceiver);
+  }
+
+  /**
    * @notice Authorize a signatory
    * @param signatory address Wallet of the signatory to authorize
    * @dev Emits an Authorize event
@@ -427,46 +414,15 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
   /**
    * @notice Checks an order for errors
    * @param senderWallet address Wallet that would send the order
-   * @param nonce uint256 Unique and should be sequential
-   * @param expiry uint256 Expiry in seconds since 1 January 1970
-   * @param signerWallet address Wallet of the signer
-   * @param signerToken address ERC20 token transferred from the signer
-   * @param signerAmount uint256 Amount transferred from the signer
-   * @param senderToken address ERC20 token transferred from the sender
-   * @param senderAmount uint256 Amount transferred from the sender
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
+   * @param order OrderERC20 struct containing order details and signature
    * @return bytes32[] errors
    */
   function check(
     address senderWallet,
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
+    OrderERC20 calldata order
   ) external view returns (bytes32[] memory) {
     bytes32[] memory errors = new bytes32[](MAX_ERROR_COUNT);
     uint256 count;
-
-    OrderERC20 memory order;
-    order.nonce = nonce;
-    order.expiry = expiry;
-    order.signerWallet = signerWallet;
-    order.signerToken = signerToken;
-    order.signerAmount = signerAmount;
-    order.senderToken = senderToken;
-    order.senderAmount = senderAmount;
-    order.v = v;
-    order.r = r;
-    order.s = s;
-    order.senderWallet = senderWallet;
 
     // Validate as the authorized signatory if set
     address signatory = order.signerWallet;
@@ -487,7 +443,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
           order.senderToken,
           order.senderAmount
         ),
-        abi.encodePacked(r, s, v)
+        abi.encodePacked(order.r, order.s, order.v)
       )
     ) {
       errors[count++] = "SignatureInvalid";
@@ -499,13 +455,15 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
       errors[count++] = "OrderExpired";
     }
 
-    if (order.senderWallet != address(0)) {
+    // Skip sender checks if order.senderWallet is zero (swapAnySender order)
+    // or if senderWallet parameter is zero (caller wants to skip checks)
+    if (order.senderWallet != address(0) && senderWallet != address(0)) {
       uint256 senderBalance = ERC20(order.senderToken).balanceOf(
-        order.senderWallet
+        senderWallet
       );
 
       uint256 senderAllowance = ERC20(order.senderToken).allowance(
-        order.senderWallet,
+        senderWallet,
         address(this)
       );
 
@@ -721,11 +679,13 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
    * @param sourceToken address
    * @param sourceWallet address
    * @param amount uint256
+   * @param feeReceiver address Wallet to receive protocol fees
    */
   function _transferProtocolFee(
     address sourceToken,
     address sourceWallet,
-    uint256 amount
+    uint256 amount,
+    address feeReceiver
   ) private {
     // Determine protocol fee from amount
     uint256 feeAmount = (amount * protocolFee) / FEE_DIVISOR;
@@ -746,19 +706,19 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
           msg.sender,
           bonusAmount
         );
-        // Transfer remaining protocol fee from source to fee wallet
+        // Transfer remaining protocol fee from source to feeReceiver
         SafeTransferLib.safeTransferFrom(
           sourceToken,
           sourceWallet,
-          protocolFeeWallet,
+          feeReceiver,
           feeAmount - bonusAmount
         );
       } else {
-        // Transfer full protocol fee from source to fee wallet
+        // Transfer full protocol fee from source to feeReceiver
         SafeTransferLib.safeTransferFrom(
           sourceToken,
           sourceWallet,
-          protocolFeeWallet,
+          feeReceiver,
           feeAmount
         );
       }

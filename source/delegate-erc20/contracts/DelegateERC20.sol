@@ -23,6 +23,9 @@ contract DelegateERC20 is IDelegateERC20, Ownable {
   // Mapping of senderWallet to an authorized manager
   mapping(address => address) public authorized;
 
+  // Fee receiver address for protocol fees
+  address public feeReceiver;
+
   /**
    * @notice Constructor
    * @param _swapERC20Contract address
@@ -109,84 +112,64 @@ contract DelegateERC20 is IDelegateERC20, Ownable {
    * @notice Perform an atomic ERC-20 swap
    * @dev Forwards to underlying SwapERC20 contract
    * @param _senderWallet address Wallet to receive sender proceeds
-   * @param _nonce uint256 Unique and should be sequential
-   * @param _expiry uint256 Expiry in seconds since 1 January 1970
-   * @param _signerWallet address Wallet of the signer
-   * @param _signerToken address ERC-20 token transferred from the signer
-   * @param _signerAmount uint256 Amount transferred from the signer
-   * @param _senderToken address ERC-20 token transferred from the sender
-   * @param _senderAmount uint256 Amount transferred from the sender
-   * @param _v uint8 "v" value of the ECDSA signature
-   * @param _r bytes32 "r" value of the ECDSA signature
-   * @param _s bytes32 "s" value of the ECDSA signature
+   * @param order OrderERC20 struct containing order details and signature
+   * @param _feeReceiver address Wallet to receive protocol fees
    */
   function swapERC20(
     address _senderWallet,
-    uint256 _nonce,
-    uint256 _expiry,
-    address _signerWallet,
-    address _signerToken,
-    uint256 _signerAmount,
-    address _senderToken,
-    uint256 _senderAmount,
-    uint8 _v,
-    bytes32 _r,
-    bytes32 _s
+    ISwapERC20.OrderERC20 calldata order,
+    address _feeReceiver
   ) external {
-    Rule storage rule = rulesERC20[_senderWallet][_senderToken][_signerToken];
+    if (feeReceiver == address(0)) revert FeeReceiverNotSet();
+    if (_feeReceiver != feeReceiver) revert FeeReceiverMismatch();
+
+    Rule storage rule = rulesERC20[_senderWallet][order.senderToken][order.signerToken];
     // Ensure the expiry is not passed
     if (rule.expiry <= block.timestamp) revert RuleERC20ExpiredOrDoesNotExist();
 
     // Ensure the sender amount is valid
-    if (_senderAmount > (rule.senderAmount - rule.senderFilledAmount)) {
+    if (order.senderAmount > (rule.senderAmount - rule.senderFilledAmount)) {
       revert SenderAmountInvalid();
     }
 
     // Ensure the signer amount is valid
     if (
-      _signerAmount != (rule.signerAmount * _senderAmount) / rule.senderAmount
+      order.signerAmount != (rule.signerAmount * order.senderAmount) / rule.senderAmount
     ) {
       revert SignerAmountInvalid();
     }
 
     // Transfer the sender token to this contract
     SafeTransferLib.safeTransferFrom(
-      _senderToken,
+      order.senderToken,
       _senderWallet,
       address(this),
-      _senderAmount
+      order.senderAmount
     );
 
     // Approve the SwapERC20 contract to transfer the sender token
     SafeTransferLib.safeApprove(
-      _senderToken,
+      order.senderToken,
       address(swapERC20Contract),
-      _senderAmount
+      order.senderAmount
     );
 
-    // Execute the swap
+    // Execute the swap - senderReceiver is this contract (delegate), feeReceiver is passed
     swapERC20Contract.swapLight(
-      _nonce,
-      _expiry,
-      _signerWallet,
-      _signerToken,
-      _signerAmount,
-      _senderToken,
-      _senderAmount,
-      _v,
-      _r,
-      _s
+      order,
+      address(this),
+      _feeReceiver
     );
 
     // Transfer the signer token to the sender wallet
-    SafeTransferLib.safeTransfer(_signerToken, _senderWallet, _signerAmount);
+    SafeTransferLib.safeTransfer(order.signerToken, _senderWallet, order.signerAmount);
 
     // Update the filled amount
-    rulesERC20[_senderWallet][_senderToken][_signerToken]
-      .senderFilledAmount += _senderAmount;
+    rulesERC20[_senderWallet][order.senderToken][order.signerToken]
+      .senderFilledAmount += order.senderAmount;
 
     // Emit a DelegatedSwapERC20For event
-    emit DelegatedSwapERC20For(_senderWallet, _signerWallet, _nonce);
+    emit DelegatedSwapERC20For(_senderWallet, order.signerWallet, order.nonce);
   }
 
   /**
@@ -217,5 +200,15 @@ contract DelegateERC20 is IDelegateERC20, Ownable {
   function setSwapERC20Contract(address _swapERC20Contract) external onlyOwner {
     if (_swapERC20Contract == address(0)) revert AddressInvalid();
     swapERC20Contract = ISwapERC20(_swapERC20Contract);
+  }
+
+  /**
+   * @notice Set the fee receiver address
+   * @param _feeReceiver address Address authorized to receive protocol fees
+   */
+  function setFeeReceiver(address _feeReceiver) external onlyOwner {
+    if (_feeReceiver == address(0)) revert AddressInvalid();
+    feeReceiver = _feeReceiver;
+    emit SetFeeReceiver(_feeReceiver);
   }
 }

@@ -27,6 +27,8 @@ interface ISwapERC20 {
   event SetBonusScale(uint256 bonusScale);
   event SetBonusMax(uint256 bonusMax);
   event SetStaking(address indexed staking);
+  event SetFeeReceiver(address indexed feeReceiver);
+  event RevokeFeeReceiver(address indexed feeReceiver);
 
   error MaxTooHigh();
   error NonceAlreadyUsed(uint256);
@@ -39,46 +41,24 @@ interface ISwapERC20 {
   error SignatureInvalid();
   error StakingInvalid();
   error TransferFromFailed();
+  error FeeReceiverInvalid();
 
   function swap(
-    address recipient,
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
+    OrderERC20 calldata order,
+    address senderReceiver,
+    address feeReceiver
   ) external;
 
   function swapAnySender(
-    address recipient,
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
+    OrderERC20 calldata order,
+    address senderReceiver,
+    address feeReceiver
   ) external;
 
   function swapLight(
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
+    OrderERC20 calldata order,
+    address senderReceiver,
+    address feeReceiver
   ) external;
 
   function authorize(address sender) external;
@@ -89,16 +69,7 @@ interface ISwapERC20 {
 
   function check(
     address senderWallet,
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
+    OrderERC20 calldata order
   ) external view returns (bytes32[] memory);
 
   function nonceUsed(address, uint256) external view returns (bool);

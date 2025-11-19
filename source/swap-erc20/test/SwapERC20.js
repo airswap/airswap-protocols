@@ -1,7 +1,6 @@
 const { expect } = require('chai')
 const {
   createOrderERC20,
-  orderERC20ToParams,
   createOrderERC20Signature,
   ADDRESS_ZERO,
   SECONDS_IN_DAY,
@@ -24,6 +23,7 @@ describe('SwapERC20 Unit', () => {
   let signer
   let protocolFeeWallet
   let anyone
+  let feeReceiver
 
   const CHAIN_ID = 31337
   const PROTOCOL_FEE = '30'
@@ -76,7 +76,7 @@ describe('SwapERC20 Unit', () => {
       senderAmount: DEFAULT_AMOUNT,
       ...params,
     })
-    return orderERC20ToParams({
+    return {
       ...unsignedOrder,
       ...(await createOrderERC20Signature(
         unsignedOrder,
@@ -84,7 +84,7 @@ describe('SwapERC20 Unit', () => {
         swap.address,
         CHAIN_ID
       )),
-    })
+    }
   }
   async function createSignedPublicOrderERC20(params, signatory) {
     const unsignedOrder = createOrderERC20({
@@ -97,7 +97,7 @@ describe('SwapERC20 Unit', () => {
       senderAmount: DEFAULT_AMOUNT,
       ...params,
     })
-    return orderERC20ToParams({
+    return {
       ...unsignedOrder,
       ...(await createOrderERC20Signature(
         unsignedOrder,
@@ -105,7 +105,7 @@ describe('SwapERC20 Unit', () => {
         swap.address,
         CHAIN_ID
       )),
-    })
+    }
   }
 
   async function setUpAllowances(senderAmount, signerAmount) {
@@ -127,7 +127,7 @@ describe('SwapERC20 Unit', () => {
   }
 
   async function checkForErrors(order, senderAddress = sender.address) {
-    return await swap.connect(sender).check(senderAddress, ...order)
+    return await swap.connect(sender).check(senderAddress, order)
   }
 
   beforeEach(async () => {
@@ -139,7 +139,7 @@ describe('SwapERC20 Unit', () => {
   })
 
   before('get signers and deploy', async () => {
-    ;[deployer, sender, signer, protocolFeeWallet, anyone] =
+    ;[deployer, sender, signer, protocolFeeWallet, anyone, feeReceiver] =
       await ethers.getSigners()
 
     signerToken = await deployMockContract(deployer, IERC20.abi)
@@ -161,6 +161,9 @@ describe('SwapERC20 Unit', () => {
       BONUS_MAX
     )
     await swap.deployed()
+
+    // Authorize fee receiver by default for tests
+    await swap.connect(deployer).setFeeReceiver(feeReceiver.address)
   })
 
   describe('Constructor', async () => {
@@ -322,6 +325,36 @@ describe('SwapERC20 Unit', () => {
         swap.connect(deployer).setStaking(ADDRESS_ZERO)
       ).to.be.revertedWith('StakingInvalid')
     })
+    it('test setFeeReceiver', async () => {
+      await expect(swap.connect(deployer).setFeeReceiver(anyone.address)).to.emit(
+        swap,
+        'SetFeeReceiver'
+      )
+      expect(await swap.authorizedFeeReceivers(anyone.address)).to.equal(true)
+    })
+    it('test setFeeReceiver with zero address', async () => {
+      await expect(
+        swap.connect(deployer).setFeeReceiver(ADDRESS_ZERO)
+      ).to.be.revertedWith('FeeReceiverInvalid')
+    })
+    it('test setFeeReceiver as non-owner', async () => {
+      await expect(
+        swap.connect(anyone).setFeeReceiver(anyone.address)
+      ).to.be.revertedWith('Unauthorized')
+    })
+    it('test revokeFeeReceiver', async () => {
+      await swap.connect(deployer).setFeeReceiver(anyone.address)
+      await expect(swap.connect(deployer).revokeFeeReceiver(anyone.address)).to.emit(
+        swap,
+        'RevokeFeeReceiver'
+      )
+      expect(await swap.authorizedFeeReceivers(anyone.address)).to.equal(false)
+    })
+    it('test revokeFeeReceiver as non-owner', async () => {
+      await expect(
+        swap.connect(anyone).revokeFeeReceiver(anyone.address)
+      ).to.be.revertedWith('Unauthorized')
+    })
   })
 
   describe('Test calculateProtocolFee', async () => {
@@ -367,10 +400,19 @@ describe('SwapERC20 Unit', () => {
     it('test swaps', async () => {
       const order = await createSignedOrderERC20({}, signer)
 
-      await expect(swap.connect(sender).swap(sender.address, ...order)).to.emit(
+      await expect(swap.connect(sender).swap(order, sender.address, feeReceiver.address)).to.emit(
         swap,
         'SwapERC20'
       )
+    })
+
+    it('test swap with unauthorized fee receiver fails', async () => {
+      const order = await createSignedOrderERC20({}, signer)
+      const unauthorizedFeeReceiver = (await ethers.getSigners())[7]
+
+      await expect(
+        swap.connect(sender).swap(order, sender.address, unauthorizedFeeReceiver.address)
+      ).to.be.revertedWith('FeeReceiverInvalid')
     })
 
     it('test authorized signer', async () => {
@@ -385,7 +427,7 @@ describe('SwapERC20 Unit', () => {
         .to.emit(swap, 'Authorize')
         .withArgs(signer.address, anyone.address)
 
-      await expect(swap.connect(sender).swap(sender.address, ...order)).to.emit(
+      await expect(swap.connect(sender).swap(order, sender.address, feeReceiver.address)).to.emit(
         swap,
         'SwapERC20'
       )
@@ -403,7 +445,7 @@ describe('SwapERC20 Unit', () => {
         .to.emit(swap, 'Authorize')
         .withArgs(erc1271.address, signer.address)
 
-      await expect(swap.connect(sender).swap(sender.address, ...order)).to.emit(
+      await expect(swap.connect(sender).swap(order, sender.address, feeReceiver.address)).to.emit(
         swap,
         'SwapERC20'
       )
@@ -422,7 +464,7 @@ describe('SwapERC20 Unit', () => {
         .withArgs(deployer.address, signer.address)
 
       await expect(
-        swap.connect(sender).swap(sender.address, ...order)
+        swap.connect(sender).swap(order, sender.address, feeReceiver.address)
       ).to.be.revertedWith('SignatureInvalid')
     })
 
@@ -435,7 +477,7 @@ describe('SwapERC20 Unit', () => {
       )
 
       await expect(
-        swap.connect(sender).swap(sender.address, ...order)
+        swap.connect(sender).swap(order, sender.address, feeReceiver.address)
       ).to.be.revertedWith('SignatureInvalid')
     })
 
@@ -447,7 +489,7 @@ describe('SwapERC20 Unit', () => {
         signer
       )
       await expect(
-        swap.connect(sender).swap(sender.address, ...order)
+        swap.connect(sender).swap(order, sender.address, feeReceiver.address)
       ).to.be.revertedWith('OrderExpired')
     })
 
@@ -458,8 +500,8 @@ describe('SwapERC20 Unit', () => {
         },
         signer
       )
-      await swap.connect(sender).swap(sender.address, ...order)
-      await expect(swap.connect(sender).swap(sender.address, ...order))
+      await swap.connect(sender).swap(order, sender.address, feeReceiver.address)
+      await expect(swap.connect(sender).swap(order, sender.address, feeReceiver.address))
         .to.be.revertedWith('NonceAlreadyUsed')
         .withArgs(0)
     })
@@ -472,7 +514,7 @@ describe('SwapERC20 Unit', () => {
         signer
       )
       await swap.connect(signer).cancel([1])
-      await expect(swap.connect(sender).swap(sender.address, ...order))
+      await expect(swap.connect(sender).swap(order, sender.address, feeReceiver.address))
         .to.be.revertedWith('NonceAlreadyUsed')
         .withArgs(1)
     })
@@ -485,7 +527,7 @@ describe('SwapERC20 Unit', () => {
       )
 
       await expect(
-        swap.connect(sender).swap(sender.address, ...order)
+        swap.connect(sender).swap(order, sender.address, feeReceiver.address)
       ).to.be.revertedWith('SignatureInvalid')
     })
   })
@@ -495,8 +537,17 @@ describe('SwapERC20 Unit', () => {
       const order = await createSignedPublicOrderERC20({}, signer)
 
       await expect(
-        swap.connect(sender).swapAnySender(sender.address, ...order)
+        swap.connect(sender).swapAnySender(order, sender.address, feeReceiver.address)
       ).to.emit(swap, 'SwapERC20')
+    })
+
+    it('test swapAnySender with unauthorized fee receiver fails', async () => {
+      const order = await createSignedPublicOrderERC20({}, signer)
+      const unauthorizedFeeReceiver = (await ethers.getSigners())[7]
+
+      await expect(
+        swap.connect(sender).swapAnySender(order, sender.address, unauthorizedFeeReceiver.address)
+      ).to.be.revertedWith('FeeReceiverInvalid')
     })
 
     it('test authorized signer', async () => {
@@ -512,7 +563,7 @@ describe('SwapERC20 Unit', () => {
         .withArgs(signer.address, anyone.address)
 
       await expect(
-        swap.connect(sender).swapAnySender(sender.address, ...order)
+        swap.connect(sender).swapAnySender(order, sender.address, feeReceiver.address)
       ).to.emit(swap, 'SwapERC20')
     })
 
@@ -525,7 +576,7 @@ describe('SwapERC20 Unit', () => {
       )
 
       await expect(
-        swap.connect(sender).swapAnySender(sender.address, ...order)
+        swap.connect(sender).swapAnySender(order, sender.address, feeReceiver.address)
       ).to.be.revertedWith('SignatureInvalid')
     })
 
@@ -537,7 +588,7 @@ describe('SwapERC20 Unit', () => {
         signer
       )
       await expect(
-        swap.connect(sender).swapAnySender(sender.address, ...order)
+        swap.connect(sender).swapAnySender(order, sender.address, feeReceiver.address)
       ).to.be.revertedWith('OrderExpired')
     })
 
@@ -548,8 +599,8 @@ describe('SwapERC20 Unit', () => {
         },
         signer
       )
-      await swap.connect(sender).swapAnySender(sender.address, ...order)
-      await expect(swap.connect(sender).swapAnySender(sender.address, ...order))
+      await swap.connect(sender).swapAnySender(order, sender.address, feeReceiver.address)
+      await expect(swap.connect(sender).swapAnySender(order, sender.address, feeReceiver.address))
         .to.be.revertedWith('NonceAlreadyUsed')
         .withArgs(0)
     })
@@ -562,16 +613,16 @@ describe('SwapERC20 Unit', () => {
         signer
       )
       await swap.connect(signer).cancel([1])
-      await expect(swap.connect(sender).swapAnySender(sender.address, ...order))
+      await expect(swap.connect(sender).swapAnySender(order, sender.address, feeReceiver.address))
         .to.be.revertedWith('NonceAlreadyUsed')
         .withArgs(1)
     })
 
     it('test invalid signature', async () => {
       const order = await createSignedOrderERC20({}, signer)
-      order[7] = '29' // Change "v" of signature
+      order.v = '29' // Change "v" of signature
       await expect(
-        swap.connect(sender).swapAnySender(sender.address, ...order)
+        swap.connect(sender).swapAnySender(order, sender.address, feeReceiver.address)
       ).to.be.revertedWith('SignatureInvalid')
     })
   })
@@ -585,10 +636,24 @@ describe('SwapERC20 Unit', () => {
         signer
       )
 
-      await expect(swap.connect(sender).swapLight(...order)).to.emit(
+      await expect(swap.connect(sender).swapLight(order, sender.address, feeReceiver.address)).to.emit(
         swap,
         'SwapERC20'
       )
+    })
+
+    it('test swapLight with unauthorized fee receiver fails', async () => {
+      const order = await createSignedOrderERC20(
+        {
+          protocolFee: PROTOCOL_FEE_LIGHT,
+        },
+        signer
+      )
+      const unauthorizedFeeReceiver = (await ethers.getSigners())[7]
+
+      await expect(
+        swap.connect(sender).swapLight(order, sender.address, unauthorizedFeeReceiver.address)
+      ).to.be.revertedWith('FeeReceiverInvalid')
     })
 
     it('test light swaps with authorized', async () => {
@@ -604,7 +669,7 @@ describe('SwapERC20 Unit', () => {
         .to.emit(swap, 'Authorize')
         .withArgs(signer.address, anyone.address)
 
-      await expect(swap.connect(sender).swapLight(...order)).to.emit(
+      await expect(swap.connect(sender).swapLight(order, sender.address, feeReceiver.address)).to.emit(
         swap,
         'SwapERC20'
       )
@@ -622,7 +687,7 @@ describe('SwapERC20 Unit', () => {
         .to.emit(swap, 'Authorize')
         .withArgs(signer.address, anyone.address)
 
-      await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
+      await expect(swap.connect(sender).swapLight(order, sender.address, feeReceiver.address)).to.be.revertedWith(
         'SignatureInvalid'
       )
     })
@@ -635,14 +700,14 @@ describe('SwapERC20 Unit', () => {
       )
       const block = await ethers.provider.getBlock()
       await ethers.provider.send('evm_mine', [block.timestamp + SECONDS_IN_DAY])
-      await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
+      await expect(swap.connect(sender).swapLight(order, sender.address, feeReceiver.address)).to.be.revertedWith(
         'OrderExpired'
       )
     })
     it('test when signatory is invalid', async () => {
       const order = await createSignedOrderERC20({}, signer)
-      order[7] = '29' // Change "v" of signature
-      await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
+      order.v = '29' // Change "v" of signature
+      await expect(swap.connect(sender).swapLight(order, sender.address, feeReceiver.address)).to.be.revertedWith(
         'SignatureInvalid'
       )
     })
@@ -654,8 +719,8 @@ describe('SwapERC20 Unit', () => {
         },
         signer
       )
-      await swap.connect(sender).swapLight(...order)
-      await expect(swap.connect(sender).swapLight(...order))
+      await swap.connect(sender).swapLight(order, sender.address, feeReceiver.address)
+      await expect(swap.connect(sender).swapLight(order, sender.address, feeReceiver.address))
         .to.be.revertedWith('NonceAlreadyUsed')
         .withArgs(0)
     })
@@ -667,7 +732,7 @@ describe('SwapERC20 Unit', () => {
         },
         anyone
       )
-      await expect(swap.connect(sender).swapLight(...order)).to.be.revertedWith(
+      await expect(swap.connect(sender).swapLight(order, sender.address, feeReceiver.address)).to.be.revertedWith(
         'SignatureInvalid'
       )
     })
@@ -714,7 +779,7 @@ describe('SwapERC20 Unit', () => {
         signer
       )
       await swap.connect(deployer).setProtocolFee('0')
-      await expect(swap.connect(sender).swap(sender.address, ...order)).to.emit(
+      await expect(swap.connect(sender).swap(order, sender.address, feeReceiver.address)).to.emit(
         swap,
         'SwapERC20'
       )
@@ -734,7 +799,7 @@ describe('SwapERC20 Unit', () => {
         signer
       )
       await expect(
-        swap.connect(sender).swap(sender.address, ...order)
+        swap.connect(sender).swap(order, sender.address, feeReceiver.address)
       ).to.be.revertedWith('SignatureInvalid')
     })
   })
@@ -890,7 +955,7 @@ describe('SwapERC20 Unit', () => {
         { senderWallet: ADDRESS_ZERO },
         signer
       )
-      const errors = await checkForErrors(order, ADDRESS_ZERO)
+      const errors = await checkForErrors(order)
       expect(errors).to.have.lengthOf(0)
     })
     it('test with nonce that has already been used', async () => {
@@ -901,7 +966,7 @@ describe('SwapERC20 Unit', () => {
         .withArgs(signer.address, sender.address, DEFAULT_AMOUNT)
         .returns(true)
       await signerToken.mock.transferFrom
-        .withArgs(signer.address, protocolFeeWallet.address, SWAP_FEE)
+        .withArgs(signer.address, feeReceiver.address, SWAP_FEE)
         .returns(true)
       const order = await createSignedOrderERC20(
         {
@@ -909,7 +974,7 @@ describe('SwapERC20 Unit', () => {
         },
         signer
       )
-      await swap.connect(sender).swap(sender.address, ...order)
+      await swap.connect(sender).swap(order, sender.address, feeReceiver.address)
       await setUpAllowances(DEFAULT_AMOUNT, DEFAULT_AMOUNT + SWAP_FEE)
       await setUpBalances(DEFAULT_BALANCE, DEFAULT_BALANCE)
       const errors = await checkForErrors(order)

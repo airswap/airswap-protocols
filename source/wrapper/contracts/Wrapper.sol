@@ -14,9 +14,11 @@ contract Wrapper is Ownable2Step {
   using SafeERC20 for IERC20;
 
   event WrappedSwapFor(address indexed senderWallet);
+  event SetFeeReceiver(address indexed feeReceiver);
 
   ISwapERC20 public swapERC20Contract;
   IWETH public wethContract;
+  address public feeReceiver;
   uint256 constant MAX_UINT = 2 ** 256 - 1;
 
   /**
@@ -45,6 +47,16 @@ contract Wrapper is Ownable2Step {
   }
 
   /**
+   * @notice Set the fee receiver address
+   * @param _feeReceiver address Address authorized to receive protocol fees
+   */
+  function setFeeReceiver(address _feeReceiver) external onlyOwner {
+    require(_feeReceiver != address(0), "INVALID_FEE_RECEIVER");
+    feeReceiver = _feeReceiver;
+    emit SetFeeReceiver(_feeReceiver);
+  }
+
+  /**
    * @notice Required when withdrawing from WETH
    * @dev During unwraps, WETH.withdraw transfers ether to msg.sender (this contract)
    */
@@ -57,87 +69,33 @@ contract Wrapper is Ownable2Step {
 
   /**
    * @notice Wrapped SwapERC20.swap
-   * @param nonce uint256 Unique and should be sequential
-   * @param expiry uint256 Expiry in seconds since 1 January 1970
-   * @param signerWallet address Wallet of the signer
-   * @param signerToken address ERC20 token transferred from the signer
-   * @param signerAmount uint256 Amount transferred from the signer
-   * @param senderToken address ERC20 token transferred from the sender
-   * @param senderAmount uint256 Amount transferred from the sender
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
+   * @param order OrderERC20 struct containing order details and signature
    */
-  function swap(
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) public payable {
-    _wrapEther(senderToken, senderAmount);
+  function swap(ISwapERC20.OrderERC20 calldata order) public payable {
+    require(feeReceiver != address(0), "FEE_RECEIVER_NOT_SET");
+    _wrapEther(order.senderToken, order.senderAmount);
     swapERC20Contract.swap(
-      address(this),
-      nonce,
-      expiry,
-      signerWallet,
-      signerToken,
-      signerAmount,
-      senderToken,
-      senderAmount,
-      v,
-      r,
-      s
+      order,
+      msg.sender,
+      feeReceiver
     );
-    _unwrapEther(signerToken, signerAmount);
+    _unwrapEther(order.signerToken, order.signerAmount);
     emit WrappedSwapFor(msg.sender);
   }
 
   /**
    * @notice Wrapped SwapERC20.swapAnySender
-   * @param nonce uint256 Unique and should be sequential
-   * @param expiry uint256 Expiry in seconds since 1 January 1970
-   * @param signerWallet address Wallet of the signer
-   * @param signerToken address ERC20 token transferred from the signer
-   * @param signerAmount uint256 Amount transferred from the signer
-   * @param senderToken address ERC20 token transferred from the sender
-   * @param senderAmount uint256 Amount transferred from the sender
-   * @param v uint8 "v" value of the ECDSA signature
-   * @param r bytes32 "r" value of the ECDSA signature
-   * @param s bytes32 "s" value of the ECDSA signature
+   * @param order OrderERC20 struct containing order details and signature
    */
-  function swapAnySender(
-    uint256 nonce,
-    uint256 expiry,
-    address signerWallet,
-    address signerToken,
-    uint256 signerAmount,
-    address senderToken,
-    uint256 senderAmount,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) public payable {
-    _wrapEther(senderToken, senderAmount);
+  function swapAnySender(ISwapERC20.OrderERC20 calldata order) public payable {
+    require(feeReceiver != address(0), "FEE_RECEIVER_NOT_SET");
+    _wrapEther(order.senderToken, order.senderAmount);
     swapERC20Contract.swapAnySender(
-      address(this),
-      nonce,
-      expiry,
-      signerWallet,
-      signerToken,
-      signerAmount,
-      senderToken,
-      senderAmount,
-      v,
-      r,
-      s
+      order,
+      msg.sender,
+      feeReceiver
     );
-    _unwrapEther(signerToken, signerAmount);
+    _unwrapEther(order.signerToken, order.signerAmount);
     emit WrappedSwapFor(msg.sender);
   }
 

@@ -1,7 +1,6 @@
 const { expect } = require('chai')
 const {
   createOrderERC20,
-  orderERC20ToParams,
   createOrderERC20Signature,
   SECONDS_IN_DAY,
 } = require('@airswap/utils')
@@ -39,7 +38,7 @@ describe('DelegateERC20 Integration', () => {
       senderAmount: DEFAULT_SENDER_AMOUNT,
       ...params,
     })
-    return orderERC20ToParams({
+    return {
       ...unsignedOrder,
       ...(await createOrderERC20Signature(
         unsignedOrder,
@@ -47,7 +46,7 @@ describe('DelegateERC20 Integration', () => {
         swapERC20.address,
         CHAIN_ID
       )),
-    })
+    }
   }
 
   beforeEach(async () => {
@@ -59,7 +58,7 @@ describe('DelegateERC20 Integration', () => {
   })
 
   before('get signers and deploy', async () => {
-    ;[deployer, sender, signer, protocolFeeWallet] = await ethers.getSigners()
+    ;[deployer, sender, signer, protocolFeeWallet, feeReceiver] = await ethers.getSigners()
 
     swapERC20 = await (
       await ethers.getContractFactory(SWAP_ERC20.abi, SWAP_ERC20.bytecode)
@@ -72,10 +71,16 @@ describe('DelegateERC20 Integration', () => {
     )
     await swapERC20.deployed()
 
+    // Authorize fee receiver in SwapERC20
+    await swapERC20.connect(deployer).setFeeReceiver(feeReceiver.address)
+
     delegate = await (
       await ethers.getContractFactory('DelegateERC20')
     ).deploy(swapERC20.address)
     await delegate.deployed()
+
+    // Set fee receiver in DelegateERC20
+    await delegate.connect(deployer).setFeeReceiver(feeReceiver.address)
 
     signerToken = await (
       await ethers.getContractFactory(ERC20.abi, ERC20.bytecode)
@@ -113,7 +118,7 @@ describe('DelegateERC20 Integration', () => {
       const order = await createSignedOrderERC20({}, signer)
 
       await expect(
-        delegate.connect(signer).swapERC20(sender.address, ...order)
+        delegate.connect(signer).swapERC20(sender.address, order, feeReceiver.address)
       ).to.emit(delegate, 'DelegatedSwapERC20For')
 
       expect(await signerToken.balanceOf(sender.address)).to.equal(
