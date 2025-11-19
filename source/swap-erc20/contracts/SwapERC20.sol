@@ -468,8 +468,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     }
 
     // Skip sender checks if order.senderWallet is zero (swapAnySender order)
-    // or if senderWallet parameter is zero (caller wants to skip checks)
-    if (order.senderWallet != address(0) && senderWallet != address(0)) {
+    if (order.senderWallet != address(0)) {
       uint256 senderBalance = ERC20(order.senderToken).balanceOf(senderWallet);
 
       uint256 senderAllowance = ERC20(order.senderToken).allowance(
