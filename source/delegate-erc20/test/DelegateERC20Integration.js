@@ -58,7 +58,8 @@ describe('DelegateERC20 Integration', () => {
   })
 
   before('get signers and deploy', async () => {
-    ;[deployer, sender, signer, protocolFeeWallet, feeReceiver] = await ethers.getSigners()
+    ;[deployer, sender, signer, protocolFeeWallet, feeReceiver] =
+      await ethers.getSigners()
 
     swapERC20 = await (
       await ethers.getContractFactory(SWAP_ERC20.abi, SWAP_ERC20.bytecode)
@@ -118,7 +119,9 @@ describe('DelegateERC20 Integration', () => {
       const order = await createSignedOrderERC20({}, signer)
 
       await expect(
-        delegate.connect(signer).swapERC20(sender.address, order, feeReceiver.address)
+        delegate
+          .connect(signer)
+          .swapERC20(sender.address, order, feeReceiver.address)
       ).to.emit(delegate, 'DelegatedSwapERC20For')
 
       expect(await signerToken.balanceOf(sender.address)).to.equal(

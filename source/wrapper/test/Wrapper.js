@@ -146,10 +146,9 @@ describe('Wrapper Unit Tests', () => {
       ).to.be.revertedWith('INVALID_SWAP_ERC20_CONTRACT')
     })
     it('test setFeeReceiver', async () => {
-      await expect(wrapper.connect(deployer).setFeeReceiver(anyone.address)).to.emit(
-        wrapper,
-        'SetFeeReceiver'
-      )
+      await expect(
+        wrapper.connect(deployer).setFeeReceiver(anyone.address)
+      ).to.emit(wrapper, 'SetFeeReceiver')
       expect(await wrapper.feeReceiver()).to.equal(anyone.address)
     })
     it('test setFeeReceiver with zero address', async () => {

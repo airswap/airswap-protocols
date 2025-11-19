@@ -346,11 +346,7 @@ describe('BatchCall Integration', () => {
       const feeReceiver = (await ethers.getSigners())[10]
       await swapERC20
         .connect(sender)
-        .swap(
-          ERC20order,
-          sender.address,
-          feeReceiver.address
-        )
+        .swap(ERC20order, sender.address, feeReceiver.address)
       const orderValidities = await batchCall
         .connect(sender)
         .getNoncesUsed(

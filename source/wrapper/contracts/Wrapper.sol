@@ -74,11 +74,7 @@ contract Wrapper is Ownable2Step {
   function swap(ISwapERC20.OrderERC20 calldata order) public payable {
     require(feeReceiver != address(0), "FEE_RECEIVER_NOT_SET");
     _wrapEther(order.senderToken, order.senderAmount);
-    swapERC20Contract.swap(
-      order,
-      msg.sender,
-      feeReceiver
-    );
+    swapERC20Contract.swap(order, msg.sender, feeReceiver);
     _unwrapEther(order.signerToken, order.signerAmount);
     emit WrappedSwapFor(msg.sender);
   }
@@ -90,11 +86,7 @@ contract Wrapper is Ownable2Step {
   function swapAnySender(ISwapERC20.OrderERC20 calldata order) public payable {
     require(feeReceiver != address(0), "FEE_RECEIVER_NOT_SET");
     _wrapEther(order.senderToken, order.senderAmount);
-    swapERC20Contract.swapAnySender(
-      order,
-      msg.sender,
-      feeReceiver
-    );
+    swapERC20Contract.swapAnySender(order, msg.sender, feeReceiver);
     _unwrapEther(order.signerToken, order.signerAmount);
     emit WrappedSwapFor(msg.sender);
   }

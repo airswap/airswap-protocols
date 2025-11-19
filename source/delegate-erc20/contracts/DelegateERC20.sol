@@ -123,7 +123,9 @@ contract DelegateERC20 is IDelegateERC20, Ownable {
     if (feeReceiver == address(0)) revert FeeReceiverNotSet();
     if (_feeReceiver != feeReceiver) revert FeeReceiverMismatch();
 
-    Rule storage rule = rulesERC20[_senderWallet][order.senderToken][order.signerToken];
+    Rule storage rule = rulesERC20[_senderWallet][order.senderToken][
+      order.signerToken
+    ];
     // Ensure the expiry is not passed
     if (rule.expiry <= block.timestamp) revert RuleERC20ExpiredOrDoesNotExist();
 
@@ -134,7 +136,8 @@ contract DelegateERC20 is IDelegateERC20, Ownable {
 
     // Ensure the signer amount is valid
     if (
-      order.signerAmount != (rule.signerAmount * order.senderAmount) / rule.senderAmount
+      order.signerAmount !=
+      (rule.signerAmount * order.senderAmount) / rule.senderAmount
     ) {
       revert SignerAmountInvalid();
     }
@@ -155,14 +158,14 @@ contract DelegateERC20 is IDelegateERC20, Ownable {
     );
 
     // Execute the swap - senderReceiver is this contract (delegate), feeReceiver is passed
-    swapERC20Contract.swapLight(
-      order,
-      address(this),
-      _feeReceiver
-    );
+    swapERC20Contract.swapLight(order, address(this), _feeReceiver);
 
     // Transfer the signer token to the sender wallet
-    SafeTransferLib.safeTransfer(order.signerToken, _senderWallet, order.signerAmount);
+    SafeTransferLib.safeTransfer(
+      order.signerToken,
+      _senderWallet,
+      order.signerAmount
+    );
 
     // Update the filled amount
     rulesERC20[_senderWallet][order.senderToken][order.signerToken]

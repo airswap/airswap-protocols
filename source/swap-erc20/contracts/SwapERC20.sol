@@ -143,7 +143,12 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     );
 
     // Calculate and transfer protocol fee
-    _transferProtocolFee(order.signerToken, order.signerWallet, order.signerAmount, feeReceiver);
+    _transferProtocolFee(
+      order.signerToken,
+      order.signerWallet,
+      order.signerAmount,
+      feeReceiver
+    );
 
     // Emit event
     emit SwapERC20(order.nonce, order.signerWallet);
@@ -195,7 +200,12 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     );
 
     // Calculate and transfer protocol fee
-    _transferProtocolFee(order.signerToken, order.signerWallet, order.signerAmount, feeReceiver);
+    _transferProtocolFee(
+      order.signerToken,
+      order.signerWallet,
+      order.signerAmount,
+      feeReceiver
+    );
 
     // Emit event
     emit SwapERC20(order.nonce, order.signerWallet);
@@ -245,12 +255,14 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     if (signatory == address(0)) revert SignatureInvalid();
 
     // Ensure the nonce is not yet used and if not mark it used
-    if (!_markNonceAsUsed(signatory, order.nonce)) revert NonceAlreadyUsed(order.nonce);
+    if (!_markNonceAsUsed(signatory, order.nonce))
+      revert NonceAlreadyUsed(order.nonce);
 
     // Ensure signatory is authorized to sign
     if (authorized[order.signerWallet] != address(0)) {
       // If one is set by signer wallet, signatory must be authorized
-      if (signatory != authorized[order.signerWallet]) revert SignatureInvalid();
+      if (signatory != authorized[order.signerWallet])
+        revert SignatureInvalid();
     } else {
       // Otherwise, signatory must be signer wallet
       if (signatory != order.signerWallet) revert SignatureInvalid();
@@ -458,9 +470,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     // Skip sender checks if order.senderWallet is zero (swapAnySender order)
     // or if senderWallet parameter is zero (caller wants to skip checks)
     if (order.senderWallet != address(0) && senderWallet != address(0)) {
-      uint256 senderBalance = ERC20(order.senderToken).balanceOf(
-        senderWallet
-      );
+      uint256 senderBalance = ERC20(order.senderToken).balanceOf(senderWallet);
 
       uint256 senderAllowance = ERC20(order.senderToken).allowance(
         senderWallet,

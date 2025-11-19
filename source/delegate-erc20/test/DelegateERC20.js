@@ -103,7 +103,8 @@ describe('DelegateERC20 Unit', () => {
   })
 
   before(async () => {
-    ;[deployer, sender, signer, manager, anyone, feeReceiver] = await ethers.getSigners()
+    ;[deployer, sender, signer, manager, anyone, feeReceiver] =
+      await ethers.getSigners()
 
     const swapERC20Factory = await ethers.getContractFactory(
       SWAP_ERC20.abi,
@@ -162,10 +163,9 @@ describe('DelegateERC20 Unit', () => {
       ).to.be.revertedWith('Unauthorized')
     })
     it('test setFeeReceiver', async () => {
-      await expect(delegate.connect(deployer).setFeeReceiver(anyone.address)).to.emit(
-        delegate,
-        'SetFeeReceiver'
-      )
+      await expect(
+        delegate.connect(deployer).setFeeReceiver(anyone.address)
+      ).to.emit(delegate, 'SetFeeReceiver')
       expect(await delegate.feeReceiver()).to.equal(anyone.address)
     })
     it('test setFeeReceiver with zero address', async () => {
@@ -198,7 +198,9 @@ describe('DelegateERC20 Unit', () => {
       const order = await createSignedOrderERC20({}, signer)
 
       await expect(
-        newDelegate.connect(signer).swapERC20(sender.address, order, feeReceiver.address)
+        newDelegate
+          .connect(signer)
+          .swapERC20(sender.address, order, feeReceiver.address)
       ).to.be.revertedWith('FeeReceiverNotSet')
     })
     it('test swapERC20 fails when fee receiver mismatch', async () => {
@@ -216,7 +218,9 @@ describe('DelegateERC20 Unit', () => {
         )
 
       await expect(
-        delegate.connect(signer).swapERC20(sender.address, order, anyone.address)
+        delegate
+          .connect(signer)
+          .swapERC20(sender.address, order, anyone.address)
       ).to.be.revertedWith('FeeReceiverMismatch')
     })
   })
@@ -491,7 +495,9 @@ describe('DelegateERC20 Unit', () => {
       await setUpBalances(signer.address, sender.address)
 
       await expect(
-        delegate.connect(signer).swapERC20(sender.address, order, feeReceiver.address)
+        delegate
+          .connect(signer)
+          .swapERC20(sender.address, order, feeReceiver.address)
       ).to.emit(delegate, 'DelegatedSwapERC20For')
     })
 
@@ -547,7 +553,9 @@ describe('DelegateERC20 Unit', () => {
       )
 
       await expect(
-        delegate.connect(signer).swapERC20(sender.address, order, feeReceiver.address)
+        delegate
+          .connect(signer)
+          .swapERC20(sender.address, order, feeReceiver.address)
       ).to.emit(delegate, 'DelegatedSwapERC20For')
     })
 
@@ -600,7 +608,9 @@ describe('DelegateERC20 Unit', () => {
         (BigInt(signerPartialFill) + BigInt(PROTOCOL_FEE)).toString()
       )
       await expect(
-        delegate.connect(signer).swapERC20(sender.address, order, feeReceiver.address)
+        delegate
+          .connect(signer)
+          .swapERC20(sender.address, order, feeReceiver.address)
       ).to.emit(delegate, 'DelegatedSwapERC20For')
     })
 
@@ -629,7 +639,9 @@ describe('DelegateERC20 Unit', () => {
       await setUpBalances(signer.address, sender.address)
 
       await expect(
-        delegate.connect(signer).swapERC20(sender.address, order, feeReceiver.address)
+        delegate
+          .connect(signer)
+          .swapERC20(sender.address, order, feeReceiver.address)
       ).to.emit(delegate, 'DelegatedSwapERC20For')
     })
 
@@ -649,7 +661,9 @@ describe('DelegateERC20 Unit', () => {
         .returns(DEFAULT_SIGNER_AMOUNT)
 
       await expect(
-        delegate.connect(signer).swapERC20(sender.address, order, feeReceiver.address)
+        delegate
+          .connect(signer)
+          .swapERC20(sender.address, order, feeReceiver.address)
       ).to.be.revertedWith('RuleERC20ExpiredOrDoesNotExist')
     })
 
@@ -676,7 +690,9 @@ describe('DelegateERC20 Unit', () => {
       await setUpBalances(signer.address, sender.address)
 
       await expect(
-        delegate.connect(signer).swapERC20(sender.address, order, feeReceiver.address)
+        delegate
+          .connect(signer)
+          .swapERC20(sender.address, order, feeReceiver.address)
       ).to.be.revertedWith('RuleERC20ExpiredOrDoesNotExist')
     })
 
@@ -711,7 +727,9 @@ describe('DelegateERC20 Unit', () => {
         .returns(DEFAULT_SIGNER_AMOUNT)
 
       await expect(
-        delegate.connect(signer).swapERC20(sender.address, order, feeReceiver.address)
+        delegate
+          .connect(signer)
+          .swapERC20(sender.address, order, feeReceiver.address)
       ).to.be.revertedWith('SenderAmountInvalid')
     })
 
@@ -746,13 +764,17 @@ describe('DelegateERC20 Unit', () => {
         .returns(DEFAULT_SIGNER_AMOUNT)
 
       await expect(
-        delegate.connect(signer).swapERC20(sender.address, order, feeReceiver.address)
+        delegate
+          .connect(signer)
+          .swapERC20(sender.address, order, feeReceiver.address)
       ).to.emit(delegate, 'DelegatedSwapERC20For')
 
       const order2 = await createSignedOrderERC20({}, signer)
 
       await expect(
-        delegate.connect(signer).swapERC20(sender.address, order2, feeReceiver.address)
+        delegate
+          .connect(signer)
+          .swapERC20(sender.address, order2, feeReceiver.address)
       ).to.be.revertedWith('SenderAmountInvalid')
     })
 
@@ -793,7 +815,9 @@ describe('DelegateERC20 Unit', () => {
         .returns(DEFAULT_SIGNER_AMOUNT - 1)
 
       await expect(
-        delegate.connect(signer).swapERC20(sender.address, order, feeReceiver.address)
+        delegate
+          .connect(signer)
+          .swapERC20(sender.address, order, feeReceiver.address)
       ).to.be.revertedWith('SignerAmountInvalid')
     })
   })
