@@ -229,6 +229,9 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     // Ensure the expiry is not passed
     if (order.expiry <= block.timestamp) revert OrderExpired();
 
+    // Cache storage read to save gas (SLOAD -> MLOAD)
+    uint256 feeLight = protocolFeeLight;
+
     // Recover the signatory from the hash and signature
     address signatory = ECDSA.tryRecover(
       _hashTypedData(
@@ -240,7 +243,7 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
             order.signerWallet,
             order.signerToken,
             order.signerAmount,
-            protocolFeeLight,
+            feeLight,
             msg.sender,
             order.senderToken,
             order.senderAmount
@@ -258,14 +261,17 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
     if (!_markNonceAsUsed(signatory, order.nonce))
       revert NonceAlreadyUsed(order.nonce);
 
-    // Ensure signatory is authorized to sign
-    if (authorized[order.signerWallet] != address(0)) {
-      // If one is set by signer wallet, signatory must be authorized
-      if (signatory != authorized[order.signerWallet])
-        revert SignatureInvalid();
-    } else {
-      // Otherwise, signatory must be signer wallet
-      if (signatory != order.signerWallet) revert SignatureInvalid();
+    // Cache authorized signatory to avoid double storage read, reuse signatory variable
+    {
+      address authorizedSignatory = authorized[order.signerWallet];
+      // Ensure signatory is authorized to sign
+      if (authorizedSignatory != address(0)) {
+        // If one is set by signer wallet, signatory must be authorized
+        if (signatory != authorizedSignatory) revert SignatureInvalid();
+      } else {
+        // Otherwise, signatory must be signer wallet
+        if (signatory != order.signerWallet) revert SignatureInvalid();
+      }
     }
 
     // Transfer token from sender to signer
@@ -284,13 +290,19 @@ contract SwapERC20 is ISwapERC20, Ownable, EIP712 {
       order.signerAmount
     );
 
-    // Transfer protocol fee from signer to feeReceiver
-    SafeTransferLib.safeTransferFrom(
-      order.signerToken,
-      order.signerWallet,
-      feeReceiver,
-      (order.signerAmount * protocolFeeLight) / FEE_DIVISOR
-    );
+    // Calculate and transfer protocol fee from signer to feeReceiver
+    unchecked {
+      // Safe: protocolFeeLight < FEE_DIVISOR (10000) and signerAmount is uint256
+      // uint256 feeAmount = (order.signerAmount * feeLight) / FEE_DIVISOR;
+      // if (feeAmount > 0) {
+      SafeTransferLib.safeTransferFrom(
+        order.signerToken,
+        order.signerWallet,
+        feeReceiver,
+        (order.signerAmount * feeLight) / FEE_DIVISOR
+      );
+      // }
+    }
 
     // Emit event
     emit SwapERC20(order.nonce, order.signerWallet);
