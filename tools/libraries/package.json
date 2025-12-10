@@ -1,6 +1,6 @@
 {
   "name": "@airswap/libraries",
-  "version": "5.0.13",
+  "version": "5.0.14",
   "description": "AirSwap: Libraries for Developers",
   "repository": {
     "type": "git",
@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@airswap/batch-call": "5.1.0",
-    "@airswap/delegate-erc20": "5.1.0",
+    "@airswap/delegate-erc20": "5.1.1",
     "@airswap/jsonrpc-client-websocket": "0.0.1",
     "@airswap/pool": "5.0.1",
     "@airswap/registry": "5.0.1",
