@@ -26,6 +26,9 @@ jobs:
           echo "npm registry: $(npm config get registry)"
           echo "ACTIONS_ID_TOKEN_REQUEST_URL: ${ACTIONS_ID_TOKEN_REQUEST_URL:-not set}"
           echo "ACTIONS_ID_TOKEN_REQUEST_TOKEN: ${ACTIONS_ID_TOKEN_REQUEST_TOKEN:+set (hidden)}"
+      - name: Clean npm config
+        run: |
+          npm config delete always-auth || true
       - run: yarn install --immutable
       - run: npx lerna run compile --concurrency=1
       - name: Debug package info
@@ -38,4 +41,8 @@ jobs:
           cd source/delegate-erc20
           npm publish --dry-run --provenance --access public
       - run: npx lerna publish from-package --yes --no-verify-access --loglevel verbose
+        env:
+          NPM_CONFIG_PROVENANCE: true
+          NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
+          NPM_CONFIG_ALWAYS_AUTH: false
 
