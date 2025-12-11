@@ -33,5 +33,9 @@ jobs:
           echo "Checking packages to publish..."
           npm view @airswap/delegate-erc20 versions --registry https://registry.npmjs.org/ || echo "Package not found or not accessible"
           npm view @airswap/libraries versions --registry https://registry.npmjs.org/ || echo "Package not found or not accessible"
+      - name: Dry-run publish delegate-erc20 (auth check)
+        run: |
+          cd source/delegate-erc20
+          npm publish --dry-run --provenance --access public
       - run: npx lerna publish from-package --yes --no-verify-access --loglevel verbose
 
