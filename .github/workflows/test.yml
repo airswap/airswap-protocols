@@ -11,10 +11,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Enable Corepack
         run: corepack enable
-      - name: Use Node.js 18.x
+      - name: Use Node.js 20.17.x
         uses: actions/setup-node@v4
         with:
-          node-version: "18.x"
+          node-version: "20.17.x"
           cache: 'yarn'
       - name: Install dependencies
         run: yarn install --immutable
