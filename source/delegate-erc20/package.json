@@ -1,6 +1,6 @@
 {
   "name": "@airswap/delegate-erc20",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "AirSwap: Delegated On-chain ERC20 Trading Rules",
   "license": "MIT",
   "repository": {

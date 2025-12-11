@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - main
+permissions:
+  id-token: write
+  contents: read
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -11,11 +14,12 @@ jobs:
       - run: corepack enable
       - uses: actions/setup-node@v4
         with:
-          node-version: "18.x"
+          node-version: "20.17.x"
           cache: "yarn"
+          registry-url: "https://registry.npmjs.org"
+      - name: Update npm
+        run: npm install -g npm@latest
       - run: yarn install --immutable
-      - run: npm config set @airswap:registry https://registry.npmjs.org/
-      - run: npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
       - run: npx lerna run compile --concurrency=1
-      - run: npx lerna publish from-package --yes
+      - run: npx lerna publish from-package --yes --loglevel verbose
 

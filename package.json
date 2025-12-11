@@ -24,7 +24,7 @@
     "prepare": "husky install",
     "prettier": "prettier --write \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\" \"./**/*.json\""
   },
-  "packageManager": "yarn@4.5.3",
+  "packageManager": "yarn@4.12.0",
   "devDependencies": {
     "@ensdomains/ens": "^0.4.4",
     "@ensdomains/resolver": "^0.2.4",
@@ -36,7 +36,7 @@
     "@typechain/ethers-v5": "^11.1.2",
     "@typechain/hardhat": "^7.0.0",
     "@types/mocha": "^10.0.1",
-    "@types/node": "^18.19.130",
+    "@types/node": "^20.17.0",
     "@types/sinon-chai": "^3.2.12",
     "@typescript-eslint/eslint-plugin": "^7.1.0",
     "@typescript-eslint/parser": "^7.1.0",
@@ -61,6 +61,6 @@
     "typescript": "^5.9.3"
   },
   "engines": {
-    "node": ">=18.16.0 <19.0.0"
+    "node": ">=20.17.0"
   }
 }
