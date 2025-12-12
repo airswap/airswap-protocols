@@ -79,4 +79,10 @@ interface ISwap {
   function authorized(address) external view returns (address);
 
   function signatoryMinimumNonce(address) external view returns (uint256);
+
+  function supportsRoyalties(address token) external view returns (bool);
+
+  function calculateSenderAmount(
+    Order calldata order
+  ) external view returns (uint256);
 }

@@ -135,8 +135,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
     }
 
     // Transfer protocol fee from sender
-    uint256 protocolFeeAmount = (order.sender.amount * protocolFee) /
-      FEE_DIVISOR;
+    uint256 protocolFeeAmount = calculateProtocolFeeAmount(order.sender.amount);
     if (protocolFeeAmount > 0) {
       _transfer(
         msg.sender,
@@ -304,11 +303,7 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
       if (order.sender.kind != requiredSenderKind) {
         errors[count++] = "SenderTokenInvalid";
       } else {
-        uint256 protocolFeeAmount = (order.sender.amount * protocolFee) /
-          FEE_DIVISOR;
-        uint256 totalSenderAmount = order.sender.amount +
-          protocolFeeAmount +
-          order.affiliateAmount;
+        uint256 totalSenderAmount = calculateSenderAmount(order);
         if (supportsRoyalties(order.signer.token)) {
           (, uint256 royaltyAmount) = IERC2981(order.signer.token).royaltyInfo(
             order.signer.id,
@@ -399,10 +394,56 @@ contract Swap is ISwap, Ownable2Step, EIP712 {
   }
 
   /**
+   * @notice Calculates the total amount the sender needs to pay
+   * @param order Order The order to calculate the sender amount for
+   * @return uint256 Total amount including base amount, protocol fee, affiliate amount, and royalties
+   */
+  function calculateSenderAmount(
+    Order calldata order
+  ) public view returns (uint256) {
+    uint256 protocolFeeAmount = calculateProtocolFeeAmount(order.sender.amount);
+    uint256 royaltyAmount = calculateRoyaltyAmount(order);
+    uint256 totalSenderAmount = order.sender.amount +
+      protocolFeeAmount +
+      order.affiliateAmount +
+      royaltyAmount;
+    return totalSenderAmount;
+  }
+
+  /**
+   * @notice Calculates the protocol fee amount for a given base amount
+   * @param amount uint256 Base amount to calculate protocol fee for
+   * @return uint256 Protocol fee amount
+   */
+  function calculateProtocolFeeAmount(
+    uint256 amount
+  ) public view returns (uint256) {
+    return (amount * protocolFee) / FEE_DIVISOR;
+  }
+
+  /**
+   * @notice Calculates the royalty amount for an order if the signer token supports royalties
+   * @param order Order The order to calculate royalties for
+   * @return uint256 Royalty amount, or 0 if token doesn't support royalties
+   */
+  function calculateRoyaltyAmount(
+    Order calldata order
+  ) public view returns (uint256) {
+    if (supportsRoyalties(order.signer.token)) {
+      (, uint256 royaltyAmount) = IERC2981(order.signer.token).royaltyInfo(
+        order.signer.id,
+        order.sender.amount
+      );
+      return royaltyAmount;
+    }
+    return 0;
+  }
+
+  /**
    * @notice Checks whether a token implements EIP-2981
    * @param token address token to check
    */
-  function supportsRoyalties(address token) private view returns (bool) {
+  function supportsRoyalties(address token) public view returns (bool) {
     try IERC165(token).supportsInterface(type(IERC2981).interfaceId) returns (
       bool result
     ) {

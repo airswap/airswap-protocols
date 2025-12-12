@@ -334,6 +334,157 @@ describe('Swap Unit', () => {
         swap.connect(sender).swap(sender.address, MAX_ROYALTY, order)
       ).to.emit(swap, 'Swap')
     })
+
+    it('calculateProtocolFeeAmount returns correct fee for given amount', async () => {
+      const amount = '1000'
+      const expectedFee =
+        (BigInt(amount) * BigInt(PROTOCOL_FEE)) / BigInt(10000)
+      const calculatedFee = await swap.calculateProtocolFeeAmount(amount)
+      expect(calculatedFee).to.equal(expectedFee.toString())
+    })
+
+    it('calculateProtocolFeeAmount returns zero when protocol fee is zero', async () => {
+      await swap.connect(deployer).setProtocolFee('0')
+      const amount = '1000'
+      const calculatedFee = await swap.calculateProtocolFeeAmount(amount)
+      expect(calculatedFee).to.equal('0')
+    })
+
+    it('calculateRoyaltyAmount returns correct royalty when token supports royalties', async () => {
+      const royaltyAmount = '50'
+      await erc721token.mock.supportsInterface
+        .withArgs(ERC2981_INTERFACE_ID)
+        .returns(true)
+      await erc721token.mock.royaltyInfo.returns(ADDRESS_ZERO, royaltyAmount)
+
+      const order = await createSignedOrder(
+        {
+          signer: {
+            token: erc721token.address,
+            kind: TokenKinds.ERC721,
+            id: '1',
+            amount: '0',
+          },
+        },
+        signer
+      )
+
+      const calculatedRoyalty = await swap.calculateRoyaltyAmount(order)
+      expect(calculatedRoyalty).to.equal(royaltyAmount)
+    })
+
+    it('calculateRoyaltyAmount returns zero when token does not support royalties', async () => {
+      await erc721token.mock.supportsInterface
+        .withArgs(ERC2981_INTERFACE_ID)
+        .returns(false)
+
+      const order = await createSignedOrder(
+        {
+          signer: {
+            token: erc721token.address,
+            kind: TokenKinds.ERC721,
+            id: '1',
+            amount: '0',
+          },
+        },
+        signer
+      )
+
+      const calculatedRoyalty = await swap.calculateRoyaltyAmount(order)
+      expect(calculatedRoyalty).to.equal('0')
+    })
+
+    it('calculateSenderAmount returns correct total with all components', async () => {
+      const baseAmount = '1000'
+      const affiliateAmount = '100'
+      const royaltyAmount = '50'
+
+      await erc721token.mock.supportsInterface
+        .withArgs(ERC2981_INTERFACE_ID)
+        .returns(true)
+      await erc721token.mock.royaltyInfo.returns(ADDRESS_ZERO, royaltyAmount)
+
+      const order = await createSignedOrder(
+        {
+          signer: {
+            token: erc721token.address,
+            kind: TokenKinds.ERC721,
+            id: '1',
+            amount: '0',
+          },
+          sender: {
+            amount: baseAmount,
+          },
+          affiliateAmount: affiliateAmount,
+        },
+        signer
+      )
+
+      const calculatedTotal = await swap.calculateSenderAmount(order)
+      const expectedProtocolFee =
+        (BigInt(baseAmount) * BigInt(PROTOCOL_FEE)) / BigInt(10000)
+      const expectedTotal =
+        BigInt(baseAmount) +
+        expectedProtocolFee +
+        BigInt(affiliateAmount) +
+        BigInt(royaltyAmount)
+
+      expect(calculatedTotal).to.equal(expectedTotal.toString())
+    })
+
+    it('calculateSenderAmount returns correct total without royalties', async () => {
+      const baseAmount = '1000'
+      const affiliateAmount = '100'
+
+      await erc721token.mock.supportsInterface
+        .withArgs(ERC2981_INTERFACE_ID)
+        .returns(false)
+
+      const order = await createSignedOrder(
+        {
+          signer: {
+            token: erc721token.address,
+            kind: TokenKinds.ERC721,
+            id: '1',
+            amount: '0',
+          },
+          sender: {
+            amount: baseAmount,
+          },
+          affiliateAmount: affiliateAmount,
+        },
+        signer
+      )
+
+      const calculatedTotal = await swap.calculateSenderAmount(order)
+      const expectedProtocolFee =
+        (BigInt(baseAmount) * BigInt(PROTOCOL_FEE)) / BigInt(10000)
+      const expectedTotal =
+        BigInt(baseAmount) + expectedProtocolFee + BigInt(affiliateAmount)
+
+      expect(calculatedTotal).to.equal(expectedTotal.toString())
+    })
+
+    it('calculateSenderAmount returns correct total with zero protocol fee', async () => {
+      await swap.connect(deployer).setProtocolFee('0')
+      const baseAmount = '1000'
+      const affiliateAmount = '100'
+
+      const order = await createSignedOrder(
+        {
+          sender: {
+            amount: baseAmount,
+          },
+          affiliateAmount: affiliateAmount,
+        },
+        signer
+      )
+
+      const calculatedTotal = await swap.calculateSenderAmount(order)
+      const expectedTotal = BigInt(baseAmount) + BigInt(affiliateAmount)
+
+      expect(calculatedTotal).to.equal(expectedTotal.toString())
+    })
   })
 
   describe('nonces, expiry, signatures', () => {

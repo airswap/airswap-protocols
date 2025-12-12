@@ -38,6 +38,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@airswap/delegate@workspace:source/delegate":
+  version: 0.0.0-use.local
+  resolution: "@airswap/delegate@workspace:source/delegate"
+  dependencies:
+    "@airswap/swap-erc20": "npm:5.0.1"
+    "@airswap/utils": "npm:5.2.0"
+    ethers: "npm:^5.7.2"
+    hardhat: "npm:^2.12.7"
+    typescript: "npm:^5.0.4"
+  languageName: unknown
+  linkType: soft
+
 "@airswap/jsonrpc-client-websocket@npm:0.0.1":
   version: 0.0.1
   resolution: "@airswap/jsonrpc-client-websocket@npm:0.0.1"
@@ -174,6 +186,21 @@ __metadata:
     typescript: "npm:^5.9.3"
   languageName: unknown
   linkType: soft
+
+"@airswap/utils@npm:5.2.0":
+  version: 5.2.0
+  resolution: "@airswap/utils@npm:5.2.0"
+  dependencies:
+    "@metamask/eth-sig-util": "npm:^5.0.2"
+    "@uniswap/token-lists": "npm:^1.0.0-beta.24"
+    bignumber.js: "npm:^9.0.1"
+    ethereumjs-util: "npm:^7.1.5"
+    ethers: "npm:^5.7.2"
+    lz-string: "npm:^1.5.0"
+    valid-url: "npm:^1.0.9"
+  checksum: 10c0/950d1c037f15eff461651c706dff956b867e818e4e49987439c7bd306ba28f296d6cd2e7030e08536ad5088bfac6a38bd1caf7bdfbe16b6caaa5674c9d5785da
+  languageName: node
+  linkType: hard
 
 "@airswap/utils@npm:5.2.1, @airswap/utils@workspace:tools/utils":
   version: 0.0.0-use.local
