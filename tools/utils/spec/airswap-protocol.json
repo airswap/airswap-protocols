@@ -1,0 +1,1114 @@
+{
+  "openrpc": "1.2.6",
+  "info": {
+    "title": "AirSwap Trading Protocol",
+    "description": "AirSwap trading technology is fully decentralized, powered by smart contracts that enable counterparty discovery and atomic swaps. AirSwap protocols communicate prices off-chain and settle on-chain.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "AirSwap",
+      "url": "https://about.airswap.xyz"
+    },
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "methods": [
+    {
+      "name": "getProtocols",
+      "tags": [{ "name": "Discovery" }],
+      "summary": "Get supported protocols and configuration",
+      "description": "Peers may call getProtocols to determine protocols supported by a peer. Protocols are identified by interfaceId and configuration params include the chainId, swapContractAddress, and walletAddress that the peer intends to use.",
+      "params": [],
+      "result": {
+        "name": "protocols",
+        "description": "Array of supported protocol configurations",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/SupportedProtocolInfo"
+          }
+        }
+      }
+    },
+    {
+      "name": "setProtocols",
+      "tags": [{ "name": "Discovery" }],
+      "summary": "Server notification of supported protocols (WebSocket)",
+      "description": "When connected via WebSocket, the server may send a setProtocols notification to the client to indicate the protocols it supports.",
+      "params": [
+        {
+          "name": "protocols",
+          "description": "Array of supported protocol configurations",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupportedProtocolInfo"
+            }
+          }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "name": "getTokens",
+      "tags": [{ "name": "Discovery" }],
+      "summary": "Get all supported tokens",
+      "description": "Peers may call getTokens to determine tokens supported by another peer, whether connected via HTTPS or WebSocket. The return value is an array of tokens identified by the token contract address.",
+      "params": [],
+      "result": {
+        "name": "tokens",
+        "description": "Array of token contract addresses",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Address"
+          }
+        }
+      }
+    },
+    {
+      "name": "setTokens",
+      "tags": [{ "name": "Discovery" }],
+      "summary": "Server notification of supported tokens (WebSocket)",
+      "description": "When connected via WebSocket, the server may send a setTokens notification to indicate the tokens it supports.",
+      "params": [
+        {
+          "name": "tokens",
+          "description": "Array of token contract addresses",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Address"
+            }
+          }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "name": "getSignerSideOrderERC20",
+      "tags": [{ "name": "RequestForQuoteERC20" }],
+      "summary": "Get a signer-side order for ERC20 tokens",
+      "description": "Given a senderAmount the server returns a signed OrderERC20 including the signerAmount. The client is selling to the server. Client may optionally request a minimum expiry in seconds.",
+      "params": [
+        {
+          "name": "chainId",
+          "description": "The blockchain network chain ID",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ChainId"
+          }
+        },
+        {
+          "name": "swapContract",
+          "description": "Address of the AirSwap SwapERC20 contract",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Address"
+          }
+        },
+        {
+          "name": "senderAmount",
+          "description": "Amount of tokens the sender will provide (in wei)",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Amount"
+          }
+        },
+        {
+          "name": "signerToken",
+          "description": "Address of the token the signer will provide",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Address"
+          }
+        },
+        {
+          "name": "senderToken",
+          "description": "Address of the token the sender will provide",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Address"
+          }
+        },
+        {
+          "name": "senderWallet",
+          "description": "Address of the sender's wallet",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Address"
+          }
+        },
+        {
+          "name": "minExpiry",
+          "description": "Minimum expiry in seconds (optional)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/Amount"
+          }
+        },
+        {
+          "name": "proxyingFor",
+          "description": "Address being proxied for (optional)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/Address"
+          }
+        }
+      ],
+      "result": {
+        "name": "order",
+        "description": "Signed ERC20 order",
+        "schema": {
+          "$ref": "#/components/schemas/OrderERC20"
+        }
+      }
+    },
+    {
+      "name": "getSenderSideOrderERC20",
+      "tags": [{ "name": "RequestForQuoteERC20" }],
+      "summary": "Get a sender-side order for ERC20 tokens",
+      "description": "Given a signerAmount the server returns a signed OrderERC20 with a senderAmount. The client is buying from the server. Client may optionally request a minimum expiry in seconds.",
+      "params": [
+        {
+          "name": "chainId",
+          "description": "The blockchain network chain ID",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ChainId"
+          }
+        },
+        {
+          "name": "swapContract",
+          "description": "Address of the AirSwap SwapERC20 contract",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Address"
+          }
+        },
+        {
+          "name": "signerAmount",
+          "description": "Amount of tokens the signer will provide (in wei)",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Amount"
+          }
+        },
+        {
+          "name": "signerToken",
+          "description": "Address of the token the signer will provide",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Address"
+          }
+        },
+        {
+          "name": "senderToken",
+          "description": "Address of the token the sender will provide",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Address"
+          }
+        },
+        {
+          "name": "senderWallet",
+          "description": "Address of the sender's wallet",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Address"
+          }
+        },
+        {
+          "name": "minExpiry",
+          "description": "Minimum expiry in seconds (optional)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/Amount"
+          }
+        },
+        {
+          "name": "proxyingFor",
+          "description": "Address being proxied for (optional)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/Address"
+          }
+        }
+      ],
+      "result": {
+        "name": "order",
+        "description": "Signed ERC20 order",
+        "schema": {
+          "$ref": "#/components/schemas/OrderERC20"
+        }
+      }
+    },
+    {
+      "name": "getPricingERC20",
+      "tags": [{ "name": "RequestForQuoteERC20" }],
+      "summary": "Get pricing information for ERC20 token pairs",
+      "description": "Client may request soft pricing for a list of token pairs. Client may optionally request a minimum expiry in seconds to be factored into pricing. Returns current formula or levels for each pair.",
+      "params": [
+        {
+          "name": "pairs",
+          "description": "Array of token pairs to get pricing for",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TokenPair"
+            }
+          }
+        },
+        {
+          "name": "minExpiry",
+          "description": "Minimum expiry in seconds (optional)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/Amount"
+          }
+        }
+      ],
+      "result": {
+        "name": "pricing",
+        "description": "Pricing information for each pair",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Pricing"
+          }
+        }
+      }
+    },
+    {
+      "name": "getAllPricingERC20",
+      "tags": [{ "name": "RequestForQuoteERC20" }],
+      "summary": "Get pricing for all available pairs",
+      "description": "Client may request pricing for all available pairs.",
+      "params": [],
+      "result": {
+        "name": "pricing",
+        "description": "Pricing information for all available pairs",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Pricing"
+          }
+        }
+      }
+    },
+    {
+      "name": "subscribePricingERC20",
+      "tags": [{ "name": "LastLookERC20" }],
+      "summary": "Subscribe to pricing updates for token pairs",
+      "description": "Client subscribes to pricing updates for a list of token pairs. Returns current formula or levels for each pair.",
+      "params": [
+        {
+          "name": "pairs",
+          "description": "Array of token pairs to subscribe to",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TokenPair"
+            }
+          }
+        },
+        {
+          "name": "minExpiry",
+          "description": "Minimum expiry in seconds (optional)",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/Amount"
+          }
+        }
+      ],
+      "result": {
+        "name": "pricing",
+        "description": "Current pricing for subscribed pairs",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Pricing"
+          }
+        }
+      }
+    },
+    {
+      "name": "subscribeAllPricingERC20",
+      "tags": [{ "name": "LastLookERC20" }],
+      "summary": "Subscribe to pricing updates for all available pairs",
+      "description": "Client subscribes to pricing updates for all available pairs. Returns current formula or levels for each pair.",
+      "params": [],
+      "result": {
+        "name": "pricing",
+        "description": "Current pricing for all available pairs",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Pricing"
+          }
+        }
+      }
+    },
+    {
+      "name": "unsubscribePricingERC20",
+      "tags": [{ "name": "LastLookERC20" }],
+      "summary": "Unsubscribe from pricing updates for token pairs",
+      "description": "Client unsubscribes from pricing updates for a list of token pairs.",
+      "params": [
+        {
+          "name": "pairs",
+          "description": "Array of token pairs to unsubscribe from",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TokenPair"
+            }
+          }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "name": "unsubscribeAllPricingERC20",
+      "tags": [{ "name": "LastLookERC20" }],
+      "summary": "Unsubscribe from all pricing updates",
+      "description": "Client unsubscribes from all pricing subscriptions.",
+      "params": [],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "name": "setPricingERC20",
+      "tags": [{ "name": "LastLookERC20" }],
+      "summary": "Server pushes pricing updates (WebSocket)",
+      "description": "Server updates pricing for one or more token pairs.",
+      "params": [
+        {
+          "name": "pricing",
+          "description": "Array of pricing updates",
+          "required": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Pricing"
+            }
+          }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "name": "considerOrderERC20",
+      "tags": [{ "name": "LastLookERC20" }],
+      "summary": "Submit an order for consideration",
+      "description": "Client provides a priced OrderERC20 to the server. Returns boolean true if accepted by the server. In last-look, the client is the signer and the server is the sender.",
+      "params": [
+        {
+          "name": "nonce",
+          "description": "Unique order nonce",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Amount"
+          }
+        },
+        {
+          "name": "expiry",
+          "description": "Order expiry timestamp",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Amount"
+          }
+        },
+        {
+          "name": "signerWallet",
+          "description": "Address of the signer's wallet",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Address"
+          }
+        },
+        {
+          "name": "signerToken",
+          "description": "Address of the token the signer will provide",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Address"
+          }
+        },
+        {
+          "name": "signerAmount",
+          "description": "Amount of tokens the signer will provide",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Amount"
+          }
+        },
+        {
+          "name": "senderToken",
+          "description": "Address of the token the sender will provide",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Address"
+          }
+        },
+        {
+          "name": "senderAmount",
+          "description": "Amount of tokens the sender will provide",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Amount"
+          }
+        },
+        {
+          "name": "v",
+          "description": "ECDSA signature recovery parameter",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Amount"
+          }
+        },
+        {
+          "name": "r",
+          "description": "ECDSA signature r parameter",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Bytes32"
+          }
+        },
+        {
+          "name": "s",
+          "description": "ECDSA signature s parameter",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Bytes32"
+          }
+        }
+      ],
+      "result": {
+        "name": "accepted",
+        "description": "Whether the order was accepted",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "name": "addOrder",
+      "tags": [{ "name": "Indexing" }],
+      "summary": "Add a full order to an index",
+      "description": "Peers may call addOrder to add an order to another peer.",
+      "params": [
+        {
+          "name": "order",
+          "description": "The full order to add",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/FullOrder"
+          }
+        },
+        {
+          "name": "tags",
+          "description": "Tags to associate with the order",
+          "required": false,
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "name": "getOrders",
+      "tags": [{ "name": "Indexing" }],
+      "summary": "Query indexed orders",
+      "description": "Peers may call getOrders to query for orders indexed by another peer.",
+      "params": [
+        {
+          "name": "filter",
+          "description": "Filter criteria for orders",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/OrderFilter"
+          }
+        },
+        {
+          "name": "offset",
+          "description": "Pagination offset",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "default": 0
+          }
+        },
+        {
+          "name": "limit",
+          "description": "Maximum number of orders to return",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "default": 10
+          }
+        },
+        {
+          "name": "by",
+          "description": "Index to sort by",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/Indexes"
+          }
+        },
+        {
+          "name": "direction",
+          "description": "Sort direction",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/Direction"
+          }
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {
+          "$ref": "#/components/schemas/OrderResponse"
+        }
+      }
+    },
+    {
+      "name": "addOrderERC20",
+      "tags": [{ "name": "IndexingERC20" }],
+      "summary": "Add a full ERC20 order to an index",
+      "description": "Peers may call addOrderERC20 to add an ERC20 order to another peer.",
+      "params": [
+        {
+          "name": "order",
+          "description": "The full ERC20 order to add",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/FullOrderERC20"
+          }
+        },
+        {
+          "name": "tags",
+          "description": "Tags to associate with the order",
+          "required": false,
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      ],
+      "result": {
+        "name": "success",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "name": "getOrdersERC20",
+      "tags": [{ "name": "IndexingERC20" }],
+      "summary": "Query indexed ERC20 orders",
+      "description": "Peers may call getOrdersERC20 to query for ERC20 orders indexed by another peer.",
+      "params": [
+        {
+          "name": "filter",
+          "description": "Filter criteria for orders",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/OrderFilter"
+          }
+        },
+        {
+          "name": "offset",
+          "description": "Pagination offset",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "default": 0
+          }
+        },
+        {
+          "name": "limit",
+          "description": "Maximum number of orders to return",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "default": 10
+          }
+        },
+        {
+          "name": "by",
+          "description": "Index to sort by",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/Indexes"
+          }
+        },
+        {
+          "name": "direction",
+          "description": "Sort direction",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/Direction"
+          }
+        }
+      ],
+      "result": {
+        "name": "response",
+        "schema": {
+          "$ref": "#/components/schemas/OrderResponseERC20"
+        }
+      }
+    },
+    {
+      "name": "getTags",
+      "tags": [{ "name": "Indexing" }, { "name": "IndexingERC20" }],
+      "summary": "Get available tags for a token",
+      "description": "Peers may call getTags to get all available tags for a token.",
+      "params": [
+        {
+          "name": "token",
+          "description": "Token contract address",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Address"
+          }
+        }
+      ],
+      "result": {
+        "name": "tags",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Address": {
+        "type": "string",
+        "pattern": "^0x[a-fA-F0-9]{40}$",
+        "description": "Ethereum address (20 bytes)"
+      },
+      "Bytes32": {
+        "type": "string",
+        "pattern": "^0x[a-fA-F0-9]{64}$",
+        "description": "32-byte hex string"
+      },
+      "Amount": {
+        "type": "string",
+        "pattern": "^[0-9]+$",
+        "description": "Numeric string representing an amount"
+      },
+      "ChainId": {
+        "type": "string",
+        "pattern": "^[0-9]+$",
+        "description": "Blockchain network chain ID"
+      },
+      "SupportedProtocolInfo": {
+        "type": "object",
+        "description": "Information about a supported trading protocol",
+        "properties": {
+          "interfaceId": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{8}$",
+            "description": "Protocol interface identifier (e.g., 0x02ad05d3 for RequestForQuoteERC20)"
+          },
+          "params": {
+            "type": "object",
+            "properties": {
+              "chainId": {
+                "$ref": "#/components/schemas/ChainId"
+              },
+              "swapContractAddress": {
+                "$ref": "#/components/schemas/Address"
+              },
+              "walletAddress": {
+                "$ref": "#/components/schemas/Address"
+              },
+              "senderServer": {
+                "type": "string",
+                "description": "URL of the sender server for last-look protocols"
+              },
+              "senderWallet": {
+                "$ref": "#/components/schemas/Address",
+                "description": "Address of the sender wallet for last-look protocols"
+              }
+            },
+            "required": ["chainId", "swapContractAddress", "walletAddress"]
+          }
+        },
+        "required": ["interfaceId", "params"]
+      },
+      "TokenPair": {
+        "type": "object",
+        "description": "A pair of tokens for trading",
+        "properties": {
+          "baseToken": {
+            "$ref": "#/components/schemas/Address",
+            "description": "Base token address"
+          },
+          "quoteToken": {
+            "$ref": "#/components/schemas/Address",
+            "description": "Quote token address"
+          }
+        },
+        "required": ["baseToken", "quoteToken"]
+      },
+      "OrderERC20": {
+        "type": "object",
+        "description": "Signed ERC20 order in AirSwap format",
+        "properties": {
+          "nonce": {
+            "$ref": "#/components/schemas/Amount",
+            "description": "Unique order nonce"
+          },
+          "expiry": {
+            "$ref": "#/components/schemas/Amount",
+            "description": "Order expiry timestamp (Unix timestamp)"
+          },
+          "signerWallet": {
+            "$ref": "#/components/schemas/Address",
+            "description": "Address of the signer's wallet"
+          },
+          "signerToken": {
+            "$ref": "#/components/schemas/Address",
+            "description": "Address of the token the signer will provide"
+          },
+          "signerAmount": {
+            "$ref": "#/components/schemas/Amount",
+            "description": "Amount of tokens the signer will provide (in wei)"
+          },
+          "protocolFee": {
+            "$ref": "#/components/schemas/Amount",
+            "description": "Protocol fee in basis points"
+          },
+          "senderToken": {
+            "$ref": "#/components/schemas/Address",
+            "description": "Address of the token the sender will provide"
+          },
+          "senderAmount": {
+            "$ref": "#/components/schemas/Amount",
+            "description": "Amount of tokens the sender will provide (in wei)"
+          },
+          "v": {
+            "$ref": "#/components/schemas/Amount",
+            "description": "ECDSA signature recovery parameter"
+          },
+          "r": {
+            "$ref": "#/components/schemas/Bytes32",
+            "description": "ECDSA signature r parameter"
+          },
+          "s": {
+            "$ref": "#/components/schemas/Bytes32",
+            "description": "ECDSA signature s parameter"
+          }
+        },
+        "required": [
+          "nonce",
+          "expiry",
+          "signerWallet",
+          "signerToken",
+          "signerAmount",
+          "protocolFee",
+          "senderToken",
+          "senderAmount",
+          "v",
+          "r",
+          "s"
+        ]
+      },
+      "FullOrderERC20": {
+        "type": "object",
+        "description": "Full ERC20 order including settlement information",
+        "allOf": [
+          { "$ref": "#/components/schemas/OrderERC20" },
+          {
+            "type": "object",
+            "properties": {
+              "chainId": {
+                "$ref": "#/components/schemas/ChainId"
+              },
+              "swapContract": {
+                "$ref": "#/components/schemas/Address"
+              },
+              "protocolFee": {
+                "$ref": "#/components/schemas/Amount",
+                "description": "Protocol fee in basis points"
+              },
+              "senderWallet": {
+                "$ref": "#/components/schemas/Address"
+              }
+            },
+            "required": ["chainId", "swapContract"]
+          }
+        ]
+      },
+      "FullOrder": {
+        "type": "object",
+        "description": "Full order for NFT/ERC721 swaps",
+        "properties": {
+          "nonce": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "expiry": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "signerWallet": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "signerToken": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "signerAmount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "signerId": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "senderWallet": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "senderToken": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "senderAmount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "senderId": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "affiliateWallet": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "affiliateAmount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "chainId": {
+            "$ref": "#/components/schemas/ChainId"
+          },
+          "swapContract": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "v": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "r": {
+            "$ref": "#/components/schemas/Bytes32"
+          },
+          "s": {
+            "$ref": "#/components/schemas/Bytes32"
+          }
+        },
+        "required": [
+          "nonce",
+          "expiry",
+          "signerWallet",
+          "chainId",
+          "swapContract"
+        ]
+      },
+      "Pricing": {
+        "type": "object",
+        "description": "Pricing information for a token pair",
+        "properties": {
+          "baseToken": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "quoteToken": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "minimum": {
+            "$ref": "#/components/schemas/Amount",
+            "description": "Minimum order size"
+          },
+          "bid": {
+            "description": "Bid pricing (levels array or formula string)",
+            "oneOf": [
+              { "$ref": "#/components/schemas/Levels" },
+              { "$ref": "#/components/schemas/Formula" }
+            ]
+          },
+          "ask": {
+            "description": "Ask pricing (levels array or formula string)",
+            "oneOf": [
+              { "$ref": "#/components/schemas/Levels" },
+              { "$ref": "#/components/schemas/Formula" }
+            ]
+          }
+        },
+        "required": ["baseToken", "quoteToken", "bid", "ask"]
+      },
+      "Levels": {
+        "type": "array",
+        "description": "Array of price levels as [baseAmount, quoteAmount] tuples in wei",
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      },
+      "Formula": {
+        "type": "string",
+        "description": "Pricing formula where x is the input amount (e.g., 'x*0.00053')"
+      },
+      "OrderFilter": {
+        "type": "object",
+        "description": "Filter criteria for querying orders",
+        "properties": {
+          "chainId": {
+            "$ref": "#/components/schemas/ChainId"
+          },
+          "signerWallet": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "signerToken": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "signerId": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "senderWallet": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "senderToken": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "minSignerAmount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "maxSignerAmount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "minSenderAmount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "maxSenderAmount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "Indexes": {
+        "type": "string",
+        "enum": ["EXPIRY", "NONCE", "SIGNER_AMOUNT", "SENDER_AMOUNT"],
+        "description": "Index to sort orders by"
+      },
+      "Direction": {
+        "type": "string",
+        "enum": ["ASC", "DESC"],
+        "description": "Sort direction"
+      },
+      "OrderResponse": {
+        "type": "object",
+        "description": "Response containing orders and pagination info",
+        "properties": {
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FullOrder"
+            }
+          },
+          "offset": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        },
+        "required": ["orders", "offset", "total"]
+      },
+      "OrderResponseERC20": {
+        "type": "object",
+        "description": "Response containing ERC20 orders and pagination info",
+        "properties": {
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FullOrderERC20"
+            }
+          },
+          "offset": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        },
+        "required": ["orders", "offset", "total"]
+      }
+    },
+    "errors": {
+      "PairNotSupported": {
+        "code": -33601,
+        "message": "Token pair not supported"
+      },
+      "InsufficientLiquidity": {
+        "code": -33602,
+        "message": "Insufficient liquidity for the requested amount"
+      },
+      "OrderExpired": {
+        "code": -33603,
+        "message": "Order has expired"
+      },
+      "InvalidSignature": {
+        "code": -33604,
+        "message": "Invalid order signature"
+      },
+      "AmountTooLow": {
+        "code": -33605,
+        "message": "Amount below minimum"
+      }
+    }
+  }
+}

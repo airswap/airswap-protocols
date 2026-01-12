@@ -400,8 +400,10 @@ describe('WebSocketServer', () => {
         mockServer.initOptions = {
           lastLook: '1.0.0',
           params: {
-            swapContract: '0x1234',
-            senderWallet: '0x2345',
+            chainId: 1,
+            swapContractAddress: '0x0000000000000000000000000000000000001234',
+            walletAddress: '0x0000000000000000000000000000000000000000',
+            senderWallet: '0x0000000000000000000000000000000000002345',
             senderServer: URL,
           },
         }
@@ -529,11 +531,14 @@ describe('WebSocketServer', () => {
     mockServer.initOptions = {
       lastLook: '1.2.3',
       params: {
-        senderWallet: '0xmySender',
+        chainId: 1,
+        swapContractAddress: '0x0000000000000000000000000000000000001234',
+        walletAddress: '0x0000000000000000000000000000000000000000',
+        senderWallet: '0x000000000000000000000000000000000000dead',
       },
     }
     const server = await Server.at(url)
-    expect(server.getSenderWallet()).to.equal('0xmySender')
+    expect(server.getSenderWallet()).to.equal('0x000000000000000000000000000000000000dead')
   })
 
   afterEach(() => {

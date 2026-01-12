@@ -111,7 +111,7 @@ export class Server extends TypedEmitter<ServerEvents> {
     // Important for WebSocket servers that can support either RFQ or Last Look
     this.requireInitialized()
     const supportedProtocolInfo = this.supportedProtocols.find(
-      (p) => p.name === protocol
+      (p) => p.interfaceId === protocol
     )
     if (!supportedProtocolInfo) return null
     return supportedProtocolInfo
@@ -410,7 +410,14 @@ export class Server extends TypedEmitter<ServerEvents> {
 
     if (!clientOnly) {
       this.supportedProtocols = [
-        { name: ProtocolIds.RequestForQuoteERC20, version: '2.0.0' },
+        {
+          interfaceId: ProtocolIds.RequestForQuoteERC20,
+          params: {
+            chainId: this.chainId,
+            swapContractAddress: this.swapContract,
+            walletAddress: ethers.constants.AddressZero,
+          },
+        },
       ]
       this.isInitialized = true
     }
@@ -535,7 +542,7 @@ export class Server extends TypedEmitter<ServerEvents> {
     if (
       valid &&
       !params.every(
-        (protocolInfo: any) => protocolInfo.version && protocolInfo.name
+        (protocolInfo: any) => protocolInfo.interfaceId && protocolInfo.params
       )
     )
       valid = false
@@ -570,7 +577,7 @@ export class Server extends TypedEmitter<ServerEvents> {
     this.validateInitializeParams(supportedProtocols)
     this.supportedProtocols = supportedProtocols
     const lastLookERC20Support = supportedProtocols.find(
-      (protocol) => protocol.name === ProtocolIds.LastLookERC20
+      (protocol) => protocol.interfaceId === ProtocolIds.LastLookERC20
     )
     if (lastLookERC20Support?.params?.senderServer) {
       this.senderServer = lastLookERC20Support.params.senderServer
