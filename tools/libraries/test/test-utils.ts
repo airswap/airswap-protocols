@@ -123,14 +123,12 @@ export class MockSocketServer extends BaseMockSocketServer {
       if (this._initOptions) {
         if (this._initOptions.lastLook)
           protocols.push({
-            name: ProtocolIds.LastLookERC20,
-            version: this._initOptions.lastLook,
+            interfaceId: ProtocolIds.LastLookERC20,
             params: this._initOptions.params,
           })
         if (this._initOptions.rfq)
           protocols.push({
-            name: ProtocolIds.RequestForQuoteERC20,
-            version: this._initOptions.rfq,
+            interfaceId: ProtocolIds.RequestForQuoteERC20,
             params: this._initOptions.params,
           })
         socket.send(
@@ -163,8 +161,10 @@ export class MockSocketServer extends BaseMockSocketServer {
       lastLook: '1.0.0',
       rfq: undefined,
       params: {
-        swapContract: '0x1234',
-        senderWallet: '0x2345',
+        chainId: 1,
+        swapContractAddress: '0x0000000000000000000000000000000000001234',
+        walletAddress: '0x0000000000000000000000000000000000000000',
+        senderWallet: '0x0000000000000000000000000000000000002345',
       },
     }
   }

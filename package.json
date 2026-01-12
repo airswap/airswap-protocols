@@ -22,7 +22,8 @@
     "drain": "node ./scripts/drain-deployer.js",
     "migrate-pool": "node ./scripts/migrate-pool.js",
     "prepare": "husky install",
-    "prettier": "prettier --write \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\" \"./**/*.json\""
+    "prettier": "prettier --write \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\" \"./**/*.json\"",
+    "prettier:check": "prettier --check \"./**/*.sol\" \"./**/*.ts\" \"./**/*.js\" \"./**/*.json\""
   },
   "packageManager": "yarn@4.12.0",
   "devDependencies": {
