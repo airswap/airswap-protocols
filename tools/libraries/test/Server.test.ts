@@ -538,7 +538,9 @@ describe('WebSocketServer', () => {
       },
     }
     const server = await Server.at(url)
-    expect(server.getSenderWallet()).to.equal('0x000000000000000000000000000000000000dead')
+    expect(server.getSenderWallet()).to.equal(
+      '0x000000000000000000000000000000000000dead'
+    )
   })
 
   afterEach(() => {
