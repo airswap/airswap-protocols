@@ -1,6 +1,6 @@
 {
   "name": "@airswap/utils",
-  "version": "5.2.1",
+  "version": "5.3.0",
   "description": "AirSwap: Utilities for Developers",
   "repository": {
     "type": "git",
@@ -12,8 +12,13 @@
   "license": "MIT",
   "main": "build/index.js",
   "files": [
-    "/build"
+    "/build",
+    "/spec"
   ],
+  "exports": {
+    ".": "./build/index.js",
+    "./spec": "./spec/airswap-protocol.json"
+  },
   "scripts": {
     "clean": "rm -rf ./build",
     "compile": "yarn clean && tsc -b",

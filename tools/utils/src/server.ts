@@ -6,9 +6,14 @@ export type ServerOptions = {
 }
 
 export type SupportedProtocolInfo = {
-  name: string
-  version: string
-  params?: any
+  interfaceId: string
+  params: {
+    chainId: number
+    swapContractAddress: string
+    walletAddress: string
+    senderServer?: string
+    senderWallet?: string
+  }
 }
 
 export type OrderFilter = {
@@ -18,27 +23,27 @@ export type OrderFilter = {
   signerId?: string
   senderWallet?: string
   senderToken?: string
+  minSignerAmount?: string
+  maxSignerAmount?: string
+  minSenderAmount?: string
+  maxSenderAmount?: string
   tags?: string[]
 }
 
 export type OrderResponse<OrderType> = {
   orders: OrderType[]
   offset: number
-  limit: number
+  total: number
 }
 
 export enum Indexes {
-  NONCE = 'nonce',
-  EXPIRY = 'expiry',
-  SIGNER_WALLET = 'signerWallet',
-  SIGNER_TOKEN = 'signerToken',
-  SIGNER_AMOUNT = 'signerAmount',
-  SIGNER_ID = 'signerId',
-  SENDER_TOKEN = 'senderToken',
-  SENDER_AMOUNT = 'senderAmount',
+  NONCE = 'NONCE',
+  EXPIRY = 'EXPIRY',
+  SIGNER_AMOUNT = 'SIGNER_AMOUNT',
+  SENDER_AMOUNT = 'SENDER_AMOUNT',
 }
 
 export enum Direction {
-  ASC = 'asc',
-  DESC = 'desc',
+  ASC = 'ASC',
+  DESC = 'DESC',
 }

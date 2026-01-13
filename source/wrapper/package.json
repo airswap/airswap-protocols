@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@airswap/swap-erc20": "5.0.1",
-    "@airswap/utils": "5.2.1",
+    "@airswap/utils": "5.3.0",
     "@openzeppelin/contracts": "^4.8.3",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
     "hardhat": "^2.20.1",
